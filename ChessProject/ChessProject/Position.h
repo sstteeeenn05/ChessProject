@@ -14,6 +14,5 @@ public:
 
 	Position getPos(); //get position
 
-	Position operator+(const Position& pos); //set +
-	void operator+= (const Position& pos); //set +=
+	bool operator==(Position&); //set ==
 };

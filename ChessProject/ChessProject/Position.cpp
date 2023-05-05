@@ -23,16 +23,14 @@ Position Position::getPos() //get position
 	return *this;
 }
 
-Position Position::operator+ (const Position& pos) //set +
+bool Position::operator==(Position& pos) //set ==
 {
-	Position ans;
-	ans.x = this->x + pos.x;
-	ans.y = this->y + pos.y;
-	return ans;
-}
-
-void Position::operator+= (const Position& pos) //set +=
-{
-	this->x += pos.x;
-	this->y += pos.y;
+	if (this->x != pos.x || this->y != pos.y)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }

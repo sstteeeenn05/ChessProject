@@ -21,3 +21,10 @@ enum Color
 	BLACK,
 	NONE
 };
+
+enum Result
+{
+	WIN,
+	LOSE,
+	CONTINUE
+};
