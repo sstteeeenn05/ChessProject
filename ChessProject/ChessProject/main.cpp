@@ -13,10 +13,9 @@ int main()
 	p1.setColor(WHITE);
 	p2.setColor(BLACK);
 	int count = 1;
+	printBoard(board.getBoard());
 	while (true)
 	{
-		system("cls");
-		printBoard(board.getBoard());
 		if (count % 2 == 0)
 		{
 			board.move(p2);
@@ -26,6 +25,8 @@ int main()
 			board.move(p1);
 		}
 		count++;
+		system("cls");
+		printBoard(board.getBoard());
 	}
 }
 
