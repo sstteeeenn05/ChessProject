@@ -485,9 +485,9 @@ void Board::move(Player& player) //move
 
 bool Board::moveAvalible(Chess chess, Position target) //check if can move
 {
-	std::vector<Position> vaildPos;
-	vaildPos = getValidPos(chess);
-	for (auto& i : vaildPos)
+	std::vector<Position> validPos;
+	validPos = getValidPos(chess);
+	for (auto& i : validPos)
 	{
 		if (i == target)
 		{

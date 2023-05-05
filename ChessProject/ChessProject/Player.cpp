@@ -3,7 +3,6 @@
 Player::Player() //constructor, initialize the player
 {
 	this->color = NONE;
-	this->status = CONTINUE;
 }
 
 Player::Player(Color color) //constructor, initialize the player
