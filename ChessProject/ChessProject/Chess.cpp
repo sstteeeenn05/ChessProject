@@ -5,25 +5,13 @@ Chess::Chess()
 	pos = Position(0, 0);
 	label = EMPTY;
 	color = NONE;
-	validPos.clear();
 }
 
-Chess::Chess(Position pos, Label label, Color color, std::vector<Position> validPos)
+Chess::Chess(Position pos, Label label, Color color)
 {
 	this->pos = pos;
 	this->label = label;
 	this->color = color;
-	this->validPos = validPos;
-}
-
-std::vector< Position> Chess::getValidPos()
-{
-	return validPos;
-}
-
-Position Chess::getPos()
-{
-	return pos;
 }
 
 void Chess::setPos(Position pos)
@@ -35,6 +23,23 @@ void Chess::setChess(Label label, Color color)
 {
 	this->label = label;
 	this->color = color;
+}
+
+void Chess::setSpace(Chess chess)
+{
+	this->color = chess.color;
+	this->label = chess.label;
+}
+
+void Chess::setEmpty()
+{
+	this->color = NONE;
+	this->label = EMPTY;
+}
+
+Position Chess::getPos()
+{
+	return pos;
 }
 
 Label Chess::getLabel()

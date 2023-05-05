@@ -9,19 +9,19 @@ protected:
 	Position pos;
 	Label label;
 	Color color;
-	std::vector<Position> validPos;
 
 public:
 	Chess();
-	Chess(Position pos, Label label, Color color, std::vector<Position> validPos);
+	Chess(Position pos, Label label, Color color);
 	//Chess(Chess baseChess);
 
-	Position getPos();
+	
 	void setPos(Position pos);
-
 	void setChess(Label label, Color color);
+	void setSpace(Chess chess);
+	void setEmpty();
 
-	std::vector< Position> getValidPos();
+	Position getPos();
 	Label getLabel();
 	Color getColor();
 };

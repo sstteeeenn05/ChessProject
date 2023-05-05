@@ -13,4 +13,6 @@ public:
 	//Board(std::string fen);
 
 	Chess* drawBoard();
+
+	std::vector<Position> getValidPos(Chess chess);
 };
