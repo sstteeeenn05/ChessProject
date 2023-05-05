@@ -1,12 +1,12 @@
 #include "Position.h"
 
-Position::Position()
+Position::Position() //constructor, initialize position
 {
 	this->x = 0;
 	this->y = 0;
 }
 
-Position::Position(int x, int y)
+Position::Position(int x, int y) //constructor, initialize position
 {
 	this->x = x;
 	this->y = y;

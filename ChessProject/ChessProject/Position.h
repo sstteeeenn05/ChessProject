@@ -7,8 +7,8 @@ public:
 	int x;
 	int y;
 
-	Position();
-	Position(int x, int y);
+	Position(); //constructor, initialize position
+	Position(int x, int y); //constructor, initialize position
 
 	void setPos(int x, int y); //set position
 

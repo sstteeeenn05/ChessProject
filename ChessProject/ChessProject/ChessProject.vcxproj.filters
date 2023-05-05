@@ -14,4 +14,32 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Broad.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Chess.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Position.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Broad.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Position.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

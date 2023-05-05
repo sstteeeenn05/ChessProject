@@ -9,10 +9,10 @@ private:
 	Chess board[8][8];
 
 public:
-	Board();
+	Board(); //constructor, initialize the board
 	//Board(std::string fen);
 
-	Chess* drawBoard();
+	Chess* drawBoard(); //let can draw board
 
-	std::vector<Position> getValidPos(Chess chess);
+	std::vector<Position> getValidPos(Chess chess); //get all the valid position
 };
