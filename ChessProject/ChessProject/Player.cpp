@@ -1,11 +1,11 @@
 #include "Player.h"
 
-Player::Player() //constructor, initialize the player
+Player::Player() //constructor and initialize the player
 {
 	this->color = NONE;
 }
 
-Player::Player(Color color) //constructor, initialize the player
+Player::Player(Color color) //constructor and initialize the player
 {
 	this->color = color;
 }
