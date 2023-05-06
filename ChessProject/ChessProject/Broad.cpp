@@ -61,7 +61,7 @@ Chess* Board::getBoard() //let can draw board
 
 std::vector<Position> Board::getValidPos(Chess chess) //get all the valid position
 {
-	Color color = chess.getColor(), enemy = NONE;
+	Color color = chess.getColor(), enemy;
 	Label label = chess.getLabel();
 	Position pos = chess.getPos();
 	std::vector<Position> validPos;
@@ -140,7 +140,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[pos.y][i].getColor() == enemy) //if there is something can eat
+			else if (board[pos.y][i].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -157,7 +157,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[pos.y][i].getColor() == enemy) //if there is something can eat
+			else if (board[pos.y][i].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -174,7 +174,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[i][pos.x].getColor() == enemy) //if there is something can eat
+			else if (board[i][pos.x].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -191,7 +191,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[i][pos.x].getColor() == enemy) //if there is something can eat
+			else if (board[i][pos.x].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -202,104 +202,72 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			}
 		}
 	case BISHOP: //if is bishop
-		for (int i = 1; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y + i < 8; i++) //run the most turn
 		{
-			if (pos.x + i >= 8 || pos.y + i >= 8) //check down right, if out of range
+			targetPos = Position(pos.x + i, pos.y + i);
+			if (board[pos.y + i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
 			{
+				validPos.push_back(targetPos);
+			}
+			else if (board[pos.y + i][pos.x + i].getColor() == enemy) //if there is something can eat
+			{
+				validPos.push_back(targetPos);
 				break;
 			}
-			else //in range
+			else //can not move
 			{
-				if (board[pos.y + i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
-				{
-					targetPos = Position(pos.x + i, pos.y + i);
-					validPos.push_back(targetPos);
-				}
-				if (board[pos.y + i][pos.x + i].getColor() == enemy) //if there is something can eat
-				{
-					targetPos = Position(pos.x + i, pos.y + i);
-					validPos.push_back(targetPos);
-					break;
-				}
-				else //can not move
-				{
-					break;
-				}
+				break;
 			}
 		}
-		for (int i = 1; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y - i >= 0; i++) //run the most turn
 		{
-			if (pos.x + i >= 8 || pos.y - i < 0) //check up right, if out of range
+			targetPos = Position(pos.x + i, pos.y - i);
+			if (board[pos.y - i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
 			{
+				validPos.push_back(targetPos);
+			}
+			else if (board[pos.y - i][pos.x + i].getColor() == enemy) //if there is something can eat
+			{
+				validPos.push_back(targetPos);
 				break;
 			}
-			else //in range
+			else //can not move
 			{
-				if (board[pos.y - i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
-				{
-					targetPos = Position(pos.x + i, pos.y - i);
-					validPos.push_back(targetPos);
-				}
-				if (board[pos.y - i][pos.x + i].getColor() == enemy) //if there is something can eat
-				{
-					targetPos = Position(pos.x + i, pos.y - i);
-					validPos.push_back(targetPos);
-					break;
-				}
-				else //can not move
-				{
-					break;
-				}
+				break;
 			}
 		}
-		for (int i = 1; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y + i < 8; i++) //run the most turn
 		{
-			if (pos.x - i < 0 || pos.y + i >= 8) //check down left, if out of range
+			targetPos = Position(pos.x - i, pos.y + i);
+			if (board[pos.y + i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
 			{
+				validPos.push_back(targetPos);
+			}
+			else if (board[pos.y + i][pos.x - i].getColor() == enemy) //if there is something can eat
+			{
+				validPos.push_back(targetPos);
 				break;
 			}
-			else //in range
+			else //can not move
 			{
-				if (board[pos.y + i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
-				{
-					targetPos = Position(pos.x - i, pos.y + i);
-					validPos.push_back(targetPos);
-				}
-				if (board[pos.y + i][pos.x - i].getColor() == enemy) //if there is something can eat
-				{
-					targetPos = Position(pos.x - i, pos.y + i);
-					validPos.push_back(targetPos);
-					break;
-				}
-				else //can not move
-				{
-					break;
-				}
+				break;
 			}
 		}
-		for (int i = 1; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y - i >= 0; i++) //run the most turn
 		{
-			if (pos.x - i < 0 || pos.y - i < 0) //check up left, if out of range
+			targetPos = Position(pos.x - i, pos.y - i);
+			if (board[pos.y - i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
 			{
+				validPos.push_back(targetPos);
+			}
+			else if (board[pos.y - i][pos.x - i].getColor() == enemy) //if there is something can eat
+			{
+				validPos.push_back(targetPos);
 				break;
 			}
-			else //in range
+			else //can not move
 			{
-				if (board[pos.y - i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
-				{
-					targetPos = Position(pos.x - i, pos.y - i);
-					validPos.push_back(targetPos);
-				}
-				if (board[pos.y - i][pos.x - i].getColor() == enemy) //if there is something can eat
-				{
-					targetPos = Position(pos.x - i, pos.y - i);
-					validPos.push_back(targetPos);
-					break;
-				}
-				else //can not move
-				{
-					break;
-				}
+				break;
 			}
 		}
 		break;
@@ -353,7 +321,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[pos.y][i].getColor() == enemy) //if there is something can eat
+			else if (board[pos.y][i].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -370,7 +338,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[pos.y][i].getColor() == enemy) //if there is something can eat
+			else if (board[pos.y][i].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -387,7 +355,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[i][pos.x].getColor() == enemy) //if there is something can eat
+			else if (board[i][pos.x].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
@@ -404,7 +372,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			{
 				validPos.push_back(targetPos);
 			}
-			if (board[i][pos.x].getColor() == enemy) //if there is something can eat
+			else if (board[i][pos.x].getColor() == enemy) //if there is something can eat
 			{
 				validPos.push_back(targetPos);
 				break;
