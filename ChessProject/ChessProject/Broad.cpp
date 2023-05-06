@@ -49,7 +49,7 @@ Board::Board() //constructor, initialize the board
 	{
 		for (int j = 0; j < 8; j++) //set the position
 		{
-			board[i][j].setPos(Position(i, j));
+			board[i][j].setPos(Position(j, i));
 		}
 	}
 }
@@ -67,16 +67,18 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 	std::vector<Position> validPos;
 	validPos.clear();
 	Position targetPos;
-	int side;
+	int side, pawnOrigin;
 	if (color == BLACK) //if the color is black
 	{
 		enemy = WHITE;
 		side = 1;
+		pawnOrigin = 1;
 	}
 	else if (color == WHITE) //if the color is white
 	{
 		enemy = BLACK;
 		side = -1;
+		pawnOrigin = 6;
 	}
 	switch (label) //judge the label
 	{
@@ -414,7 +416,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 		}
 		break;
 	case PAWN: //if is pawn
-		if (pos.y == 1) //the first step, can move one or tow
+		if (pos.y == pawnOrigin) //the first step, can move one or tow
 		{
 			for (int i = 1; i <= 2; i++) //can move one or two step, check if can move
 			{
@@ -485,9 +487,9 @@ void Board::move(Player& player) //move
 
 bool Board::moveAvalible(Chess chess, Position target) //check if can move
 {
-	std::vector<Position> vaildPos;
-	vaildPos = getValidPos(chess);
-	for (auto& i : vaildPos)
+	std::vector<Position> validPos;
+	validPos = getValidPos(chess);
+	for (auto& i : validPos)
 	{
 		if (i == target)
 		{
