@@ -17,10 +17,13 @@ public:
 	
 	void setPos(Position pos); //set position
 	void setChess(Label label, Color color); //set chess label and color
+	void setLabel(Label label); //set label
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
 
 	Position getPos(); //get position
 	Label getLabel(); //get label
 	Color getColor(); //get color
+
+	void checkPawn(); //check and change if the pawn at the end
 };

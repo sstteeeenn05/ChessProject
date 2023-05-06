@@ -202,7 +202,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			}
 		}
 	case BISHOP: //if is bishop
-		for (int i = 0; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8; i++) //run the most turn
 		{
 			if (pos.x + i >= 8 || pos.y + i >= 8) //check down right, if out of range
 			{
@@ -227,7 +227,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				}
 			}
 		}
-		for (int i = 0; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8; i++) //run the most turn
 		{
 			if (pos.x + i >= 8 || pos.y - i < 0) //check up right, if out of range
 			{
@@ -252,7 +252,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				}
 			}
 		}
-		for (int i = 0; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8; i++) //run the most turn
 		{
 			if (pos.x - i < 0 || pos.y + i >= 8) //check down left, if out of range
 			{
@@ -277,7 +277,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				}
 			}
 		}
-		for (int i = 0; i < 8; i++) //run the most turn
+		for (int i = 1; i < 8; i++) //run the most turn
 		{
 			if (pos.x - i < 0 || pos.y - i < 0) //check up left, if out of range
 			{
@@ -440,12 +440,12 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 			}
 			if (pos.x + 1 < 8 && board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy) //if there is something can eat
 			{
-				targetPos = Position(pos.x + 1, pos.y + 1);
+				targetPos = Position(pos.x + 1, pos.y + (1 * side));
 				validPos.push_back(targetPos);
 			}
-			if (pos.x - 1 >= 0 && board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy) //if there is something can eat
+			if (pos.x - 1 >= 0 && board[pos.y + (1 * side)][pos.x - 1].getColor() == enemy) //if there is something can eat
 			{
-				targetPos = Position(pos.x - 1, pos.y + 1);
+				targetPos = Position(pos.x - 1, pos.y + (1 * side));
 				validPos.push_back(targetPos);
 			}
 		}
@@ -475,6 +475,10 @@ void Board::move(Player& player) //move
 			board[target.y][target.x].setSpace(board[source.y][source.x]);
 			board[source.y][source.x].setEmpty();
 			std::cout << "Success" << std::endl;
+			if (board[target.y][target.x].getLabel() == PAWN) //if is pawn
+			{
+				board[target.y][target.x].checkPawn();
+			}
 			break;
 		}
 		else //if cannot move
@@ -491,6 +495,7 @@ bool Board::moveAvalible(Chess chess, Position target) //check if can move
 	validPos = getValidPos(chess);
 	for (auto& i : validPos)
 	{
+		std::cout << i.x << i.y << std::endl;
 		if (i == target)
 		{
 			return true;
@@ -498,6 +503,8 @@ bool Board::moveAvalible(Chess chess, Position target) //check if can move
 	}
 	return false;
 }
+
+
 
 /*Board::Board(std::string fen)
 {
