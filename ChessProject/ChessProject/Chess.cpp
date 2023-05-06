@@ -1,13 +1,13 @@
 #include "Chess.h"
 
-Chess::Chess() //constructor, initialize the chess
+Chess::Chess() //constructor initialize the chess
 {
 	pos = Position(0, 0);
 	label = EMPTY;
 	color = NONE;
 }
 
-Chess::Chess(Position pos, Label label, Color color) //constructor, initialize the chess
+Chess::Chess(Position pos, Label label, Color color) //constructor and initialize the chess
 {
 	this->pos = pos;
 	this->label = label;
@@ -63,7 +63,7 @@ void Chess::checkPawn() //check and change if the pawn at the end
 	{
 		if (this->pos.y == 7) //at the end
 		{
-			while (this->label == PAWN) //has not promotion
+			while (this->label == PAWN) //haven't promotion
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
@@ -94,7 +94,7 @@ void Chess::checkPawn() //check and change if the pawn at the end
 	{
 		if (this->pos.y == 0) //if at the end
 		{
-			while (this->label == PAWN) //has not promotion
+			while (this->label == PAWN) //haven't promotion
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
