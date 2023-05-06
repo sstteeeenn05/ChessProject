@@ -1,11 +1,11 @@
-// Name: 
-//		§d²»ºö B11110520
-//		­ð¤_µx B11130006
-// Date: 
-//		May 5, 2023
-// Last Update: 
-//		May 6, 2023
-// Problem statement: the class of broad
+/*****************************************************************
+* File: Broad.cpp
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/06
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/06
+ * Description: set and update broad
+ *********************************************************************/
 
 #include "Broad.h"
 #include <map>
