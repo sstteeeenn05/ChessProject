@@ -13,7 +13,6 @@ public:
 	Chess(); //constructor, initialize the chess
 	Chess(Position pos, Label label, Color color); //constructor, initialize the chess
 	//Chess(Chess baseChess);
-
 	
 	void setPos(Position pos); //set position
 	void setChess(Label label, Color color); //set chess label and color
@@ -25,5 +24,5 @@ public:
 	Label getLabel(); //get label
 	Color getColor(); //get color
 
-	void checkPawn(); //check and change if the pawn at the end
+	void checkPawn(); //check and change if the pawn at the end lines
 };

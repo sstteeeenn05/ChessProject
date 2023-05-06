@@ -201,6 +201,28 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
+
+		//check the square of the queen
+		for (int i = -1; i <= 1; i++) 
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				targetPos = Position(pos.x, i);
+				if (board[pos.y + i][pos.x + j].getColor() == NONE) //if there is nothing in the space
+				{
+					validPos.push_back(targetPos);
+				}
+				if (board[i][pos.y + j].getColor() == enemy) //if there is something can eat
+				{
+					validPos.push_back(targetPos);
+					break;
+				}
+				else //if there is something in the space
+				{
+					break;
+				}
+			}
+		}
 	case BISHOP: //if is bishop
 		for (int i = 1; i < 8; i++) //run the most turn
 		{
@@ -461,10 +483,10 @@ void Board::move(Player& player) //move
 	while (true) //do until move success
 	{
 		std::cin >> a >> b;
-		source.x = a[0] - 97;
-		source.y = 8 - (a[1] - 48);
-		target.x = b[0] - 97;
-		target.y = 8 - (b[1] - 48);
+		source.x = a[0] - 'a';
+		source.y = 8 - (a[1] - '0');
+		target.x = b[0] - 'a';
+		target.y = 8 - (b[1] - '0');
 		if (player.getColor() != board[source.y][source.x].getColor()) //wrong color
 		{
 			std::cout << "Fail" << std::endl;
