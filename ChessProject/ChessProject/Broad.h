@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Chess.h"
-#include "header.h"
+#include "Header.h"
 
 class Board
 {

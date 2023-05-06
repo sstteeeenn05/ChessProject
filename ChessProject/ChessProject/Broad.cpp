@@ -3,7 +3,7 @@
 
 /*std::map <char, std::string> charToLabel =
 {
-	'k' = "king",
+	'k' = "KING",
 
 }*/
 
