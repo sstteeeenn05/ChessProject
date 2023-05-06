@@ -1,16 +1,10 @@
 #pragma once
 
 #include "Chess.h"
-<<<<<<< Updated upstream
 #include "Header.h"
-=======
-<<<<<<< HEAD
 #include "header.h"
 #include "Player.h"
-=======
 #include "Header.h"
->>>>>>> f51c2130c90e0368030ad528c27f0042d58ff3b5
->>>>>>> Stashed changes
 
 class Board
 {
