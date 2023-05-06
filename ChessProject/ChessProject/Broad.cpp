@@ -135,7 +135,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 		break;
 
 	case QUEEN: //if is queen
-		for (int i = pos.x + 2; i < 8; i++) //check go right
+		for (int i = pos.x + 1; i < 8; i++) //check go right
 		{
 			targetPos = Position(i, pos.y);
 			if (board[pos.y][i].getColor() == NONE) //if there is nothing in the space
@@ -152,7 +152,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = pos.x - 2; i >= 0; i--) //check go left
+		for (int i = pos.x - 1; i >= 0; i--) //check go left
 		{
 			targetPos = Position(i, pos.y);
 			if (board[pos.y][i].getColor() == NONE) //if there is nothing in the space
@@ -169,7 +169,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = pos.y + 2; i < 8; i++) //check go down
+		for (int i = pos.y + 1; i < 8; i++) //check go down
 		{
 			targetPos = Position(pos.x, i);
 			if (board[i][pos.x].getColor() == NONE) //if there is nothing in the space
@@ -186,7 +186,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = pos.y - 2; i >= 0; i--) //check go up
+		for (int i = pos.y - 1; i >= 0; i--) //check go up
 		{
 			targetPos = Position(pos.x, i);
 			if (board[i][pos.x].getColor() == NONE) //if there is nothing in the space
@@ -203,35 +203,8 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-
-		//check the square of the queen
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				if (pos.x + j < 8 && pos.x + j >= 0 && pos.y + i < 8 && pos.y + i >= 0)
-				{
-					targetPos = Position(pos.x + j, pos.y + i);
-					std::cout << ".."<<pos.x + j << pos.y + i << std::endl;
-					if (board[pos.y + i][pos.x + j].getColor() == NONE) //if there is nothing in the space
-					{
-						std::cout << "NONE" << std::endl;
-						validPos.push_back(targetPos);
-					}
-					if (board[pos.y + i][pos.x + j].getColor() == enemy) //if there is something can eat
-					{
-						validPos.push_back(targetPos);
-					}
-					else //if there is something in the space
-					{
-						break;
-					}
-				}
-			}
-		}
-		break;
 	case BISHOP: //if is bishop
-		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y + i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y + i < 8; i++) //check down right
 		{
 			targetPos = Position(pos.x + i, pos.y + i);
 			if (board[pos.y + i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
@@ -248,7 +221,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y - i >= 0; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y - i >= 0; i++) //check up right
 		{
 			targetPos = Position(pos.x + i, pos.y - i);
 			if (board[pos.y - i][pos.x + i].getColor() == NONE) //if there is nothing in the sapce
@@ -265,7 +238,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y + i < 8; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y + i < 8; i++) //check down left
 		{
 			targetPos = Position(pos.x - i, pos.y + i);
 			if (board[pos.y + i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
@@ -282,7 +255,7 @@ std::vector<Position> Board::getValidPos(Chess chess) //get all the valid positi
 				break;
 			}
 		}
-		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y - i >= 0; i++) //run the most turn
+		for (int i = 1; i < 8 && pos.x - i >= 0 && pos.y - i >= 0; i++) //check up left
 		{
 			targetPos = Position(pos.x - i, pos.y - i);
 			if (board[pos.y - i][pos.x - i].getColor() == NONE) //if there is nothing in the sapce
