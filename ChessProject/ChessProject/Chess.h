@@ -1,4 +1,14 @@
+/*****************************************************************
+* File: Chess.h
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/05
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/07
+ * Description: prototype of the chess
+ *********************************************************************/
+
 #pragma once
+
 #include "Header.h"
 #include "Position.h"
 
@@ -10,8 +20,8 @@ protected:
 	Color color;
 
 public:
-	Chess(); //constructor, initialize the chess
-	Chess(Position pos, Label label, Color color); //constructor, initialize the chess
+	Chess(); //constructor and initialize the chess
+	Chess(Position pos, Label label, Color color); //constructor and initialize the chess
 	//Chess(Chess baseChess);
 	
 	void setPos(Position pos); //set position
@@ -24,5 +34,5 @@ public:
 	Label getLabel(); //get label
 	Color getColor(); //get color
 
-	void checkPawn(); //check and change if the pawn at the end lines
+	void checkPawn(); //check and change if the pawn is at end lines
 };

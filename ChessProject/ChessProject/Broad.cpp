@@ -1,7 +1,7 @@
 /*****************************************************************
 * File: Broad.cpp
  * Author: ­ð¤_µx¡B§d²»ºö
- * Create Date: 2023/05/06
+ * Create Date: 2023/05/05
  * Editor: ­ð¤_µx¡B§d²»ºö
  * Update Date: 2023/05/06
  * Description: set and update broad
@@ -175,6 +175,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			validPos.push_back(targetPos);
 		}
 		break;
+
 	case QUEEN: //if is queen
 
 		//check the rigth side
@@ -260,6 +261,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 				break;
 			}
 		}
+
 	case BISHOP: //if is bishop
 
 		//run the most turn
@@ -346,6 +348,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			}
 		}
 		break;
+
 	case KNIGHT: //if is knight
 
 		//if can move
@@ -404,6 +407,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			validPos.push_back(targetPos);
 		}
 		break;
+
 	case ROOK: //if is rook
 
 		//check go right
@@ -490,6 +494,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			}
 		}
 		break;
+
 	case PAWN: //if is pawn
 
 		//the first step, can move one or tow
@@ -539,8 +544,8 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			}
 		}
 		break;
-		}
-		return validPos;
+	}
+	return validPos;
 }
 
 //intent: move the chess

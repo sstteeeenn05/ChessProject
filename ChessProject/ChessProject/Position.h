@@ -1,3 +1,12 @@
+/*****************************************************************
+* File: Position.h
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/05
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/07
+ * Description: prototype of the Position
+ *********************************************************************/
+
 #pragma once
 
 class Position

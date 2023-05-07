@@ -1,3 +1,12 @@
+/*****************************************************************
+* File: Position.cpp
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/05
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/07
+ * Description: set and update Position
+ *********************************************************************/
+
 #include "Position.h"
 
 Position::Position() //constructor and initialize position
@@ -23,7 +32,7 @@ Position Position::getPos() //get position
 	return *this;
 }
 
-bool Position::operator==(Position& pos) //set ==
+bool Position::operator==(Position& pos) //oveload operation ==
 {
 	if (this->x != pos.x || this->y != pos.y)
 	{

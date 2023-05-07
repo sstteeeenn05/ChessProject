@@ -1,3 +1,12 @@
+/*****************************************************************
+* File: Broad.h
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/05
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/06
+ * Description: prototype of the  broad
+ *********************************************************************/
+
 #pragma once
 
 #include "Chess.h"

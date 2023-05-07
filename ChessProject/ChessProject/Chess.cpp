@@ -1,88 +1,145 @@
+/*****************************************************************
+* File: Chess.cpp
+ * Author: ­ð¤_µx¡B§d²»ºö
+ * Create Date: 2023/05/05
+ * Editor: ­ð¤_µx¡B§d²»ºö
+ * Update Date: 2023/05/07
+ * Description: set and update chess
+ *********************************************************************/
+
 #include "Chess.h"
 
-Chess::Chess() //constructor initialize the chess
+//intent:constructor initialize the chess
+//pre: none
+//post:none
+Chess::Chess() 
 {
 	pos = Position(0, 0);
 	label = EMPTY;
 	color = NONE;
 }
 
-Chess::Chess(Position pos, Label label, Color color) //constructor and initialize the chess
+//intent:constructor and initialize the chess
+//pre:a Position a Label and a Color
+//post:a object of Chess
+Chess::Chess(Position pos, Label label, Color color)
 {
 	this->pos = pos;
 	this->label = label;
 	this->color = color;
 }
 
-void Chess::setPos(Position pos) //set position
+//intent:set position
+//pre:a position
+//post:none
+void Chess::setPos(Position pos)
 {
 	this->pos = pos;
 }
 
-void Chess::setChess(Label label, Color color) //set chess label and color
+//intent:set chess label and color
+//pre: a Label and a Color
+//post:none
+void Chess::setChess(Label label, Color color) 
 {
 	this->label = label;
 	this->color = color;
 }
 
-void Chess::setLabel(Label label) //set label
+//intent:set the Label
+//pre:the label 
+//post:none
+void Chess::setLabel(Label label)
 {
 	this->label = label;
 }
 
-void Chess::setSpace(Chess chess) //set the space to the chess
+//intent:set the space to the chess
+//pre:a object of the Chess
+//post:none
+void Chess::setSpace(Chess chess) 
 {
 	this->color = chess.color;
 	this->label = chess.label;
 }
 
-void Chess::setEmpty() //set the space to empty
+//intent:set the space to empty
+//pre:none
+//post:none
+void Chess::setEmpty() 
 {
 	this->color = NONE;
 	this->label = EMPTY;
 }
 
-Position Chess::getPos() //get position
+//intent:get the Position of this class
+//pre:none
+//post:return the Promotion
+Position Chess::getPos() 
 {
 	return pos;
 }
 
-Label Chess::getLabel() //get label
+//intent:get the of this chess
+//pre:none
+//post:return the object of Label
+Label Chess::getLabel() 
 {
 	return label;
 }
 
-Color Chess::getColor() //get color
+//intent:get the color of this chess
+//pre:none
+//post:return the object of Color
+Color Chess::getColor() 
 {
 	return color;
 }
 
-void Chess::checkPawn() //check and change if the pawn at the end
+//intent:check and change if the pawn is at the end
+//pre: none
+//post:none
+void Chess::checkPawn() 
 {
-	if (this->color == BLACK) //if the color is black
+	//if the color is black
+	if (this->color == BLACK) 
 	{
-		if (this->pos.y == 7) //at the end
+		//pawn at the end
+		if (this->pos.y == 7) 
 		{
-			while (this->label == PAWN) //haven't promotion
+			//loop until promotion successfully
+			while (this->label == PAWN) 
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
 				std::cin >> choose;
-				switch (choose) //change to what
+
+				//what to chage to 
+				switch (choose) 
 				{
-				case 1: //change to queen
+
+				//change to queen
+				case 1: 
 					this->setLabel(QUEEN);
 					break;
-				case 2: //change to bishop
+
+				//change to bishop
+				case 2: 
 					this->setLabel(BISHOP);
 					break;
-				case 3: //change to knight
+
+				//change to knight
+				case 3: 
 					this->setLabel(KNIGHT);
 					break;
-				case 4: //change to rook
+
+				//change to rook
+				case 4: 
 					this->setLabel(ROOK);
 					break;
-				default: //change fail
+
+				//fail to change
+				default: 
 					std::cout << "Fail" << std::endl;
 					break;
 				}
@@ -92,28 +149,42 @@ void Chess::checkPawn() //check and change if the pawn at the end
 	}
 	else //if the color is white
 	{
-		if (this->pos.y == 0) //if at the end
+		//if at the end
+		if (this->pos.y == 0) 
 		{
-			while (this->label == PAWN) //haven't promotion
+			//loop until promotion successfully
+			while (this->label == PAWN)
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
 				std::cin >> choose;
-				switch (choose) //change to what
+
+				//what to chage to 
+				switch (choose)
 				{
-				case 1: //change to queen
+
+				//change to queen
+				case 1:
 					this->setLabel(QUEEN);
 					break;
-				case 2: //change to bishop
+
+				//change to bishop
+				case 2:
 					this->setLabel(BISHOP);
 					break;
-				case 3: //change to knight
+
+				//change to knight
+				case 3:
 					this->setLabel(KNIGHT);
 					break;
-				case 4: //change to rook
+
+				//change to rook
+				case 4:
 					this->setLabel(ROOK);
 					break;
-				default: //change fail
+
+				//fail to change
+				default:
 					std::cout << "Fail" << std::endl;
 					break;
 				}
