@@ -49,7 +49,7 @@ void Chess::setChess(Type label, Color color)
 //intent:set the Label
 //pre:the label 
 //post:none
-void Chess::setLabel(Type label)
+void Chess::setType(Type label)
 {
 	this->type = label;
 }
@@ -83,7 +83,7 @@ Position Chess::getPos()
 //intent:get the of this chess
 //pre:none
 //post:return the object of Label
-Type Chess::getLabel() 
+Type Chess::getType() 
 {
 	return type;
 }
@@ -120,22 +120,22 @@ void Chess::checkPawn()
 
 				//change to queen
 				case 1: 
-					this->setLabel(QUEEN);
+					this->setType(QUEEN);
 					break;
 
 				//change to bishop
 				case 2: 
-					this->setLabel(BISHOP);
+					this->setType(BISHOP);
 					break;
 
 				//change to knight
 				case 3: 
-					this->setLabel(KNIGHT);
+					this->setType(KNIGHT);
 					break;
 
 				//change to rook
 				case 4: 
-					this->setLabel(ROOK);
+					this->setType(ROOK);
 					break;
 
 				//fail to change
@@ -165,22 +165,22 @@ void Chess::checkPawn()
 
 				//change to queen
 				case 1:
-					this->setLabel(QUEEN);
+					this->setType(QUEEN);
 					break;
 
 				//change to bishop
 				case 2:
-					this->setLabel(BISHOP);
+					this->setType(BISHOP);
 					break;
 
 				//change to knight
 				case 3:
-					this->setLabel(KNIGHT);
+					this->setType(KNIGHT);
 					break;
 
 				//change to rook
 				case 4:
-					this->setLabel(ROOK);
+					this->setType(ROOK);
 					break;
 
 				//fail to change
@@ -249,18 +249,7 @@ std::vector<Position> Chess::getValidPos()
 				validPos.push_back(targetPos);
 			}
 		}
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0)
-				{
-					targetPos = Position(pos.x + i, pos.y + j);
-					validPos.push_back(targetPos);
-				}
-			}
-		}
-		break;
+
 	case BISHOP: //if is bishop
 
 		for (int i = -7; i <= 7; i++)
@@ -276,7 +265,10 @@ std::vector<Position> Chess::getValidPos()
 				validPos.push_back(targetPos);
 			}
 		}
+		break;
+
 	case KNIGHT: //if is knight
+
 		{
 			int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
 			for (int i = 0; i < 8; i++)
@@ -286,7 +278,9 @@ std::vector<Position> Chess::getValidPos()
 			}
 		}
 		break;
+
 	case ROOK:
+
 		for (int i = -7; i <= 7; i++)
 		{
 			if (pos.x + i < 8 && pos.x + i >= 0)
@@ -301,6 +295,7 @@ std::vector<Position> Chess::getValidPos()
 			}
 		}
 		break;
+
 	case PAWN: //if is pawn
 
 		//the first step, can move one or tow

@@ -624,19 +624,12 @@ void crossSide(Chess& chess)
 //intent: move the chess
 //pre: whose turn
 //post: none
-void Board::move(Player& player) 
+void Board::move(Player& player, Position source, Position target)
 {
-	Position source, target;
-	std::string a, b;
-
 	//loop until it move successfully
 	while (true) 
 	{
-		std::cin >> a >> b;
-		source.x = a[0] - 'a';
-		source.y = 8 - (a[1] - '0');
-		target.x = b[0] - 'a';
-		target.y = 8 - (b[1] - '0');
+		
 
 		//if it is not this player's turn
 		if (player.getColor() != board[source.y][source.x].getColor()) 
@@ -648,8 +641,9 @@ void Board::move(Player& player)
 		//if the target position is valid
 		if (moveAvalible(board[source.y][source.x], target)) 
 		{
-			logs.push_back(board[source.y][source.x].getType()+ board[source.y][source.x].getPos().x+ board[source.y][source.x].getPos().y 
-				+ board[target.y][target.x].getPos().x + board[target.y][target.x].getPos().y + board[target.y][target.x].getType());
+			Log record(board[source.y][source.x], board[target.y][target.x]);
+			logs.push_back(record);
+			
 			board[target.y][target.x].setSpace(board[source.y][source.x]);
 			board[source.y][source.x].setEmpty();
 			std::cout << "Success" << std::endl;
@@ -664,6 +658,12 @@ void Board::move(Player& player)
 		else 
 		{
 			std::cout << "Fail" << std::endl;
+			std::string a, b;
+			std::cin >> a >> b;
+			source.x = a[0] - 'a';
+			source.y = 8 - (a[1] - '0');
+			target.x = b[0] - 'a';
+			target.y = 8 - (b[1] - '0');
 			continue;
 		}
 	}
@@ -692,6 +692,40 @@ bool Board::moveAvalible(Chess chess, Position target)
 		}
 	}
 	return false;
+}
+
+void Board::undo(int& count) //undo
+{
+	if (count == 0)
+	{
+		std::cout << "Fail" << std::endl;
+		return;
+	}
+	else
+	{
+		Log record(logs[count - 1].source, logs[count - 1].target);
+		board[record.source.getPos().y][record.source.getPos().x] = record.source;
+		board[record.target.getPos().y][record.target.getPos().x] = record.target;
+		count--;
+		std::cout << "Success" << std::endl;
+	}
+}
+
+void Board::redo(int& count) //redo
+{
+	if (count >= logs.size())
+	{
+		std::cout << "Fail" << std::endl;
+		return;
+	}
+	else
+	{
+		Log record(logs[count].source, logs[count].target);
+		board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]);
+		board[record.source.getPos().y][record.source.getPos().x].setEmpty();
+		count++;
+		std::cout << "Success" << std::endl;
+	}
 }
 
 /*Board::Board(std::string fen)

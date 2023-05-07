@@ -29,12 +29,12 @@ public:
 	
 	void setPos(Position pos); //set position
 	void setChess(Type type, Color color); //set chess type and color
-	void setLabel(Type type); //set type
+	void setType(Type type); //set type
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
 
 	Position getPos(); //get position
-	Type getLabel(); //get type
+	Type getType(); //get type
 	Color getColor(); //get color
 
 	void checkPawn(); //check and change if the pawn is at end lines

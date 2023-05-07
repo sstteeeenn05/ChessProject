@@ -12,19 +12,41 @@ int main()
 	Player p1, p2;
 	p1.setColor(WHITE);
 	p2.setColor(BLACK);
-	int count = 1;
+	int count = 0;
 	printBoard(board.getBoard());
 	while (true)
 	{
-		if (count % 2 == 0)
+		char choose;
+		std::cout << "u:undo r:redo" << std::endl;
+		std::cin >> choose;
+		switch (choose)
 		{
-			board.move(p2);
+		case 'u':
+			board.undo(count);
+			break;
+		case 'r':
+			board.redo(count);
+			break;
+		default:
+			std::string a, b;
+			Position source, target;
+			std::cin >> a >> b;
+			a = choose + a;
+			source.x = a[0] - 'a';
+			source.y = 8 - (a[1] - '0');
+			target.x = b[0] - 'a';
+			target.y = 8 - (b[1] - '0');
+			if (count % 2 == 1)
+			{
+				board.move(p2, source, target);
+			}
+			else
+			{
+				board.move(p1, source, target);
+			}
+			count++;
+			break;
 		}
-		else
-		{
-			board.move(p1);
-		}
-		count++;
 		system("cls");
 		printBoard(board.getBoard());
 	}
@@ -46,7 +68,7 @@ void printBoard(Chess* source) //print board
 		std::cout << 8 - i << " ";
 		for (int j = 0; j < 8; j++) //output board
 		{
-			switch (board[i][j].getLabel())
+			switch (board[i][j].getType())
 			{
 			case KING:
 				if (board[i][j].getColor() == BLACK)

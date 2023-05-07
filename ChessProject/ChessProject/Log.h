@@ -4,10 +4,12 @@
 
 class Log
 {
-private:
+public:
 	Chess source;
 	Chess target;
-public:
+
 	Log(Chess source, Chess target);
 	Log& getLog();
+	Chess getSource();
+	Chess getTarget();
 };

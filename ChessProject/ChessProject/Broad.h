@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Chess.h"
+#include "Log.h";
 #include "Player.h"
 #include "Header.h"
 
@@ -17,7 +18,7 @@ class Board
 {
 private:
 	Chess board[8][8];
-	std::vector<int> logs;
+	std::vector<Log> logs;
 
 public:
 	Board(); //constructor and initialize the board
@@ -25,8 +26,10 @@ public:
 
 	Chess* getBoard(); //get board
 
-	void move(Player& player); //move
+	void move(Player& player, Position source, Position target); //move
 	bool moveAvalible(Chess chess, Position target); //check if can move
+	void undo(int& count); //undo
+	void redo(int& count); //redo
 };
 
 // moveAvalible ¦b Broad.h

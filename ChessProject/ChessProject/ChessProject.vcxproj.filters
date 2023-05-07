@@ -30,6 +30,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>資源檔</Filter>
     </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Broad.h">
@@ -45,6 +48,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
