@@ -1,0 +1,37 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("assets/randy-fath-G1yhU1Ej-9A-unsplash.jpg");
+    background-position: center;
+    background-size: cover;
+}
+
+.main{
+    padding: 0 20px 20px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: rgba(0, 0, 0, .5) 0 0 10px 5px;
+}
+
+.main > .single-play-button{
+    height: 50px;
+    width: 200px;
+    font-size: larger;
+    color: white;
+    border-radius: 16px;
+    background: #008dcd;
+    border: none;
+}
+
+.main > .single-play-button:hover {
+    background: #005b9b;
+    cursor: pointer;
+}
+
+.main > .single-play-button:active {
+    background: #002969;
+    cursor: pointer;
+}
+
+

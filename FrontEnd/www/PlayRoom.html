@@ -1,0 +1,57 @@
+<html>
+
+<head>
+  <script defer src="./api/Alpine.js"></script>
+  <link rel="stylesheet" href="PlayRoomStyle.css">
+  <title>Playing Chess</title>
+</head>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    console.log('0.0');
+    Alpine.data('globalScope', () => ({
+      board: [
+        'rnbqkbnr',
+        'pppppppp',
+        '........',
+        '........',
+        '........',
+        '........',
+        'PPPPPPPP',
+        'RNBQKBNR'
+      ],
+      nowMoving: 'white',
+      calculateUrl: (input)=>{
+        if(input !== '.'){
+          if(input === input.toLowerCase()) {
+            return './assets/b'+ input + '.svg'
+          }
+          return './assets/w'+ input.toLowerCase() + '.svg'
+        }
+        return false
+      },
+
+    }))
+  })
+</script>
+
+<body>
+  <div x-data="globalScope">
+<!--    <button class="leave-button">leave</button>-->
+    <div class="board">
+      <template x-for="(line, row) in board" :key="row">
+        <div class="row">
+          <template x-for="(item, column) in line" :key="column">
+            <div class="row-element">
+              <img class="image" x-show="calculateUrl(item)"
+                   :src="calculateUrl(item)" :alt="item">
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+  </div>
+</body>
+
+</html>

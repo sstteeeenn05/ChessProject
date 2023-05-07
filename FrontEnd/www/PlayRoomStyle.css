@@ -1,0 +1,27 @@
+.board{
+    width: 90vh;
+    max-width: 90vw;
+}
+
+.row{
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+}
+
+.row-element{
+    aspect-ratio: 1;
+    width: 100%;
+    background: #008dcd;
+    cursor: pointer;
+}
+
+.row:nth-child(odd) > .row-element:nth-child(even),
+.row:nth-child(even) > .row-element:nth-child(odd) {
+    background: deepskyblue;
+}
+
+.image {
+    width: 80%;
+    height: 80%;
+    margin: 10%;
+}
