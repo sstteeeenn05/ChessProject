@@ -4,7 +4,7 @@
  * Create Date: 2023/05/05
  * Editor: ­ð¤_µx¡B§d²»ºö
  * Update Date: 2023/05/07
- * Description: set the enum of Label and Color
+ * Description: set the enum of Type and Color
  *********************************************************************/
 
 #pragma once
@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-enum Label
+enum Type
 {
 	KING,
 	QUEEN,

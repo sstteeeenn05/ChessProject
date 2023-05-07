@@ -10,8 +10,6 @@
 #pragma once
 
 #include "Chess.h"
-#include "Header.h"
-#include "header.h"
 #include "Player.h"
 #include "Header.h"
 
@@ -30,3 +28,8 @@ public:
 	void move(Player& player); //move
 	bool moveAvalible(Chess chess, Position target); //check if can move
 };
+
+//move  getValidPos 改到 chess.h
+// moveAvalible 在 Broad.h
+//getValidPos 版面內只存可以動的(都是空的)
+//要吃棋子再去movaAvalible 比較

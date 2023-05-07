@@ -86,7 +86,7 @@ Chess* Board::getBoard()
 std::vector<Position> Board::getValidPos(Chess chess) 
 {
 	Color color = chess.getColor(), enemy;
-	Label label = chess.getLabel();
+	Type label = chess.getLabel();
 	Position pos = chess.getPos();
 	std::vector<Position> validPos;
 	validPos.clear();
@@ -112,7 +112,19 @@ std::vector<Position> Board::getValidPos(Chess chess)
 	{
 	case KING: //if is king
 
-		//if can move
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0 && board[pos.y + j][pos.x + i].getColor() != color)
+				{
+					targetPos = Position(pos.x + i, pos.y + j);
+					validPos.push_back(targetPos);
+				}
+			}
+		}
+
+		/*//if can move
 		if (pos.x + 1 < 8 && pos.y + 1 < 8 && board[pos.y + 1][pos.x + 1].getColor() != color) 
 		{
 			targetPos = Position(pos.x + 1, pos.y + 1);
@@ -173,11 +185,38 @@ std::vector<Position> Board::getValidPos(Chess chess)
 
 			targetPos = Position(pos.x - 1, pos.y - 1);
 			validPos.push_back(targetPos);
-		}
+		}*/
 		break;
 
 	case QUEEN: //if is queen
-
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0)
+			{
+				Position targetPos = Position(pos.x + i, pos.y);
+				validPos.push_back(targetPos);
+			}
+		}
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.y + i < 8 && pos.y + i >= 0)
+			{
+				Position targetPos = Position(pos.x, pos.y + i);
+				validPos.push_back(targetPos);
+			}
+		}
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0 && board[pos.y + j][pos.x + i].getColor() != color)
+				{
+					targetPos = Position(pos.x + i, pos.y + j);
+					validPos.push_back(targetPos);
+				}
+			}
+		}
+		/* 
 		//check the rigth side
 		for (int i = pos.x + 1; i < 8; i++) 
 		{
@@ -260,7 +299,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			{
 				break;
 			}
-		}
+		} */
 
 	case BISHOP: //if is bishop
 
@@ -547,6 +586,27 @@ std::vector<Position> Board::getValidPos(Chess chess)
 	}
 	return validPos;
 }
+
+/*void crossSide(Chess& chess)
+{
+	Position currPos = chess.getPos();
+	for (int i = -7; i <= 7; i++)
+	{
+		if (currPos.x + i < 8 && currPos.x + i >= 0)
+		{
+			Position targetPos = Position(currPos.x + i, currPos.y);
+			validPos.push_back(targetPos);
+		}
+	}
+	for (int i = -7; i <= 7; i++)
+	{
+		if (currPos.y + i < 8 && currPos.y + i >= 0)
+		{
+			Position targetPos = Position(currPos.x, currPos.y+i);
+			validPos.push_back(targetPos);
+		}
+	}
+}*/
 
 //intent: move the chess
 //pre: whose turn

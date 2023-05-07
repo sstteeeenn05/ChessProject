@@ -22,7 +22,7 @@ Chess::Chess()
 //intent:constructor and initialize the chess
 //pre:a Position a Label and a Color
 //post:a object of Chess
-Chess::Chess(Position pos, Label label, Color color)
+Chess::Chess(Position pos, Type label, Color color)
 {
 	this->pos = pos;
 	this->label = label;
@@ -40,7 +40,7 @@ void Chess::setPos(Position pos)
 //intent:set chess label and color
 //pre: a Label and a Color
 //post:none
-void Chess::setChess(Label label, Color color) 
+void Chess::setChess(Type label, Color color) 
 {
 	this->label = label;
 	this->color = color;
@@ -49,7 +49,7 @@ void Chess::setChess(Label label, Color color)
 //intent:set the Label
 //pre:the label 
 //post:none
-void Chess::setLabel(Label label)
+void Chess::setLabel(Type label)
 {
 	this->label = label;
 }
@@ -83,7 +83,7 @@ Position Chess::getPos()
 //intent:get the of this chess
 //pre:none
 //post:return the object of Label
-Label Chess::getLabel() 
+Type Chess::getLabel() 
 {
 	return label;
 }
