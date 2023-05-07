@@ -194,6 +194,9 @@ void Chess::checkPawn()
 	}
 }
 
+//intent:get all the valid position
+//pre:none
+//post:a vector full of valid positions
 std::vector<Position> Chess::getValidPos()
 {
 	std::vector<Position> validPos;
@@ -274,13 +277,30 @@ std::vector<Position> Chess::getValidPos()
 			}
 		}
 	case KNIGHT: //if is knight
-
-		int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
-		for (int i = 0; i < 8; i++)
 		{
-			targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
-			validPos.push_back(targetPos);
+			int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
+			for (int i = 0; i < 8; i++)
+			{
+				targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
+				validPos.push_back(targetPos);
+			}
 		}
+		break;
+	case ROOK:
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0)
+			{
+				Position targetPos = Position(pos.x + i, pos.y);
+				validPos.push_back(targetPos);
+			}
+			if (pos.y + i < 8 && pos.y + i >= 0)
+			{
+				Position targetPos = Position(pos.x, pos.y + i);
+				validPos.push_back(targetPos);
+			}
+		}
+		break;
 	case PAWN: //if is pawn
 
 		//the first step, can move one or tow

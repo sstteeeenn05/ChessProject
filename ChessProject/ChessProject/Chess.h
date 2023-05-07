@@ -19,21 +19,22 @@ private:
 	Position pos;
 	Type type;
 	Color color;
+
 	//Player& player;
 
 public:
 	Chess(); //constructor and initialize the chess
-	Chess(Position pos, Type label, Color color); //constructor and initialize the chess
+	Chess(Position pos, Type type, Color color); //constructor and initialize the chess
 	//Chess(Chess baseChess);
 	
 	void setPos(Position pos); //set position
-	void setChess(Type label, Color color); //set chess label and color
-	void setLabel(Type label); //set label
+	void setChess(Type type, Color color); //set chess type and color
+	void setLabel(Type type); //set type
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
 
 	Position getPos(); //get position
-	Type getLabel(); //get label
+	Type getLabel(); //get type
 	Color getColor(); //get color
 
 	void checkPawn(); //check and change if the pawn is at end lines

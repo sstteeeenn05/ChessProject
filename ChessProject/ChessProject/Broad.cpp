@@ -70,6 +70,8 @@ Board::Board()
 			board[i][j].setPos(Position(j, i));
 		}
 	}
+
+	logs.clear();
 }
 
 //intent: return the chess board to display it
@@ -81,9 +83,7 @@ Chess* Board::getBoard()
 }
 
 
-//intent:get all the valid position
-//pre:none
-//post:a vector full of valid positions
+
 
 /*std::vector<Position> Board::getValidPos(Chess chess)
 {
@@ -648,12 +648,14 @@ void Board::move(Player& player)
 		//if the target position is valid
 		if (moveAvalible(board[source.y][source.x], target)) 
 		{
+			logs.push_back(board[source.y][source.x].getType()+ board[source.y][source.x].getPos().x+ board[source.y][source.x].getPos().y 
+				+ board[target.y][target.x].getPos().x + board[target.y][target.x].getPos().y + board[target.y][target.x].getType());
 			board[target.y][target.x].setSpace(board[source.y][source.x]);
 			board[source.y][source.x].setEmpty();
 			std::cout << "Success" << std::endl;
 
 			//if is pawn check if it can promotion
-			if (board[target.y][target.x].getLabel() == PAWN) 
+			if (board[target.y][target.x].getType() == PAWN) 
 			{
 				board[target.y][target.x].checkPawn();
 			}
@@ -675,21 +677,22 @@ bool Board::moveAvalible(Chess chess, Position target)
 	std::vector<Position> validPos;
 	validPos = chess.getValidPos();
 
-	//run int the vector saved valid positions
-	for (auto& i : validPos)
+	if (board[target.y][target.x].getColor() != chess.getColor())
 	{
-		std::cout << i.x << i.y << std::endl;
-
-		//if the position if found
-		if (i == target)
+		//run int the vector saved valid positions
+		for (auto& i : validPos)
 		{
-			return true;
+			std::cout << i.x << i.y << std::endl;
+
+			//if the position if found
+			if (i == target)
+			{
+				return true;
+			}
 		}
 	}
 	return false;
 }
-
-
 
 /*Board::Board(std::string fen)
 {

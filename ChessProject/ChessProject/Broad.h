@@ -17,6 +17,7 @@ class Board
 {
 private:
 	Chess board[8][8];
+	std::vector<int> logs;
 
 public:
 	Board(); //constructor and initialize the board
@@ -28,7 +29,5 @@ public:
 	bool moveAvalible(Chess chess, Position target); //check if can move
 };
 
-//move  getValidPos 改到 chess.h
 // moveAvalible 在 Broad.h
-//getValidPos 版面內只存可以動的(都是空的)
 //要吃棋子再去movaAvalible 比較
