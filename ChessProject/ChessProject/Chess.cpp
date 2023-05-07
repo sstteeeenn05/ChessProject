@@ -15,7 +15,7 @@
 Chess::Chess() 
 {
 	pos = Position(0, 0);
-	label = EMPTY;
+	type = EMPTY;
 	color = NONE;
 }
 
@@ -25,7 +25,7 @@ Chess::Chess()
 Chess::Chess(Position pos, Type label, Color color)
 {
 	this->pos = pos;
-	this->label = label;
+	this->type = label;
 	this->color = color;
 }
 
@@ -42,7 +42,7 @@ void Chess::setPos(Position pos)
 //post:none
 void Chess::setChess(Type label, Color color) 
 {
-	this->label = label;
+	this->type = label;
 	this->color = color;
 }
 
@@ -51,7 +51,7 @@ void Chess::setChess(Type label, Color color)
 //post:none
 void Chess::setLabel(Type label)
 {
-	this->label = label;
+	this->type = label;
 }
 
 //intent:set the space to the chess
@@ -60,7 +60,7 @@ void Chess::setLabel(Type label)
 void Chess::setSpace(Chess chess) 
 {
 	this->color = chess.color;
-	this->label = chess.label;
+	this->type = chess.type;
 }
 
 //intent:set the space to empty
@@ -69,7 +69,7 @@ void Chess::setSpace(Chess chess)
 void Chess::setEmpty() 
 {
 	this->color = NONE;
-	this->label = EMPTY;
+	this->type = EMPTY;
 }
 
 //intent:get the Position of this class
@@ -85,7 +85,7 @@ Position Chess::getPos()
 //post:return the object of Label
 Type Chess::getLabel() 
 {
-	return label;
+	return type;
 }
 
 //intent:get the color of this chess
@@ -108,7 +108,7 @@ void Chess::checkPawn()
 		if (this->pos.y == 7) 
 		{
 			//loop until promotion successfully
-			while (this->label == PAWN) 
+			while (this->type == PAWN) 
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
@@ -153,7 +153,7 @@ void Chess::checkPawn()
 		if (this->pos.y == 0) 
 		{
 			//loop until promotion successfully
-			while (this->label == PAWN)
+			while (this->type == PAWN)
 			{
 				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
 				int choose;
@@ -192,4 +192,114 @@ void Chess::checkPawn()
 			std::cout << "Success" << std::endl;
 		}
 	}
+}
+
+std::vector<Position> Chess::getValidPos()
+{
+	std::vector<Position> validPos;
+	validPos.clear();
+	Position targetPos;
+	int side, pawnOrigin;
+	Color enemy;
+	if (color == BLACK)
+	{
+		enemy = WHITE;
+		side = 1;
+		pawnOrigin = 1;
+	}
+	else if (color == WHITE) //if the color is white
+	{
+		enemy = BLACK;
+		side = -1;
+		pawnOrigin = 6;
+	}
+	//judge the label
+	switch (this->type)
+	{
+	case KING: //if is king
+
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0)
+				{
+					targetPos = Position(pos.x + i, pos.y + j);
+					validPos.push_back(targetPos);
+				}
+			}
+		}
+		break;
+
+	case QUEEN: //if is queen
+
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0)
+			{
+				Position targetPos = Position(pos.x + i, pos.y);
+				validPos.push_back(targetPos);
+			}
+			if (pos.y + i < 8 && pos.y + i >= 0)
+			{
+				Position targetPos = Position(pos.x, pos.y + i);
+				validPos.push_back(targetPos);
+			}
+		}
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0)
+				{
+					targetPos = Position(pos.x + i, pos.y + j);
+					validPos.push_back(targetPos);
+				}
+			}
+		}
+		break;
+	case BISHOP: //if is bishop
+
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0)
+			{
+				Position targetPos = Position(pos.x + i, pos.y + i);
+				validPos.push_back(targetPos);
+			}
+			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0)
+			{
+				Position targetPos = Position(pos.x + i, pos.y - i);
+				validPos.push_back(targetPos);
+			}
+		}
+	case KNIGHT: //if is knight
+
+		int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
+		for (int i = 0; i < 8; i++)
+		{
+			targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
+			validPos.push_back(targetPos);
+		}
+	case PAWN: //if is pawn
+
+		//the first step, can move one or tow
+		if (pos.y == pawnOrigin)
+		{
+			//can move one or two step, check if can move
+			for (int i = 1; i <= 2; i++)
+			{
+				targetPos = Position(pos.x, (pos.y + (i * side)));
+				validPos.push_back(targetPos);
+			}
+		}
+		//not the first step, can move one step
+		if (pos.y + 1 < 8 && pos.y - 1 >= 0)
+		{
+			targetPos = Position(pos.x, (pos.y + (1 * side)));
+			validPos.push_back(targetPos);
+		}
+		break;
+	}
+	return validPos;
 }

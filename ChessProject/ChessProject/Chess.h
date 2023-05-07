@@ -17,7 +17,7 @@ class Chess
 {
 private:
 	Position pos;
-	Type label;
+	Type type;
 	Color color;
 	//Player& player;
 
@@ -37,4 +37,5 @@ public:
 	Color getColor(); //get color
 
 	void checkPawn(); //check and change if the pawn is at end lines
+	std::vector<Position>getValidPos();
 };

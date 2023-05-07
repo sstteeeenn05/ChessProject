@@ -23,7 +23,6 @@ public:
 	//Board(std::string fen);
 
 	Chess* getBoard(); //get board
-	std::vector<Position> getValidPos(Chess chess); //get all the valid position
 
 	void move(Player& player); //move
 	bool moveAvalible(Chess chess, Position target); //check if can move

@@ -80,10 +80,12 @@ Chess* Board::getBoard()
 	return &board[0][0];
 }
 
+
 //intent:get all the valid position
 //pre:none
 //post:a vector full of valid positions
-std::vector<Position> Board::getValidPos(Chess chess) 
+
+/*std::vector<Position> Board::getValidPos(Chess chess)
 {
 	Color color = chess.getColor(), enemy;
 	Type label = chess.getLabel();
@@ -124,7 +126,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			}
 		}
 
-		/*//if can move
+		/if can move
 		if (pos.x + 1 < 8 && pos.y + 1 < 8 && board[pos.y + 1][pos.x + 1].getColor() != color) 
 		{
 			targetPos = Position(pos.x + 1, pos.y + 1);
@@ -185,21 +187,24 @@ std::vector<Position> Board::getValidPos(Chess chess)
 
 			targetPos = Position(pos.x - 1, pos.y - 1);
 			validPos.push_back(targetPos);
-		}*/
+		}
 		break;
 
 	case QUEEN: //if is queen
-		for (int i = -7; i <= 7; i++)
+		for (int i = -1; i <= 1; i++)
 		{
-			if (pos.x + i < 8 && pos.x + i >= 0)
+			for (int j = -1; j <= 1; j++)
 			{
-				Position targetPos = Position(pos.x + i, pos.y);
-				validPos.push_back(targetPos);
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0 && board[pos.y + j][pos.x + i].getColor() != color)
+				{
+					targetPos = Position(pos.x + i, pos.y + j);
+					validPos.push_back(targetPos);
+				}
 			}
 		}
 		for (int i = -7; i <= 7; i++)
 		{
-			if (pos.y + i < 8 && pos.y + i >= 0)
+			if (pos.y + i < 8 && pos.y + i >= 0 && board[pos.y + j][pos.x + i].getColor() != color)
 			{
 				Position targetPos = Position(pos.x, pos.y + i);
 				validPos.push_back(targetPos);
@@ -216,7 +221,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 				}
 			}
 		}
-		/* 
+		break;
 		//check the rigth side
 		for (int i = pos.x + 1; i < 8; i++) 
 		{
@@ -299,10 +304,18 @@ std::vector<Position> Board::getValidPos(Chess chess)
 			{
 				break;
 			}
-		} */
+		} 
 
 	case BISHOP: //if is bishop
 
+		for (int i = -7; i <= 7; i++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0 && board[pos.y + i][pos.x + i].getColor() != color)
+			{
+				Position targetPos = Position(pos.x + i, pos.y);
+				validPos.push_back(targetPos);
+			}
+		}
 		//run the most turn
 		for (int i = 1; i < 8 && pos.x + i < 8 && pos.y + i < 8; i++) 
 		{
@@ -587,7 +600,7 @@ std::vector<Position> Board::getValidPos(Chess chess)
 	return validPos;
 }
 
-/*void crossSide(Chess& chess)
+void crossSide(Chess& chess)
 {
 	Position currPos = chess.getPos();
 	for (int i = -7; i <= 7; i++)
@@ -660,7 +673,7 @@ void Board::move(Player& player)
 bool Board::moveAvalible(Chess chess, Position target)
 {
 	std::vector<Position> validPos;
-	validPos = getValidPos(chess);
+	validPos = chess.getValidPos();
 
 	//run int the vector saved valid positions
 	for (auto& i : validPos)
