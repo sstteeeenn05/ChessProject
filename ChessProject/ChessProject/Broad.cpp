@@ -730,7 +730,7 @@ bool Board::castling(Chess& chess)
 {
 	if (!chess.getMoved())
 	{
-		if (!(board[chess.getPos().y][0].getMoved()) && board[chess.getPos().y][2].getColor() == NONE && board[chess.getPos().y][3].getColor() == NONE)
+		if (!(board[chess.getPos().y][0].getMoved()) && board[chess.getPos().y][2].getColor() != chess.getColor() && board[chess.getPos().y][3].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][3].setSpace(board[chess.getPos().y][0]);
 			board[chess.getPos().y][0].setEmpty();
@@ -738,7 +738,7 @@ bool Board::castling(Chess& chess)
 			logs.push_back(record);
 			return true;
 		}
-		if ((!board[chess.getPos().y][7].getMoved()) && board[chess.getPos().y][6].getColor() == NONE && board[chess.getPos().y][5].getColor() == NONE)
+		if ((!board[chess.getPos().y][7].getMoved()) && board[chess.getPos().y][6].getColor() != chess.getColor() && board[chess.getPos().y][5].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][5].setSpace(board[chess.getPos().y][7]);
 			board[chess.getPos().y][7].setEmpty();
