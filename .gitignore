@@ -1,3 +1,7 @@
 .vs
 .idea
 out
+ChessProject/x64
+ChessProject/Debug
+ChessProject/ChessProject/x64
+ChessProject/ChessProject/Debug

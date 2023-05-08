@@ -1,6 +1,0 @@
-﻿  Broad.cpp
-D:\report college\OOP\chess\chess\chess\ChessProject\ChessProject\Broad.h(13,10): warning C4067: 未預期的語彙基元，接著前置處理器指示詞 - 必須是新行
-  main.cpp
-D:\report college\OOP\chess\chess\chess\ChessProject\ChessProject\Broad.h(13,10): warning C4067: 未預期的語彙基元，接著前置處理器指示詞 - 必須是新行
-  正在產生程式碼...
-  ChessProject.vcxproj -> D:\report college\OOP\chess\chess\chess\ChessProject\x64\Debug\ChessProject.exe
