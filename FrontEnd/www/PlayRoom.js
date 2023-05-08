@@ -47,7 +47,9 @@ document.addEventListener('alpine:init', () => {
                             }).catch(error=>console.error(error))
                         }
                         if(resolve=="promotion"){
-
+                            this.game.promotion(/* implement your code here */).then((resolve)=>{
+                                /* implement your code here */
+                            }).catch(error=>console.error(error))
                         }
                     }).catch(error=>console.error(error))
                 this.clickedX=-1;

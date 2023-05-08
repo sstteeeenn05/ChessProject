@@ -5,6 +5,17 @@ export class Game{
         new WebSocket(WS_URL,"protocol-create-game");
         this.ws=new WebSocket(WS_URL,"protocol-input-command");
     }
+    promotion(choice){
+        return new Promise((resolve,reject)=>{
+            this.ws.onmessage=(event)=>{
+                resolve(JSON.parse(event.data.toString()).value);
+            }
+            this.ws.onerror=(event)=>{
+                reject(event);
+            }
+            this.ws.send(choice);
+        })
+    }
     printBoard(){
         return new Promise((resolve,reject)=>{
             this.ws.onmessage=(event)=>{
