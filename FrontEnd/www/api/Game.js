@@ -1,8 +1,6 @@
 const WS_URL="ws://localhost:1234";
 
 export class Game{
-    pending=false;
-    buffer={};
     constructor(){
         new WebSocket(WS_URL,"protocol-create-game");
         this.ws=new WebSocket(WS_URL,"protocol-input-command");
@@ -11,7 +9,7 @@ export class Game{
         new Promise((resolve,reject)=>{
             this.ws.onmessage=(event)=>{
                 let status=JSON.parse(event.data.toString()).value;
-                if(status=="success") resolve();
+                if(status.includes("success")) resolve();
                 else reject("failed");
             }
             this.ws.onerror=(event)=>{

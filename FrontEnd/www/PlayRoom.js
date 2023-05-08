@@ -33,7 +33,7 @@ document.addEventListener('alpine:init', () => {
                 this.clickedX=x;
                 this.clickedY=y;
             }else{
-                if(x!=this.clickedX&&y!=this.clickedY)
+                if(x!=this.clickedX||y!=this.clickedY)
                     this.game.move(
                         this.clickedX,
                         this.clickedY,
