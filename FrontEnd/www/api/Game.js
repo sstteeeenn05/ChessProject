@@ -1,18 +1,56 @@
+const WS_URL="ws://localhost:1234";
+
 export class Game{
     pending=false;
-    buffer;
+    buffer={};
     constructor(){
-        this.ws=new WebSocket("ws://localhost:1234");
-        this.ws.onmessage((event)=>{
-            this.buffer=event.data.toString().split('\n');
-            this.pending=false;
-        })
+        new WebSocket(WS_URL,"protocol-create-game");
+        this.ws=new WebSocket(WS_URL,"protocol-input-command");
     }
-    move(x1,y1,x2,y2){
-        if(this.pending) return alert("fuckyou");
-        this.pending=true;
-        this.ws.send(`move ${x1} ${y1} ${x2} ${y2}`);
-        while(this.pending);
-        return this.buffer;
+    move(x1,y1,x2,y2,board){
+        new Promise((resolve,reject)=>{
+            this.ws.onmessage=(event)=>{
+                let status=JSON.parse(event.data.toString()).value;
+                if(status=="success") resolve();
+                else reject("failed");
+            }
+            this.ws.onerror=(event)=>{
+                reject(event);
+            }
+            this.ws.send(`move ${x1} ${y1} ${x2} ${y2}`);
+        }).then((resolve)=>{
+            console.info(resolve);
+            new Promise((resolve,reject)=>{
+                this.ws.onmessage=(event)=>{
+                    resolve(JSON.parse(event.data.toString()));
+                }
+                this.ws.onerror=(event)=>{
+                    reject(event);
+                }
+                this.ws.send("print board");
+            }).then((resolve)=>{
+                board=resolve.value.split('\n');
+            }).catch(err=>console.error(err))
+        }).catch(
+            err=>console.error(err)
+        )
+    }
+    preview(x,y,maskBoard){
+        new Promise((resolve,reject)=>{
+            this.ws.onmessage=(event)=>{
+                resolve(JSON.parse(event.data.toString()));
+            }
+            this.ws.onerror=(event)=>{
+                reject(event);
+            }
+            this.ws.send(`preview ${x} ${y}`);
+        }).then((resolve)=>{
+            maskBoard=resolve.value.replaceAll(' ','').split("").map((char)=>{
+                return char==='1';
+            })
+            console.log(maskBoard);
+        }).catch(
+            err=>console.error(err)
+        )
     }
 }
