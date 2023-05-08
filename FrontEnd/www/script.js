@@ -7,7 +7,7 @@ ws.onopen=()=>{
 window.onload=()=>{
     let opt=document.querySelector('#opt');
     ws.onmessage=(e)=>{
-        opt.innerHTML=e.data;
+        opt.innerHTML=e.data.toString().replaceAll('\n','<br/>');
     }
     let ipt=document.querySelector('#ipt');
     let btn=document.querySelector('#btn');
