@@ -52,6 +52,7 @@ function inputCommand(ws){
 
     let sendToClient=(type,value)=>{
         console.log("send result:\n"+value);
+        console.log(value.length);
         ws.send(JSON.stringify({
             type:type,
             value:value
@@ -60,15 +61,15 @@ function inputCommand(ws){
         buffer.clear();
     }
     process.stdout.on('data',(data)=>{
-        let result=data.toString();
+        let result=data.toString().replaceAll(' ','.').replaceAll('\n',' ').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'');
         console.log("ondata!");
         if(buffer.isEmpty()){
-            if(result.indexOf('{')==-1) return sendToClient("status",result);
-            else result=result.substring(result.indexOf('{')+3);
+            if(result.indexOf('{')==-1) return sendToClient("status",result.replace(' ',''));
+            else result=result.substring(result.indexOf('{')+1);
         }
         buffer.push(result);
         if(result.indexOf('}')!=-1)
-            sendToClient("data",buffer.value.substring(0,buffer.value.indexOf('}')-1));
+            sendToClient("data",buffer.value.substring(0,buffer.value.indexOf('}')));
     })
 
     let queueTimer=setInterval(()=>{

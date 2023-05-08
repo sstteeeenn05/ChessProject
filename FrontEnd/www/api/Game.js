@@ -5,11 +5,24 @@ export class Game{
         new WebSocket(WS_URL,"protocol-create-game");
         this.ws=new WebSocket(WS_URL,"protocol-input-command");
     }
+    printBoard(board){
+        new Promise((resolve,reject)=>{
+            this.ws.onmessage=(event)=>{
+                resolve(JSON.parse(event.data.toString()));
+            }
+            this.ws.onerror=(event)=>{
+                reject(event);
+            }
+            this.ws.send("print board");
+        }).then((resolve)=>{
+            board=resolve.value.split(' ');
+        }).catch(err=>console.error(err))
+    }
     move(x1,y1,x2,y2,board){
         new Promise((resolve,reject)=>{
             this.ws.onmessage=(event)=>{
                 let status=JSON.parse(event.data.toString()).value;
-                if(status.includes("success")) resolve();
+                if(status=="success") resolve();
                 else reject("failed");
             }
             this.ws.onerror=(event)=>{
@@ -18,17 +31,7 @@ export class Game{
             this.ws.send(`move ${x1} ${y1} ${x2} ${y2}`);
         }).then((resolve)=>{
             console.info(resolve);
-            new Promise((resolve,reject)=>{
-                this.ws.onmessage=(event)=>{
-                    resolve(JSON.parse(event.data.toString()));
-                }
-                this.ws.onerror=(event)=>{
-                    reject(event);
-                }
-                this.ws.send("print board");
-            }).then((resolve)=>{
-                board=resolve.value.split('\n');
-            }).catch(err=>console.error(err))
+            this.printBoard(board);
         }).catch(
             err=>console.error(err)
         )

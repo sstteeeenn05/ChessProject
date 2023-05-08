@@ -13,7 +13,7 @@
       <template x-for="(line, row) in board" :key="row">
         <div class="row">
           <template x-for="(item, column) in line" :key="column">
-            <div class="row-element" x-on:click="click(row,column)">
+            <div class="row-element" x-on:click="click(column,row)">
               <img class="image" x-show="calculateUrl(item)"
                    :src="calculateUrl(item)" :alt="item">
             </div>
