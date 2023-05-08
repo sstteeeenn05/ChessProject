@@ -639,9 +639,10 @@ void Board::move(Player& player, Position source, Position target)
 		}
 
 		bool canCastle = false;
-		if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 0 || target.x == 7))
+		if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
 		{
 			canCastle = castling(board[source.y][source.x]);
+			std::cout << canCastle << std::endl;
 		}
 
 		//if the target position is valid
@@ -754,8 +755,8 @@ bool Board::castling(Chess& chess)
 			logs.push_back(record);
 			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
 /*Board::Board(std::string fen)
