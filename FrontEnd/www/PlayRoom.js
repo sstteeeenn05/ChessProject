@@ -18,29 +18,38 @@ document.addEventListener('alpine:init', () => {
         nowMoving: 'white',
         calculateUrl: (input)=>{
             if(input !== '.'){
-                if(input === input.toLowerCase()) {
-                return './assets/b'+ input + '.svg'
-                }
-                return './assets/w'+ input.toLowerCase() + '.svg'
+                if(input === input.toLowerCase())
+                    return './assets/b'+ input + '.svg';
+                return './assets/w'+ input.toLowerCase() + '.svg';
             }
-            return false
+            return false;
         },
         clickedX:-1,
         clickedY:-1,
         click(x,y){
             if(this.clickedX==-1&&this.clickedY==-1){
-                this.game.preview(x,y,this.maskBoard);
                 this.clickedX=x;
                 this.clickedY=y;
+                this.game.preview(x,y).then((resolve)=>{
+                    this.maskBoard=resolve;
+                }).catch(error=>console.error(error))
             }else{
                 if(x!=this.clickedX||y!=this.clickedY)
                     this.game.move(
                         this.clickedX,
                         this.clickedY,
                         x,
-                        y,
-                        this.board
-                    );
+                        y
+                    ).then((resolve)=>{
+                        if(resolve=="success"){
+                            this.game.printBoard().then((resolve)=>{
+                                this.board=resolve;
+                            }).catch(error=>console.error(error))
+                        }
+                        if(resolve=="promotion"){
+
+                        }
+                    }).catch(error=>console.error(error))
                 this.clickedX=-1;
                 this.clickedY=-1;
             }

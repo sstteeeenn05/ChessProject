@@ -65,11 +65,11 @@ function inputCommand(ws){
         console.log("ondata!");
         if(buffer.isEmpty()){
             if(result.indexOf('{')==-1) return sendToClient("status",result.replace(' ',''));
-            else result=result.substring(result.indexOf('{')+1);
+            else result=result.substring(result.indexOf('{')+2);
         }
         buffer.push(result);
         if(result.indexOf('}')!=-1)
-            sendToClient("data",buffer.value.substring(0,buffer.value.indexOf('}')));
+            sendToClient("data",buffer.value.substring(0,buffer.value.indexOf('}')-1));
     })
 
     let queueTimer=setInterval(()=>{
