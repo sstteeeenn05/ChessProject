@@ -622,7 +622,7 @@ void crossSide(Chess& chess)
 //intent: move the chess
 //pre: whose turn
 //post: none
-bool Board::move(Player& player, Position source, Position target)
+bool Board::move(Player& player, Position source, Position target, const int& count)
 {
 	//if it is not this player's turn
 	if (player.getColor() != board[source.y][source.x].getColor()) 
@@ -637,13 +637,18 @@ bool Board::move(Player& player, Position source, Position target)
 	{
 		canCastle = castling(board[source.y][source.x]);
 	}
-
+	
 	//if the target position is valid
 	if (moveAvalible(board[source.y][source.x], target) || canCastle)
 	{
+		while (count < logs.size())
+		{
+			logs.pop_back();
+		}
 		Log record(board[source.y][source.x], board[target.y][target.x]);
 		logs.push_back(record);
-			
+		
+
 		board[source.y][source.x].setMoved();
 
 		board[target.y][target.x].setSpace(board[source.y][source.x]);
@@ -675,7 +680,6 @@ bool Board::moveAvalible(Chess chess, Position target)
 		//run int the vector saved valid positions
 		for (auto& i : validPos)
 		{
-			std::cout << i.x << i.y << std::endl;
 
 			//if the position if found
 			if (i == target)

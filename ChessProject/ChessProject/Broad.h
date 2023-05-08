@@ -26,7 +26,7 @@ public:
 
 	Chess* getBoard(); //get board
 
-	bool move(Player& player, Position source, Position target); //move
+	bool move(Player& player, Position source, Position target, const int& count); //move
 	bool moveAvalible(Chess chess, Position target); //check if can move
 	void undo(int& count); //undo
 	void redo(int& count); //redo

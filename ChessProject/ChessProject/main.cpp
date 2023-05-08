@@ -39,11 +39,11 @@ int main()
 			bool validMotion = false;
 			if (count % 2 == 1)
 			{
-				validMotion = board.move(p2, source, target);
+				validMotion = board.move(p2, source, target, count);
 			}
 			else
 			{
-				validMotion = board.move(p1, source, target);
+				validMotion = board.move(p1, source, target, count);
 			}
 			if (validMotion)
 			{
