@@ -30,6 +30,8 @@ public:
 	bool moveAvalible(Chess chess, Position target); //check if can move
 	void undo(int& count); //undo
 	void redo(int& count); //redo
+
+	bool castling(Chess& chess);
 };
 
 // moveAvalible ¦b Broad.h

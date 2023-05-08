@@ -19,7 +19,7 @@ private:
 	Position pos;
 	Type type;
 	Color color;
-
+	bool moved;
 	//Player& player;
 
 public:
@@ -36,6 +36,7 @@ public:
 	Position getPos(); //get position
 	Type getType(); //get type
 	Color getColor(); //get color
+	bool getMoved();
 
 	void checkPawn(); //check and change if the pawn is at end lines
 	std::vector<Position>getValidPos();

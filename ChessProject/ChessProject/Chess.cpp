@@ -27,6 +27,7 @@ Chess::Chess(Position pos, Type label, Color color)
 	this->pos = pos;
 	this->type = label;
 	this->color = color;
+	//move=false;
 }
 
 //intent:set position
@@ -35,6 +36,7 @@ Chess::Chess(Position pos, Type label, Color color)
 void Chess::setPos(Position pos)
 {
 	this->pos = pos;
+	//move=true;
 }
 
 //intent:set chess label and color
@@ -94,6 +96,11 @@ Type Chess::getType()
 Color Chess::getColor() 
 {
 	return color;
+}
+
+bool Chess::getMoved()
+{
+	return moved;
 }
 
 //intent:check and change if the pawn is at the end
