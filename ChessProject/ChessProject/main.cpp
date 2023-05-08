@@ -36,22 +36,30 @@ int main()
 			source.y = 8 - (a[1] - '0');
 			target.x = b[0] - 'a';
 			target.y = 8 - (b[1] - '0');
+			bool validMotion = false;
 			if (count % 2 == 1)
 			{
-				board.move(p2, source, target);
+				validMotion = board.move(p2, source, target);
 			}
 			else
 			{
-				board.move(p1, source, target);
+				validMotion = board.move(p1, source, target);
 			}
-			count++;
+			if (validMotion)
+			{
+				std::cout << "Success" << std::endl;
+				count++;
+			}
+			else
+			{
+				std::cout << "Fail" << std::endl;
+			}
 			break;
 		}
 		system("cls");
 		printBoard(board.getBoard());
 	}
 }
-
 void printBoard(Chess* source) //print board
 {
 	Chess board[8][8];

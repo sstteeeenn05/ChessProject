@@ -83,8 +83,6 @@ Chess* Board::getBoard()
 }
 
 
-
-
 /*std::vector<Position> Board::getValidPos(Chess chess)
 {
 	Color color = chess.getColor(), enemy;
@@ -624,56 +622,43 @@ void crossSide(Chess& chess)
 //intent: move the chess
 //pre: whose turn
 //post: none
-void Board::move(Player& player, Position source, Position target)
+bool Board::move(Player& player, Position source, Position target)
 {
-	//loop until it move successfully
-	while (true) 
+	//if it is not this player's turn
+	if (player.getColor() != board[source.y][source.x].getColor()) 
 	{
-		
+		std::cout << "Fail" << std::endl;
+		return false;
+	}
 
-		//if it is not this player's turn
-		if (player.getColor() != board[source.y][source.x].getColor()) 
-		{
-			std::cout << "Fail" << std::endl;
-			continue;
-		}
+	bool canCastle = false;
 
-		bool canCastle = false;
+	if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
+	{
+		canCastle = castling(board[source.y][source.x]);
+	}
 
-		if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
-		{
-			canCastle = castling(board[source.y][source.x]);
-		}
-		//if the target position is valid
-		if (moveAvalible(board[source.y][source.x], target) || canCastle)
-		{
-			Log record(board[source.y][source.x], board[target.y][target.x]);
-			logs.push_back(record);
+	//if the target position is valid
+	if (moveAvalible(board[source.y][source.x], target) || canCastle)
+	{
+		Log record(board[source.y][source.x], board[target.y][target.x]);
+		logs.push_back(record);
 			
-			board[source.y][source.x].setMoved();
+		board[source.y][source.x].setMoved();
 
-			board[target.y][target.x].setSpace(board[source.y][source.x]);
-			board[source.y][source.x].setEmpty();
-			std::cout << "Success" << std::endl;
+		board[target.y][target.x].setSpace(board[source.y][source.x]);
+		board[source.y][source.x].setEmpty();
 
-			//if is pawn check if it can promotion
-			if (board[target.y][target.x].getType() == PAWN) 
-			{
-				board[target.y][target.x].checkPawn();
-			}
-			break;
-		}
-		else 
+		//if is pawn check if it can promotion
+		if (board[target.y][target.x].getType() == PAWN) 
 		{
-			std::cout << "Fail" << std::endl;
-			std::string a, b;
-			std::cin >> a >> b;
-			source.x = a[0] - 'a';
-			source.y = 8 - (a[1] - '0');
-			target.x = b[0] - 'a';
-			target.y = 8 - (b[1] - '0');
-			continue;
+			board[target.y][target.x].checkPawn();
 		}
+		return true;
+	}
+	else 
+	{
+		return false;
 	}
 }
 
@@ -736,6 +721,7 @@ void Board::redo(int& count) //redo
 	}
 }
 
+//record ¤£¹ï
 bool Board::castling(Chess& chess)
 {
 	if (!chess.getMoved())
