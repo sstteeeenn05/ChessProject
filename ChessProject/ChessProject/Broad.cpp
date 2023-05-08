@@ -639,18 +639,19 @@ void Board::move(Player& player, Position source, Position target)
 		}
 
 		bool canCastle = false;
+
 		if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
 		{
 			canCastle = castling(board[source.y][source.x]);
-			std::cout << canCastle << std::endl;
 		}
-
 		//if the target position is valid
 		if (moveAvalible(board[source.y][source.x], target) || canCastle)
 		{
 			Log record(board[source.y][source.x], board[target.y][target.x]);
 			logs.push_back(record);
 			
+			board[source.y][source.x].setMoved();
+
 			board[target.y][target.x].setSpace(board[source.y][source.x]);
 			board[source.y][source.x].setEmpty();
 			std::cout << "Success" << std::endl;
@@ -739,7 +740,7 @@ bool Board::castling(Chess& chess)
 {
 	if (!chess.getMoved())
 	{
-		if (!board[chess.getPos().y][0].getMoved() && board[chess.getPos().y][2].getColor() == EMPTY && board[chess.getPos().y][3].getColor() == EMPTY)
+		if (!(board[chess.getPos().y][0].getMoved()) && board[chess.getPos().y][2].getColor() == NONE && board[chess.getPos().y][3].getColor() == NONE)
 		{
 			board[chess.getPos().y][3].setSpace(board[chess.getPos().y][0]);
 			board[chess.getPos().y][0].setEmpty();
@@ -747,7 +748,7 @@ bool Board::castling(Chess& chess)
 			logs.push_back(record);
 			return true;
 		}
-		if (!board[chess.getPos().y][7].getMoved() && board[chess.getPos().y][6].getColor() == EMPTY && board[chess.getPos().y][5].getColor() == EMPTY)
+		if ((!board[chess.getPos().y][7].getMoved()) && board[chess.getPos().y][6].getColor() == NONE && board[chess.getPos().y][5].getColor() == NONE)
 		{
 			board[chess.getPos().y][5].setSpace(board[chess.getPos().y][7]);
 			board[chess.getPos().y][7].setEmpty();

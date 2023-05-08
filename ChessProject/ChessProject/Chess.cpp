@@ -27,7 +27,7 @@ Chess::Chess(Position pos, Type label, Color color)
 	this->pos = pos;
 	this->type = label;
 	this->color = color;
-	moved=false;
+	moved = false;
 }
 
 //intent:set position
@@ -36,7 +36,6 @@ Chess::Chess(Position pos, Type label, Color color)
 void Chess::setPos(Position pos)
 {
 	this->pos = pos;
-	moved=true;
 }
 
 //intent:set chess label and color
@@ -72,6 +71,11 @@ void Chess::setEmpty()
 {
 	this->color = NONE;
 	this->type = EMPTY;
+}
+
+void Chess::setMoved()
+{
+	moved = true;
 }
 
 //intent:get the Position of this class

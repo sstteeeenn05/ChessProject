@@ -32,6 +32,7 @@ public:
 	void setType(Type type); //set type
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
+	void setMoved();
 
 	Position getPos(); //get position
 	Type getType(); //get type
