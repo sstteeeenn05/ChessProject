@@ -1,13 +1,13 @@
 /*****************************************************************
-* File: Broad.cpp
+* File: Board.cpp
  * Author: ­ð¤_µx¡B§d²»ºö
  * Create Date: 2023/05/05
  * Editor: ­ð¤_µx¡B§d²»ºö
  * Update Date: 2023/05/06
- * Description: set and update broad
+ * Description: set and update board
  *********************************************************************/
 
-#include "Broad.h"
+#include "Board.h"
 #include <map>
 
 /*std::map <char, std::string> charToLabel =

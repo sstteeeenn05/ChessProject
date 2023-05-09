@@ -1,10 +1,10 @@
 /*****************************************************************
-* File: Broad.h
+* File: Board.h
  * Author: 唐于硯、吳祥綺
  * Create Date: 2023/05/05
  * Editor: 唐于硯、吳祥綺
  * Update Date: 2023/05/06
- * Description: prototype of the  broad
+ * Description: prototype of the  board
  *********************************************************************/
 
 #pragma once
@@ -35,5 +35,5 @@ public:
 	bool enPassant(Chess& chess, Position target, Log record);
 };
 
-// moveAvalible 在 Broad.h
+// moveAvalible 在 Board.h
 //要吃棋子再去movaAvalible 比較

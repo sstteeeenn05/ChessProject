@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Broad.cpp" />
+    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Chess.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
@@ -147,7 +147,7 @@
     <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Broad.h" />
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Chess.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Log.h" />

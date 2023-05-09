@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Broad.cpp">
+    <ClCompile Include="Board.cpp">
       <Filter>資源檔</Filter>
     </ClCompile>
     <ClCompile Include="Chess.cpp">
@@ -35,7 +35,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Broad.h">
+    <ClInclude Include="Board.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Chess.h">
