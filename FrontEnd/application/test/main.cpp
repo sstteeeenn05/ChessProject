@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <string>
 
 using namespace std;
 
@@ -21,23 +22,25 @@ string printGameState() {
     random_device dev;
     mt19937 gen(dev());
     int rand = gen() % 5;
+    string output;
     switch (rand) {
     case 0:
-        return "white win;";
+        output = "white win;";
         break;
     case 1:
-        return "black win;";
+        output = "black win;";
         break;
     case 2:
-        return "white turn;";
+        output = "white turn;";
         break;
     case 3:
-        return "black turn;";
+        output = "black turn;";
         break;
     case 4:
-        return "tie;";
+        output = "tie;";
         break;
     }
+    return output + to_string(gen() % 2) + ";" + to_string(gen() % 2) + ";";
 }
 
 void move(int x1, int y1, int x2, int y2) {

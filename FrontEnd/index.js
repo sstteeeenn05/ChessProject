@@ -71,12 +71,15 @@ function inputCommand(ws){
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
         data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
-        console.log(data.length)
-        if(data.length!=2) ws.close();
+        if(data.length!=4) ws.close();
         else{
-            let obj={status:data[0],value:data[1]}
-            console.log("status:"+obj.status);
-            console.log("send:"+obj.value);
+            let obj={
+                status:data[0],
+                canUndo:data[1]==='1',
+                canRedo:data[2]==='1',
+                value:data[3]
+            }
+            console.log(`send:${obj.value} > ${obj.status}`);
             ws.send(JSON.stringify(obj));
         }
     })

@@ -9,10 +9,8 @@ export class Game{
         return new Promise((resolve,reject)=>{
             this.ws.onmessage=(event)=>{
                 let data=JSON.parse(event.data.toString());
-                resolve({
-                    status:data.status,
-                    value:valueLambda(data.value)
-                })
+                data.value=valueLambda(data.value);
+                resolve(data);
             }
             this.ws.onerror=(event)=>reject(event);
             this.ws.send(command);
