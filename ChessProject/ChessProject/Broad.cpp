@@ -782,14 +782,14 @@ bool Board::castling(Chess& chess, Position target)
 {
 	if (!chess.getMoved())
 	{
-		if (!(board[chess.getPos().y][0].getMoved()) && target.x == 0
+		if (!(board[chess.getPos().y][0].getMoved()) && target.x == 2
 			&&board[chess.getPos().y][2].getColor() != chess.getColor() && board[chess.getPos().y][3].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][3].setSpace(board[chess.getPos().y][0]);
 			board[chess.getPos().y][0].setEmpty();
 			return true;
 		}
-		if ((!board[chess.getPos().y][7].getMoved()) && target.x == 7
+		if ((!board[chess.getPos().y][7].getMoved()) && target.x == 6
 			&&board[chess.getPos().y][6].getColor() != chess.getColor() && board[chess.getPos().y][5].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][5].setSpace(board[chess.getPos().y][7]);
