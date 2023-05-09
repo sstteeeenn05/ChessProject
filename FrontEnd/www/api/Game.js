@@ -59,7 +59,7 @@ export class Game{
             this.ws.onmessage=(event)=>{
                 resolve(Game.getObj(event).value
                     .replaceAll(' ','')
-                    .split("").map(char=>{return 0+(char==='1');})
+                    .split("").map(char=>{return parseInt(char);})
                 );
             }
             this.ws.onerror=(event)=>{
