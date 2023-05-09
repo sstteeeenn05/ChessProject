@@ -5,46 +5,36 @@ export class Game{
         new WebSocket(WS_URL,"protocol-create-game");
         this.ws=new WebSocket(WS_URL,"protocol-input-command");
     }
-    static getObj=(event)=>{
-        return JSON.parse(event.data.toString())
-    }
-    generatePromise(command,dataLambda){
+    generatePromise(command,valueLambda=(value)=>{return value}){
         return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>resolve(dataLambda(Game.getObj(event)));
+            this.ws.onmessage=(event)=>{
+                let data=JSON.parse(event.data.toString());
+                resolve({
+                    status:data.status,
+                    value:valueLambda(data.value)
+                })
+            }
             this.ws.onerror=(event)=>reject(event);
             this.ws.send(command);
         })
     }
-    getGameState(){
-        return this.generatePromise(
-            "print gameState",
-            (data)=>{return data.value}
-        )
-    }
     getBoard(){
         return this.generatePromise(
-            "print board",
-            (data)=>{return data.value.split(' ')}
+            "print",
+            (value)=>{return value.match(/.{1,8}/g)}
         )
     }
     promotion(choice){
-        return this.generatePromise(
-            choice,
-            (data)=>{return data.value}
-        )
+        return this.generatePromise(choice)
     }
     move(x1,y1,x2,y2){
-        return this.generatePromise(
-            `move ${x1} ${y1} ${x2} ${y2}`,
-            (data)=>{return data.value}
-        )
+        return this.generatePromise(`move ${x1} ${y1} ${x2} ${y2}`)
     }
     preview(x,y){
         return this.generatePromise(
             `preview ${x} ${y}`,
-            (data)=>{
-                return data.value.replaceAll(' ','').split("")
-                    .map(char=>{return parseInt(char)})
+            (value)=>{
+                return value.split("").map(char=>{return parseInt(char)})
             }
         )
     }
