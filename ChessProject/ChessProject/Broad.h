@@ -32,6 +32,7 @@ public:
 	void redo(int& count); //redo
 
 	bool castling(Chess& chess, Position target);
+	bool enPassant(Chess& chess, Position target, Log record);
 };
 
 // moveAvalible ¦b Broad.h
