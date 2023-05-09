@@ -8,18 +8,35 @@
 
 <body>
   <div x-data="globalScope">
-<!--    <button class="leave-button">leave</button>-->
+    <button class="leave-button">
+      <img class="leave-button-image" src="./assets/chevron-left-solid.svg"
+           alt="leave">
+    </button>
     <div class="board">
       <template x-for="(line, row) in board" :key="row">
         <div class="row">
           <template x-for="(item, column) in line" :key="column">
-            <div class="row-element" @click="click(column,row)">
+            <div class="row-element"
+                 :style="{background: previewClass[maskBoard[row*8+column]]}"
+                 @click="click(column,row)">
               <img class="image" x-show="calculateUrl(item)"
                    :src="calculateUrl(item)" :alt="item">
             </div>
           </template>
         </div>
       </template>
+      <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+      <dialog class="promotion-lightbox" id="promotion">
+        <h2>Promotion!!!</h2>
+        <div class="select-div">
+          <template x-for="(item, index) in calculatePromotionUrl()">
+            <div class="promotion-container">
+              <img class="promotion-image" :src="calculateUrl(item)"
+                   :alt="item" @click="promotion(index)">
+            </div>
+          </template>
+        </div>
+      </dialog>
     </div>
 
   </div>

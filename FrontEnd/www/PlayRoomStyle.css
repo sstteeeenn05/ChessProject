@@ -1,6 +1,12 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .board{
-    width: 90vh;
-    max-width: 90vw;
+    margin: auto;
+    width: 80vh;
+    max-width: 80vw;
 }
 
 .row{
@@ -9,6 +15,8 @@
 }
 
 .row-element{
+    border: black 2px solid ;
+    box-sizing: border-box;
     aspect-ratio: 1;
     width: 100%;
     background: #008dcd;
@@ -24,4 +32,76 @@
     width: 80%;
     height: 80%;
     margin: 10%;
+}
+
+.leave-button-image{
+    width: 90%;
+    height: 90%;
+}
+
+.leave-button {
+    width: 10vh;
+    height: 10vh;
+    max-width: 10vw;
+    max-height: 10vw;
+    border: none;
+    cursor: pointer;
+    position: fixed;
+    z-index: 1000;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border-radius: 100%;
+}
+
+.round-message{
+    text-align: center;
+}
+
+.promotion-lightbox{
+    width: 350px;
+    border-radius: 24px;
+    transition: opacity 0.2s ease;
+}
+
+.promotion-lightbox::backdrop{
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.promotion-lightbox>h2{
+    margin-top: 0;
+    text-align: center;
+}
+
+.select-div{
+    width: 310px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.promotion-container{
+    cursor: pointer;
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    background: #008dcd;
+}
+
+.promotion-container:nth-child(odd){
+    background: deepskyblue;
+}
+
+.promotion-image{
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+}
+
+.leave-button:hover{
+    background: lightgray;
+}
+
+.leave-button:active{
+    background: gray;
 }
