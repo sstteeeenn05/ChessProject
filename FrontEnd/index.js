@@ -71,6 +71,7 @@ function inputCommand(ws){
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
         data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
+        console.log(data.length)
         if(data.length!=2) ws.close();
         else{
             let obj={status:data[0],value:data[1]}
@@ -81,7 +82,7 @@ function inputCommand(ws){
     })
 
     let queueTimer=setInterval(()=>{
-        if(queue.length && buffer.writeable){
+        if(queue.length){
             let commands=queue.shift();
             console.log("execute:",commands);
             commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));

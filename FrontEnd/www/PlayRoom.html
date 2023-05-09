@@ -12,6 +12,7 @@
       <img class="leave-button-image" src="./assets/chevron-left-solid.svg"
            alt="leave">
     </button>
+
     <div class="board">
       <template x-for="(line, row) in board" :key="row">
         <div class="row">
@@ -20,25 +21,34 @@
                  :style="{background: previewClass[maskBoard[row*8+column]]}"
                  @click="click(column,row)">
               <img class="image" x-show="calculateUrl(item)"
-                   :src="calculateUrl(item)" :alt="item">
+                   :src="calculateUrl(item)" :alt="item"
+                   x-transition:enter.duration.500ms x-transition:leave.duration.0s>
             </div>
           </template>
         </div>
       </template>
-      <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
-      <dialog class="promotion-lightbox" id="promotion">
-        <h2>Promotion!!!</h2>
-        <div class="select-div">
-          <template x-for="(item, index) in calculatePromotionUrl()">
-            <div class="promotion-container">
-              <img class="promotion-image" :src="calculateUrl(item)"
-                   :alt="item" @click="promotion(index)">
-            </div>
-          </template>
-        </div>
-      </dialog>
     </div>
-
+    <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+    <dialog class="lightbox" id="promotion"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isPromoting" x-transition>
+      <h2>Promotion!!!</h2>
+      <div class="select-div">
+        <template x-for="(item, index) in calculatePromotionChess()" :key="index">
+          <div class="promotion-container">
+            <img class="promotion-image" :src="calculateUrl(item)"
+                 :alt="item" @click="promotion(index)">
+          </div>
+        </template>
+      </div>
+    </dialog>
+    <dialog class="lightbox" id="messageBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isMessage" x-transition>
+      <h2 class="box-title" x-text="boxTitle"></h2>
+      <p class="box-content" x-text="boxContext"></p>
+      <button class="confirm-button" @click="closeMessage">OK</button>
+    </dialog>
   </div>
 </body>
 

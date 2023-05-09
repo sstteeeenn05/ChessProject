@@ -3,8 +3,10 @@ body{
     justify-content: center;
     align-items: center;
 }
+
 .board{
     margin: auto;
+    border: black 2px solid;
     width: 80vh;
     max-width: 80vw;
 }
@@ -58,17 +60,18 @@ body{
     text-align: center;
 }
 
-.promotion-lightbox{
+.lightbox{
     width: 350px;
     border-radius: 24px;
-    transition: opacity 0.2s ease;
+    border: none;
+    outline: none;
 }
 
-.promotion-lightbox::backdrop{
+.lightbox::backdrop{
     background: rgba(0, 0, 0, 0.6);
 }
 
-.promotion-lightbox>h2{
+.lightbox>h2{
     margin-top: 0;
     text-align: center;
 }
@@ -104,4 +107,31 @@ body{
 
 .leave-button:active{
     background: gray;
+}
+
+.box-content{
+    font-size: larger;
+    text-align: center;
+}
+
+.confirm-button{
+    display: block;
+    margin: auto;
+    width: 150px;
+    height: 40px;
+    color: white;
+    font-size: large;
+    border-radius: 16px;
+    background: #008dcd;
+    border: none;
+}
+
+.confirm-button:hover{
+    background: #005b9b;
+    cursor: pointer;
+}
+
+.confirm-button:active {
+    background: #002969;
+    cursor: pointer;
 }

@@ -2,7 +2,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url("assets/randy-fath-G1yhU1Ej-9A-unsplash.jpg");
+    background-image: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)), url("assets/randy-fath-G1yhU1Ej-9A-unsplash.jpg");
+    ;
     background-position: center;
     background-size: cover;
 }
