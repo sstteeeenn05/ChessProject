@@ -635,9 +635,13 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 
 	if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
 	{
-		canCastle = castling(board[source.y][source.x]);
+		canCastle = castling(board[source.y][source.x], target);
 	}
 	
+	bool EnPassant = false;
+
+	if()
+
 	//if the target position is valid
 	if (moveAvalible(board[source.y][source.x], target) || canCastle)
 	{
@@ -645,7 +649,7 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 		{
 			logs.pop_back();
 		}
-		Log record(board[source.y][source.x], board[target.y][target.x]);
+		Log record(board[source.y][source.x], board[target.y][target.x], canCastle, EnPassant);
 		logs.push_back(record);
 		
 
@@ -700,7 +704,31 @@ void Board::undo(int& count) //undo
 	}
 	else
 	{
-		Log record(logs[count - 1].source, logs[count - 1].target);
+		Log record(logs[count - 1].source, logs[count - 1].target, logs[count - 1].castling, logs[count - 1].enPassant);
+		if (record.castling)
+		{
+			if (record.target.getPos().x == 6)
+			{
+				board[record.source.getPos().y][7].setSpace(board[record.source.getPos().y][5]);
+				board[record.source.getPos().y][5].setEmpty();
+			}
+			else
+			{
+				board[record.source.getPos().y][0].setSpace(board[record.source.getPos().y][3]);
+				board[record.source.getPos().y][3].setEmpty();
+			}
+		}
+		if (record.enPassant)
+		{
+			if (record.source.getPos().y == 4)
+			{
+				board[4][record.target.getPos().x].setChess(PAWN, WHITE);
+			}
+			else
+			{
+				board[3][record.target.getPos().x].setChess(PAWN, BLACK);
+			}
+		}
 		board[record.source.getPos().y][record.source.getPos().x] = record.source;
 		board[record.target.getPos().y][record.target.getPos().x] = record.target;
 		count--;
@@ -717,7 +745,31 @@ void Board::redo(int& count) //redo
 	}
 	else
 	{
-		Log record(logs[count].source, logs[count].target);
+		Log record(logs[count].source, logs[count].target, logs[count].castling, logs[count - 1].enPassant);
+		if (record.castling)
+		{
+			if (record.target.getPos().x == 6)
+			{
+				board[record.source.getPos().y][5].setSpace(board[record.source.getPos().y][7]);
+				board[record.source.getPos().y][7].setEmpty();
+			}
+			else
+			{
+				board[record.source.getPos().y][3].setSpace(board[record.source.getPos().y][0]);
+				board[record.source.getPos().y][0].setEmpty();
+			}
+		}
+		if (record.enPassant)
+		{
+			if (record.source.getPos().y == 4)
+			{
+				board[4][record.target.getPos().x].setEmpty();
+			}
+			else
+			{
+				board[3][record.target.getPos().x].setEmpty();
+			}
+		}
 		board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]);
 		board[record.source.getPos().y][record.source.getPos().x].setEmpty();
 		count++;
@@ -725,25 +777,23 @@ void Board::redo(int& count) //redo
 	}
 }
 
-//record ¤£¹ï
-bool Board::castling(Chess& chess)
+
+bool Board::castling(Chess& chess, Position target)
 {
 	if (!chess.getMoved())
 	{
-		if (!(board[chess.getPos().y][0].getMoved()) && board[chess.getPos().y][2].getColor() != chess.getColor() && board[chess.getPos().y][3].getColor() != chess.getColor())
+		if (!(board[chess.getPos().y][0].getMoved()) && target.x == 0
+			&&board[chess.getPos().y][2].getColor() != chess.getColor() && board[chess.getPos().y][3].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][3].setSpace(board[chess.getPos().y][0]);
 			board[chess.getPos().y][0].setEmpty();
-			Log record(board[chess.getPos().y][0], board[chess.getPos().y][3]);
-			logs.push_back(record);
 			return true;
 		}
-		if ((!board[chess.getPos().y][7].getMoved()) && board[chess.getPos().y][6].getColor() != chess.getColor() && board[chess.getPos().y][5].getColor() != chess.getColor())
+		if ((!board[chess.getPos().y][7].getMoved()) && target.x == 7
+			&&board[chess.getPos().y][6].getColor() != chess.getColor() && board[chess.getPos().y][5].getColor() != chess.getColor())
 		{
 			board[chess.getPos().y][5].setSpace(board[chess.getPos().y][7]);
 			board[chess.getPos().y][7].setEmpty();
-			Log record(board[chess.getPos().y][7], board[chess.getPos().y][5]);
-			logs.push_back(record);
 			return true;
 		}
 	}

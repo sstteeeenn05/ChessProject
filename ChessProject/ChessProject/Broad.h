@@ -31,7 +31,7 @@ public:
 	void undo(int& count); //undo
 	void redo(int& count); //redo
 
-	bool castling(Chess& chess);
+	bool castling(Chess& chess, Position target);
 };
 
 // moveAvalible ¦b Broad.h
