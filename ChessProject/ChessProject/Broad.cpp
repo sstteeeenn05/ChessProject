@@ -640,10 +640,14 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 	
 	bool EnPassant = false;
 
-	if()
+	if (abs(target.y - source.y)==1 && abs(target.x - source.x) == 1 &&
+		board[source.y][source.x].getType() == PAWN && board[source.y][target.x].getType() == PAWN)
+	{
+		EnPassant = enPassant(board[source.y][source.x], target, logs[count - 1]);
+	}
 
 	//if the target position is valid
-	if (moveAvalible(board[source.y][source.x], target) || canCastle)
+	if (moveAvalible(board[source.y][source.x], target) || canCastle || EnPassant)
 	{
 		while (count < logs.size())
 		{
@@ -745,7 +749,7 @@ void Board::redo(int& count) //redo
 	}
 	else
 	{
-		Log record(logs[count].source, logs[count].target, logs[count].castling, logs[count - 1].enPassant);
+		Log record(logs[count].source, logs[count].target, logs[count].castling, logs[count].enPassant);
 		if (record.castling)
 		{
 			if (record.target.getPos().x == 6)
@@ -798,6 +802,37 @@ bool Board::castling(Chess& chess, Position target)
 		}
 	}
 	return false;
+}
+
+bool Board::enPassant(Chess& chess, Position target, Log record)
+{
+	if (record.source.getType() != PAWN)
+	{
+		return false;
+	}
+	if (abs(record.source.getPos().y - record.target.getPos().y) != 2)
+	{
+		return false;
+	}
+	Color color = chess.getColor();
+	if (color == BLACK)
+	{
+		if (chess.getPos().y != 4)
+		{
+			return false;
+		}
+		board[4][target.x].setEmpty();
+		return true;
+	}
+	else
+	{
+		if (chess.getPos().y != 3)
+		{
+			return false;
+		}
+		board[3][target.x].setEmpty();
+		return true;
+	}
 }
 
 /*Board::Board(std::string fen)
