@@ -1,6 +1,5 @@
 import "./api/Alpine.js";
 import {Game} from "./api/Game.js"
-import {data} from "alpinejs/src/datas";
 
 document.addEventListener('alpine:init', () => {
     console.log('0.0');

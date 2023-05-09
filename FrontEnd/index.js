@@ -14,6 +14,13 @@ let room=new Map();
 
 let process;
 
+/**
+ * @typedef {Object} Package
+ * @param {string} type
+ * @param {number} roomId
+ * @param {boolean} isSingle
+ */
+
 wss.on('connection',(ws)=>{
     console.log(`web socket connected! (${ws.protocol})`);
     switch(ws.protocol){
@@ -46,12 +53,12 @@ function inputCommand(ws){
     if(!process) ws.close();
 
     ws.on('message',(data)=>{
-        console.log("receive command:"+data);
+        console.log("receive:"+data);
         queue.push(data.toString());
     })
 
     let sendToClient=(type,value)=>{
-        console.log("send result:\n"+value);
+        console.log("send:\n"+value);
         console.log(value.length);
         ws.send(JSON.stringify({
             type:type,
@@ -75,12 +82,12 @@ function inputCommand(ws){
     let queueTimer=setInterval(()=>{
         if(queue.length && buffer.writeable){
             let commands=queue.shift();
-            console.log("executing:",commands);
+            console.log("execute:",commands);
             buffer.writeable=false;
             commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
             process.stdin.write("\n");
         }
-    },100)
+    },20)
 
     ws.on('close',()=>{
         console.log("onclose!");

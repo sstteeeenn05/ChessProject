@@ -8,64 +8,44 @@ export class Game{
     static getObj=(event)=>{
         return JSON.parse(event.data.toString())
     }
-    getGameState(){
+    generatePromise(command,dataLambda){
         return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>{
-                resolve(Game.getObj(event).value);
-            }
-            this.ws.onerror=(event)=>{
-                reject(event);
-            }
-            this.ws.send("print gameState")
+            this.ws.onmessage=(event)=>resolve(dataLambda(Game.getObj(event)));
+            this.ws.onerror=(event)=>reject(event);
+            this.ws.send(command);
         })
+    }
+    getGameState(){
+        return this.generatePromise(
+            "print gameState",
+            (data)=>{return data.value}
+        )
     }
     getBoard(){
-        return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>{
-                resolve(Game.getObj(event).value.split(' '));
-            }
-            this.ws.onerror=(event)=>{
-                reject(event);
-            }
-            this.ws.send("print board");
-        })
+        return this.generatePromise(
+            "print board",
+            (data)=>{return data.value.split(' ')}
+        )
     }
     promotion(choice){
-        return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>{
-                resolve(Game.getObj(event).value);
-            }
-            this.ws.onerror=(event)=>{
-                reject(event);
-            }
-            this.ws.send(choice);
-        })
+        return this.generatePromise(
+            choice,
+            (data)=>{return data.value}
+        )
     }
     move(x1,y1,x2,y2){
-        return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>{
-                let status=Game.getObj(event).value;
-                if(status=="failed") reject("failed");
-                else resolve(status);
-            }
-            this.ws.onerror=(event)=>{
-                reject(event);
-            }
-            this.ws.send(`move ${x1} ${y1} ${x2} ${y2}`);
-        })
+        return this.generatePromise(
+            `move ${x1} ${y1} ${x2} ${y2}`,
+            (data)=>{return data.value}
+        )
     }
     preview(x,y){
-        return new Promise((resolve,reject)=>{
-            this.ws.onmessage=(event)=>{
-                resolve(Game.getObj(event).value
-                    .replaceAll(' ','')
-                    .split("").map(char=>{return parseInt(char);})
-                );
+        return this.generatePromise(
+            `preview ${x} ${y}`,
+            (data)=>{
+                return data.value.replaceAll(' ','').split("")
+                    .map(char=>{return parseInt(char)})
             }
-            this.ws.onerror=(event)=>{
-                reject(event);
-            }
-            this.ws.send(`preview ${x} ${y}`);
-        })
+        )
     }
 }
