@@ -17,69 +17,69 @@ vector<string> board = {
         "RNBQKBNR"
 };
 
+string printGameState() {
+    random_device dev;
+    mt19937 gen(dev());
+    int rand = gen() % 5;
+    switch (rand) {
+    case 0:
+        return "white win;";
+        break;
+    case 1:
+        return "black win;";
+        break;
+    case 2:
+        return "white turn;";
+        break;
+    case 3:
+        return "black turn;";
+        break;
+    case 4:
+        return "tie;";
+        break;
+    }
+}
+
 void move(int x1, int y1, int x2, int y2) {
+    string output(printGameState());
     random_device dev;
     mt19937 gen(dev());
     int rand = gen() % 3;
     switch (rand) {
         case 0:
-            cout << "failed" << '\n';
+            cout << printGameState() + "failed" << '\n';
             break;
         case 1:
             swap(board[y1][x1], board[y2][x2]);
-            cout << "success" << '\n';
+            cout << printGameState() + "success" << '\n';
             break;
         case 2:
-            cout << "promotion" << '\n';
+            cout << printGameState() + "promotion" << '\n';
             int option;
             cin >> option;
-            cout << "success" << '\n';
+            cout << printGameState() + "success" << '\n';
             break;
     }
 }
 
 void printBoard() {
-    cout << '{' << '\n';
+    string output(printGameState());
     for (auto &item: board) {
-        cout << item << '\n';
+        output += item;
     }
-    cout << '}' << '\n';
+    cout << output << endl;
 }
 
 void preview(int x1, int y1) {
+    string output(printGameState());
     random_device dev;
     mt19937 gen(dev());
-    cout << '{' << '\n';
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
-            cout << gen()%2;
+            output+=gen()%2?'1':'0';
         }
-        cout<<'\n';
     }
-    cout << '}' << '\n';
-}
-
-void printGameState() {
-    random_device dev;
-    mt19937 gen(dev());
-    int rand = gen() % 5;
-    switch (rand) {
-        case 0:
-            cout << "white win" << '\n';
-            break;
-        case 1:
-            cout << "black win" << '\n';
-            break;
-        case 2:
-            cout << "white turn" << '\n';
-            break;
-        case 3:
-            cout << "black turn" << '\n';
-            break;
-        case 4:
-            cout << "tie" << '\n';
-            break;
-    }
+    cout << output << endl;
 }
 
 
@@ -99,14 +99,7 @@ int main() {
             preview(x1,y1);
         }
         else if(command == "print") {
-            string type;
-            cin >> type;
-            cout << "command:" << command << type << '\n';
-            if(type == "board") {
-                printBoard();
-            }
-            else if (type == "gameState") printGameState();
-            else cout << "invalid print type" << '\n';
+            printBoard();
         }
         else {
             cout << "invalid" << '\n';

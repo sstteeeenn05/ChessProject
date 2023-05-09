@@ -8,17 +8,37 @@ app.use(express.static(__dirname+"\\www"));
 const PORT=1234;
 const server=app.listen(PORT);
 
+/**
+ * @typedef {Object} Room
+ * @prop {WebScoket} p0
+ * @prop {WebScoket} p1
+ * @prop {pipe.ChildProcess} process
+ */
+
 let wss=new SocketServer({server});
-/** @type {Map<number,pipe.ChildProcess>} */
+/** @type {Map<number,Room>} */
 let room=new Map();
 
 let process;
 
 /**
+ * @typedef {Object} CreateArgs
+ * @prop {boolean} isSingle
+ * @prop {string} ipaddr
+ * @prop {string} nickname
+ */
+
+/**
+ * @typedef {Object} JoinArgs
+ * @prop {number} roomId
+ * @prop {string} ipaddr
+ * @prop {string} nickname
+ */
+
+/**
  * @typedef {Object} Package
- * @param {string} type
- * @param {number} roomId
- * @param {boolean} isSingle
+ * @prop {string} header
+ * @prop {CreateArgs|JoinArgs} args
  */
 
 wss.on('connection',(ws)=>{
@@ -38,17 +58,8 @@ function createGame(ws){
     process=pipe.execFile("application\\chess.exe");
 }
 
-class Buffer{
-    value="";
-    writeable=true;
-    clear=()=>{this.value=""};
-    isEmpty=()=>{return !this.value.length}
-    push=(str)=>{this.value=this.value+str}
-}
-
 function inputCommand(ws){
     let queue=new Array();
-    let buffer=new Buffer();
 
     if(!process) ws.close();
 
@@ -57,33 +68,22 @@ function inputCommand(ws){
         queue.push(data.toString());
     })
 
-    let sendToClient=(type,value)=>{
-        console.log("send:\n"+value);
-        console.log(value.length);
-        ws.send(JSON.stringify({
-            type:type,
-            value:value
-        }));
-        buffer.writeable=true;
-        buffer.clear();
-    }
     process.stdout.on('data',(data)=>{
-        let result=data.toString().replaceAll(' ','.').replaceAll('\n',' ').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'');
         console.log("ondata!");
-        if(buffer.isEmpty()){
-            if(result.indexOf('{')==-1) return sendToClient("status",result.replace(' ',''));
-            else result=result.substring(result.indexOf('{')+2);
+        data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
+        if(data.length!=2) ws.close();
+        else{
+            let obj={status:data[0],value:data[1]}
+            console.log("status:"+obj.status);
+            console.log("send:"+obj.value);
+            ws.send(JSON.stringify(obj));
         }
-        buffer.push(result);
-        if(result.indexOf('}')!=-1)
-            sendToClient("data",buffer.value.substring(0,buffer.value.indexOf('}')-1));
     })
 
     let queueTimer=setInterval(()=>{
         if(queue.length && buffer.writeable){
             let commands=queue.shift();
             console.log("execute:",commands);
-            buffer.writeable=false;
             commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
             process.stdin.write("\n");
         }
