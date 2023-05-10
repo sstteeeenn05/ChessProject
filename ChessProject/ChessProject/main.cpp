@@ -10,8 +10,21 @@ int main()
 {
 	Board board;
 	Player p1, p2;
-	p1.setColor(WHITE);
-	p2.setColor(BLACK);
+	int checkFirst;
+	std::cout << "Who goes first? 1.BLACK 2.WHITE" << std::endl;
+	std::cin >> checkFirst;
+	switch (checkFirst)
+	{
+	case 1:
+		p1.setColor(BLACK);
+		p2.setColor(WHITE);
+		break;
+	case 2:
+	default:
+		p1.setColor(WHITE);
+		p2.setColor(BLACK);
+		break;
+	}
 	int count = 0;
 	printBoard(board.getBoard());
 	while (true)
@@ -60,6 +73,7 @@ int main()
 		printBoard(board.getBoard());
 	}
 }
+
 void printBoard(Chess* source) //print board
 {
 	Chess board[8][8];

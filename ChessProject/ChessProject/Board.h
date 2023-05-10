@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "Header.h"
 
+
 class Board
 {
 private:
@@ -28,6 +29,9 @@ public:
 
 	bool move(Player& player, Position source, Position target, const int& count); //move
 	bool moveAvalible(Chess chess, Position target); //check if can move
+
+	Color colorOfPosition(int x, int y);
+
 	void undo(int& count); //undo
 	void redo(int& count); //redo
 

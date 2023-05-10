@@ -205,10 +205,12 @@ void Chess::checkPawn()
 	}
 }
 
+
+
 //intent:get all the valid position
 //pre:none
 //post:a vector full of valid positions
-std::vector<Position> Chess::getValidPos()
+std::vector<Position> Chess::getValidPos(Chess board[8][8])
 {
 	std::vector<Position> validPos;
 	validPos.clear();
@@ -236,7 +238,8 @@ std::vector<Position> Chess::getValidPos()
 		{
 			for (int j = -1; j <= 1; j++)
 			{
-				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0)
+				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
+					&& color != board[pos.y + j][pos.x + i].getColor())
 				{
 					targetPos = Position(pos.x + i, pos.y + j);
 					validPos.push_back(targetPos);
@@ -246,65 +249,32 @@ std::vector<Position> Chess::getValidPos()
 		break;
 
 	case QUEEN: //if is queen
-
-		for (int i = -7; i <= 7; i++)
-		{
-			if (pos.x + i < 8 && pos.x + i >= 0)
-			{
-				Position targetPos = Position(pos.x + i, pos.y);
-				validPos.push_back(targetPos);
-			}
-			if (pos.y + i < 8 && pos.y + i >= 0)
-			{
-				Position targetPos = Position(pos.x, pos.y + i);
-				validPos.push_back(targetPos);
-			}
-		}
+		strightLine(board, validPos);
+		crossLine(board, validPos);
+		break;
 
 	case BISHOP: //if is bishop
 
-		for (int i = -7; i <= 7; i++)
-		{
-			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0)
-			{
-				Position targetPos = Position(pos.x + i, pos.y + i);
-				validPos.push_back(targetPos);
-			}
-			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0)
-			{
-				Position targetPos = Position(pos.x + i, pos.y - i);
-				validPos.push_back(targetPos);
-			}
-		}
+		crossLine(board, validPos);
 		break;
 
 	case KNIGHT: //if is knight
-
 		{
 			int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
 			for (int i = 0; i < 8; i++)
 			{
-				targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
-				validPos.push_back(targetPos);
+				if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
+					&& color != board[pos.y + i][pos.x + i].getColor())
+				{
+					targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
+					validPos.push_back(targetPos);
+				}
 			}
+			break;
 		}
-		break;
-
 	case ROOK:
 
-		for (int i = -7; i <= 7; i++)
-		{
-			if (pos.x + i < 8 && pos.x + i >= 0)
-			{
-				Position targetPos = Position(pos.x + i, pos.y);
-				validPos.push_back(targetPos);
-			}
-			if (pos.y + i < 8 && pos.y + i >= 0)
-			{
-				Position targetPos = Position(pos.x, pos.y + i);
-				validPos.push_back(targetPos);
-			}
-		}
+		strightLine(board, validPos);
 		break;
 
 	case PAWN: //if is pawn
@@ -328,4 +298,66 @@ std::vector<Position> Chess::getValidPos()
 		break;
 	}
 	return validPos;
+}
+
+void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
+{
+	for (int i = 1; i <= 7; i++)
+	{
+		while (pos.x + i < 8 && pos.x + i >= 0
+			&& color != board[pos.y][pos.x + i].getColor())
+		{
+			Position targetPos = Position(pos.x + i, pos.y);
+			validPos.push_back(targetPos);
+		}
+		while (pos.y + i < 8 && pos.y + i >= 0
+			&& color != board[pos.y + i][pos.x].getColor())
+		{
+			Position targetPos = Position(pos.x, pos.y + i);
+			validPos.push_back(targetPos);
+		}
+		while (pos.x - i < 8 && pos.x - i >= 0
+			&& color != board[pos.y][pos.x - i].getColor())
+		{
+			Position targetPos = Position(pos.x - i, pos.y);
+			validPos.push_back(targetPos);
+		}
+		while (pos.y - i < 8 && pos.y - i >= 0
+			&& color != board[pos.y - i][pos.x].getColor())
+		{
+			Position targetPos = Position(pos.x, pos.y - i);
+			validPos.push_back(targetPos);
+		}
+	}
+}
+
+void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
+{
+	for (int i = 1; i <= 7; i++)
+	{
+		while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+			&& color != board[pos.y + i][pos.x + i].getColor())
+		{
+			Position targetPos = Position(pos.x + i, pos.y + i);
+			validPos.push_back(targetPos);
+		}
+		while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+			&& color != board[pos.y - i][pos.x + i].getColor())
+		{
+			Position targetPos = Position(pos.x + i, pos.y - i);
+			validPos.push_back(targetPos);
+		}
+		while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+			&& color != board[pos.y - i][pos.x - i].getColor())
+		{
+			Position targetPos = Position(pos.x - i, pos.y - i);
+			validPos.push_back(targetPos);
+		}
+		while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+			&& color != board[pos.y + i][pos.x - i].getColor())
+		{
+			Position targetPos = Position(pos.x - i, pos.y + i);
+			validPos.push_back(targetPos);
+		}
+	}
 }

@@ -681,7 +681,7 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 bool Board::moveAvalible(Chess chess, Position target)
 {
 	std::vector<Position> validPos;
-	validPos = chess.getValidPos();
+	validPos = chess.getValidPos(board);
 
 	if (board[target.y][target.x].getColor() != chess.getColor())
 	{
@@ -833,6 +833,11 @@ bool Board::enPassant(Chess& chess, Position target, Log record)
 		board[3][target.x].setEmpty();
 		return true;
 	}
+}
+
+Color Board::colorOfPosition(int x, int y)
+{
+	return board[y][x].getColor();
 }
 
 /*Board::Board(std::string fen)
