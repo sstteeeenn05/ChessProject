@@ -374,7 +374,7 @@ void Chess::lLine(Chess board[8][8], std::vector<Position>& validPos)
 	for (int i = 0; i < 8; i++)
 	{
 		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
-			&& color != board[pos.y + i][pos.x + i].getColor())
+			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getColor())
 		{
 			Position targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
 			validPos.push_back(targetPos);
