@@ -30,7 +30,7 @@ document.addEventListener('alpine:init', () => {
         },
         calculatePromotionChess() {
             const options = ['q', 'b', 'n', 'r']
-            const isBlack = this.nowMoving[0] === 'b'
+            const isBlack = this.nowMoving === 'black'
             if (isBlack) return options;
             return options.map((char) => {
                 return char.toUpperCase()
@@ -62,16 +62,15 @@ document.addEventListener('alpine:init', () => {
             }, 75)
 
         },
-        changeTurn(status) {
-            status = status.split('.')
-            if (status[0] === 'tie') {
+        changeTurn(status,who) {
+            if (status === 'tie') {
                 this.showResult(this.nowMoving, 'tie')
             }
-            else if (status[1] === 'win') {
-                this.showResult(status[0], status[1]);
+            else if (status === 'win') {
+                this.showResult(who, status);
             }
             else{
-                this.nowMoving = status[0]
+                this.nowMoving = who
             }
         },
         promotion(option) {
@@ -84,7 +83,7 @@ document.addEventListener('alpine:init', () => {
                       this.isPromoting = false;
                       setTimeout(() => {
                           document.getElementById('promotion').close()
-                          this.changeTurn(resolve.status)
+                          this.changeTurn(resolve.status,resolve.who)
                       }, 75)
 
                   }
@@ -148,7 +147,7 @@ document.addEventListener('alpine:init', () => {
                               this.game.getBoard().then((resolve) => {
                                   this.board = resolve.value;
                                   this.resetXY()
-                                  this.changeTurn(resolve.status)
+                                  this.changeTurn(resolve.status,resolve.who)
                               })
                           }
                           if (resolve.value === "promotion") {

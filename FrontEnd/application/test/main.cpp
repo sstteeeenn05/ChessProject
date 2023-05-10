@@ -25,19 +25,19 @@ string printGameState() {
     string output;
     switch (rand) {
     case 0:
-        output = "white win;";
+        output = "win;white;";
         break;
     case 1:
-        output = "black win;";
+        output = "win;black;";
         break;
     case 2:
-        output = "white turn;";
+        output = "turn;white;";
         break;
     case 3:
-        output = "black turn;";
+        output = "turn;black;";
         break;
     case 4:
-        output = "tie;";
+        output = "tie;;";
         break;
     }
     return output + to_string(gen() % 2) + ";" + to_string(gen() % 2) + ";";

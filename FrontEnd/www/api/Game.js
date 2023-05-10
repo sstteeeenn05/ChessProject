@@ -31,7 +31,7 @@ export class Game{
             }
         })
     }
-    sendCommand(command,valueLambda=(value)=>{return value}){
+    generatePromise(type,value,valueLambda=(value)=>{return value}){
         return new Promise((resolve,reject)=>{
             if(!this.ws) reject("Web Socket is not ready!");
             this.ws.onmessage=(event)=>{
@@ -42,10 +42,16 @@ export class Game{
             this.ws.onclose=()=>reject("Web Socket is closed!");
             this.ws.onerror=(event)=>reject(event);
             this.ws.send(JSON.stringify({
-                type:"command",
-                value:command
+                type:type,
+                value:value
             }));
         })
+    }
+    sendCommand(command,valueLambda=(value)=>{return value}){
+        return this.generatePromise("command",command,valueLambda);
+    }
+    getState(){
+        return this.generatePromise("get","state");
     }
     getBoard(){
         return this.sendCommand(
