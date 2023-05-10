@@ -412,21 +412,51 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 
 	case PAWN: //if is pawn
 
-		//the first step, can move one or tow
+		//the first step, can move one or two
 		if (pos.y == pawnOrigin)
 		{
+
 			//can move one or two step, check if can move
 			for (int i = 1; i <= 2; i++)
 			{
 				targetPos = Position(pos.x, (pos.y + (i * side)));
-				validPos.push_back(targetPos);
+
+				//if there is nothing in the space
+				if (board[pos.y + (i * side)][pos.x].getColor() == NONE)
+				{
+					validPos.push_back(targetPos);
+				}
+				else //if there is something in the space
+				{
+					break;
+				}
 			}
 		}
+
 		//not the first step, can move one step
 		if (pos.y + 1 < 8 && pos.y - 1 >= 0)
 		{
 			targetPos = Position(pos.x, (pos.y + (1 * side)));
-			validPos.push_back(targetPos);
+
+			//if there is nothing in the sapce
+			if (board[pos.y + (1 * side)][pos.x].getColor() == NONE)
+			{
+				validPos.push_back(targetPos);
+			}
+
+			//if there is something can eat
+			if (pos.x + 1 < 8 && board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy)
+			{
+				targetPos = Position(pos.x + 1, pos.y + (1 * side));
+				validPos.push_back(targetPos);
+			}
+
+			//if there is something can eat
+			if (pos.x - 1 >= 0 && board[pos.y + (1 * side)][pos.x - 1].getColor() == enemy)
+			{
+				targetPos = Position(pos.x - 1, pos.y + (1 * side));
+				validPos.push_back(targetPos);
+			}
 		}
 		break;
 	}
