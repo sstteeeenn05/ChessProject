@@ -205,7 +205,162 @@ void Chess::checkPawn()
 	}
 }
 
-
+bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
+{
+	Color enemy;
+	int side;
+	if (color == BLACK)
+	{
+		enemy = WHITE;
+		side = 1;
+	}
+	else if (color == WHITE) //if the color is white
+	{
+		enemy = BLACK;
+		side = -1;
+	}
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
+				&& color != board[pos.y + j][pos.x + i].getColor() && board[pos.y + j][pos.x + i].getType() == KING)
+			{
+				return true;
+			}
+		}
+	}
+	int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
+	for (int i = 0; i < 8; i++)
+	{
+		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
+			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getColor() && board[pos.y + turn[i][1]][pos.x + turn[i][0]].getType() == KNIGHT)
+		{
+			return true;
+		}
+	}
+	int i = 1;
+	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x + i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x + i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x - i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x - i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.x + i < 8 && pos.x + i >= 0
+		&& color != board[pos.y][pos.x + i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == ROOK))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == ROOK))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0
+		&& color != board[pos.y][pos.x - i].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == ROOK))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	i = 1;
+	while (pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x].getColor())
+	{
+		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == ROOK))
+		{
+			return true;
+		}
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
+		i++;
+	}
+	if (board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy && board[pos.y + (1 * side)][pos.x + 1].getType() == PAWN)
+	{
+		return true;
+	}
+	if (board[pos.y + (1 * side)][pos.x - 1].getColor() == enemy && board[pos.y + (1 * side)][pos.x - 1].getType() == PAWN)
+	{
+		return true;
+	}
+	return false;
+}
 
 //intent:get all the valid position
 //pre:none
@@ -237,9 +392,7 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 		break;
 
 	case QUEEN: //if is queen
-		std::cout << "..." << std::endl;
 		strightLine(board, validPos);
-		std::cout << "====" << std::endl;
 		crossLine(board, validPos);
 		break;
 
@@ -282,6 +435,15 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 
 void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 {
+	Color enemy;
+	if (color == BLACK)
+	{
+		enemy = WHITE;
+	}
+	else if (color == WHITE) //if the color is white
+	{
+		enemy = BLACK;
+	}
 	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0
 		&& color != board[pos.y][pos.x + i].getColor())
@@ -289,6 +451,10 @@ void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x + i, pos.y);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.y + i < 8 && pos.y + i >= 0
@@ -297,6 +463,10 @@ void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x, pos.y + i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0
@@ -305,6 +475,10 @@ void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x - i, pos.y);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.y - i < 8 && pos.y - i >= 0
@@ -313,18 +487,35 @@ void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x, pos.y - i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 }
 
 void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 {
-	int i = 0;
+	Color enemy;
+	if (color == BLACK)
+	{
+		enemy = WHITE;
+	}
+	else if (color == WHITE) //if the color is white
+	{
+		enemy = BLACK;
+	}
+	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
 		&& color != board[pos.y + i][pos.x + i].getColor())
 	{
 		Position targetPos = Position(pos.x + i, pos.y + i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
@@ -333,6 +524,10 @@ void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x + i, pos.y - i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
@@ -341,6 +536,10 @@ void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x - i, pos.y - i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
@@ -349,6 +548,10 @@ void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 		Position targetPos = Position(pos.x - i, pos.y + i);
 		validPos.push_back(targetPos);
 		i++;
+		if (board[pos.y][pos.x + i].getColor() == enemy)
+		{
+			break;
+		}
 	}
 }
 
@@ -359,7 +562,7 @@ void Chess::nineSquare(Chess board[8][8], std::vector<Position>& validPos)
 		for (int j = -1; j <= 1; j++)
 		{
 			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
-				&& color != board[pos.y + j][pos.x + i].getColor())
+				&& color != board[pos.y + j][pos.x + i].getColor() && !checkCheck(color, Position(pos.x + i, pos.y + j),board))
 			{
 				Position targetPos = Position(pos.x + i, pos.y + j);
 				validPos.push_back(targetPos);

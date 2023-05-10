@@ -26,6 +26,7 @@ int main()
 		break;
 	}
 	int count = 0;
+	system("cls");
 	printBoard(board.getBoard());
 	while (true)
 	{

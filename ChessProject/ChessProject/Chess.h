@@ -43,6 +43,8 @@ public:
 
 	std::vector<Position>getValidPos(Chess board[8][8]);
 
+	bool checkCheck(Color color, Position pos, Chess board[8][8]);
+
 	void strightLine(Chess board[8][8], std::vector<Position>& validPos);
 	void crossLine(Chess board[8][8], std::vector<Position>& validPos);
 	void nineSquare(Chess board[8][8], std::vector<Position>& validPos);
