@@ -42,6 +42,9 @@ public:
 	void checkPawn(); //check and change if the pawn is at end lines
 
 	std::vector<Position>getValidPos(Chess board[8][8]);
+
 	void strightLine(Chess board[8][8], std::vector<Position>& validPos);
 	void crossLine(Chess board[8][8], std::vector<Position>& validPos);
+	void nineSquare(Chess board[8][8], std::vector<Position>& validPos);
+	void lLine(Chess board[8][8], std::vector<Position>& validPos);
 };

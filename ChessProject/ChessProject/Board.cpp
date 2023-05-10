@@ -781,7 +781,6 @@ void Board::redo(int& count) //redo
 	}
 }
 
-
 bool Board::castling(Chess& chess, Position target)
 {
 	if (!chess.getMoved())

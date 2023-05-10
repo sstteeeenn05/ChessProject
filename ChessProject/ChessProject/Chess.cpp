@@ -233,23 +233,13 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 	switch (this->type)
 	{
 	case KING: //if is king
-
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
-					&& color != board[pos.y + j][pos.x + i].getColor())
-				{
-					targetPos = Position(pos.x + i, pos.y + j);
-					validPos.push_back(targetPos);
-				}
-			}
-		}
+		nineSquare(board, validPos);
 		break;
 
 	case QUEEN: //if is queen
+		std::cout << "..." << std::endl;
 		strightLine(board, validPos);
+		std::cout << "====" << std::endl;
 		crossLine(board, validPos);
 		break;
 
@@ -259,19 +249,9 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 		break;
 
 	case KNIGHT: //if is knight
-		{
-			int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
-			for (int i = 0; i < 8; i++)
-			{
-				if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
-					&& color != board[pos.y + i][pos.x + i].getColor())
-				{
-					targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
-					validPos.push_back(targetPos);
-				}
-			}
-			break;
-		}
+		lLine(board, validPos);
+		break;
+
 	case ROOK:
 
 		strightLine(board, validPos);
@@ -302,61 +282,101 @@ std::vector<Position> Chess::getValidPos(Chess board[8][8])
 
 void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 {
-	for (int i = 1; i <= 7; i++)
+	int i = 1;
+	while (pos.x + i < 8 && pos.x + i >= 0
+		&& color != board[pos.y][pos.x + i].getColor())
 	{
-		while (pos.x + i < 8 && pos.x + i >= 0
-			&& color != board[pos.y][pos.x + i].getColor())
-		{
-			Position targetPos = Position(pos.x + i, pos.y);
-			validPos.push_back(targetPos);
-		}
-		while (pos.y + i < 8 && pos.y + i >= 0
-			&& color != board[pos.y + i][pos.x].getColor())
-		{
-			Position targetPos = Position(pos.x, pos.y + i);
-			validPos.push_back(targetPos);
-		}
-		while (pos.x - i < 8 && pos.x - i >= 0
-			&& color != board[pos.y][pos.x - i].getColor())
-		{
-			Position targetPos = Position(pos.x - i, pos.y);
-			validPos.push_back(targetPos);
-		}
-		while (pos.y - i < 8 && pos.y - i >= 0
-			&& color != board[pos.y - i][pos.x].getColor())
-		{
-			Position targetPos = Position(pos.x, pos.y - i);
-			validPos.push_back(targetPos);
-		}
+		Position targetPos = Position(pos.x + i, pos.y);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x].getColor())
+	{
+		Position targetPos = Position(pos.x, pos.y + i);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0
+		&& color != board[pos.y][pos.x - i].getColor())
+	{
+		Position targetPos = Position(pos.x - i, pos.y);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x].getColor())
+	{
+		Position targetPos = Position(pos.x, pos.y - i);
+		validPos.push_back(targetPos);
+		i++;
 	}
 }
 
 void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 {
-	for (int i = 1; i <= 7; i++)
+	int i = 0;
+	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x + i].getColor())
 	{
-		while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+		Position targetPos = Position(pos.x + i, pos.y + i);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x + i].getColor())
+	{
+		Position targetPos = Position(pos.x + i, pos.y - i);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
+		&& color != board[pos.y - i][pos.x - i].getColor())
+	{
+		Position targetPos = Position(pos.x - i, pos.y - i);
+		validPos.push_back(targetPos);
+		i++;
+	}
+	i = 1;
+	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
+		&& color != board[pos.y + i][pos.x - i].getColor())
+	{
+		Position targetPos = Position(pos.x - i, pos.y + i);
+		validPos.push_back(targetPos);
+		i++;
+	}
+}
+
+void Chess::nineSquare(Chess board[8][8], std::vector<Position>& validPos)
+{
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
+				&& color != board[pos.y + j][pos.x + i].getColor())
+			{
+				Position targetPos = Position(pos.x + i, pos.y + j);
+				validPos.push_back(targetPos);
+			}
+		}
+	}
+}
+
+void Chess::lLine(Chess board[8][8], std::vector<Position>& validPos)
+{
+	int turn[8][2] = { {2,-1},{2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2} };
+	for (int i = 0; i < 8; i++)
+	{
+		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
 			&& color != board[pos.y + i][pos.x + i].getColor())
 		{
-			Position targetPos = Position(pos.x + i, pos.y + i);
-			validPos.push_back(targetPos);
-		}
-		while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-			&& color != board[pos.y - i][pos.x + i].getColor())
-		{
-			Position targetPos = Position(pos.x + i, pos.y - i);
-			validPos.push_back(targetPos);
-		}
-		while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-			&& color != board[pos.y - i][pos.x - i].getColor())
-		{
-			Position targetPos = Position(pos.x - i, pos.y - i);
-			validPos.push_back(targetPos);
-		}
-		while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-			&& color != board[pos.y + i][pos.x - i].getColor())
-		{
-			Position targetPos = Position(pos.x - i, pos.y + i);
+			Position targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
 			validPos.push_back(targetPos);
 		}
 	}
