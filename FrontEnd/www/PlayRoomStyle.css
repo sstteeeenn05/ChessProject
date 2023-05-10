@@ -1,12 +1,23 @@
+[x-cloak] {
+    display: none !important;
+}
+
 body{
+    user-select: none;
+
     display: flex;
     justify-content: center;
     align-items: center;
+    background: rgb(56, 56, 56);
+}
+
+img{
+    pointer-events: none;
 }
 
 .board{
     margin: auto;
-    border: black 2px solid;
+    border: white 2px solid;
     width: 80vh;
     max-width: 80vw;
 }
@@ -17,7 +28,7 @@ body{
 }
 
 .row-element{
-    border: black 2px solid ;
+    border: white 2px solid ;
     box-sizing: border-box;
     aspect-ratio: 1;
     width: 100%;
@@ -56,7 +67,16 @@ body{
     border-radius: 100%;
 }
 
+.leave-button:hover{
+    background: gray;
+}
+
+.leave-button:active{
+    background: #4e4e4e;
+}
+
 .round-message{
+    color: white;
     text-align: center;
 }
 
@@ -101,12 +121,39 @@ body{
     margin: 5px;
 }
 
-.leave-button:hover{
-    background: lightgray;
+.leave-button-image{
+    transform: rotate(180deg);
 }
 
-.leave-button:active{
+.bottom-info{
+    display: flex;
+    justify-content: space-between;
+}
+
+.undo-button, .redo-button{
+    border: none;
+    background: transparent;
+}
+
+.undo-button:hover, .redo-button:hover{
+    cursor: pointer;
     background: gray;
+}
+
+.undo-button:active, .redo-button:active{
+    background: #4e4e4e;
+}
+
+.undo-button:disabled, .redo-button:disabled{
+    cursor: default;
+    background: transparent;
+    opacity: .3;
+    transition: opacity 150ms;
+}
+
+.undo-button-image, .redo-button-image{
+    width: 50px;
+    height: 50px;
 }
 
 .box-content{

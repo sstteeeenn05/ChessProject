@@ -7,9 +7,9 @@
 </head>
 
 <body>
-  <div x-data="globalScope">
+  <div x-data="globalScope" x-cloak>
     <button class="leave-button">
-      <img class="leave-button-image" src="./assets/chevron-left-solid.svg"
+      <img class="leave-button-image" src="./assets/exit.svg"
            alt="leave">
     </button>
 
@@ -28,7 +28,15 @@
         </div>
       </template>
     </div>
-    <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+    <div class="bottom-info">
+      <button class="undo-button" :disabled="!canUndo" @click="readHistory('undo')">
+        <img class="undo-button-image" src="./assets/left.svg" alt="undo">
+      </button>
+      <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+      <button class="redo-button" :disabled="!canRedo" @click="readHistory('redo')">
+        <img class="redo-button-image" src="./assets/right.svg" alt="undo">
+      </button>
+    </div>
     <dialog class="lightbox" id="promotion"
             @cancel="(event)=>{event.preventDefault()}"
             x-show="isPromoting" x-transition>

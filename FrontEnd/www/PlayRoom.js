@@ -62,16 +62,40 @@ document.addEventListener('alpine:init', () => {
             }, 75)
 
         },
-        changeTurn(status,who) {
+        changeTurn({status, who, canUndo, canRedo}) {
+            this.canUndo = canUndo
+            this.canRedo = canRedo
+            console.log(canUndo,canRedo);
             if (status === 'tie') {
                 this.showResult(this.nowMoving, 'tie')
-            }
-            else if (status === 'win') {
+            } else if (status === 'win') {
                 this.showResult(who, status);
-            }
-            else{
+            } else {
                 this.nowMoving = who
             }
+        },
+        canUndo: false,
+        canRedo: false,
+        readHistory(option) { // TODO : add undo redo when API is done
+            this.board = [
+                '........',
+                '........',
+                '........',
+                '........',
+                '........',
+                '........',
+                '........',
+                '........'
+            ]
+            setTimeout(()=>{
+                this.game.getBoard().then(
+                  (resolve) => {
+                      this.board = resolve.value
+                      this.changeTurn(resolve)
+                  }
+                )
+            },30)
+
         },
         promotion(option) {
             this.game.promotion(option + 1).then(() => {
@@ -83,7 +107,7 @@ document.addEventListener('alpine:init', () => {
                       this.isPromoting = false;
                       setTimeout(() => {
                           document.getElementById('promotion').close()
-                          this.changeTurn(resolve.status,resolve.who)
+                          this.changeTurn(resolve)
                       }, 75)
 
                   }
@@ -137,7 +161,7 @@ document.addEventListener('alpine:init', () => {
                     ).then(
                       (resolve) => {
                           if (resolve.value === 'failed') {
-                              alert('failed')
+                              this.showMessage('Alert!!', 'invalid move')
                               return;
                           }
                           this.clickingX = x;
@@ -147,7 +171,7 @@ document.addEventListener('alpine:init', () => {
                               this.game.getBoard().then((resolve) => {
                                   this.board = resolve.value;
                                   this.resetXY()
-                                  this.changeTurn(resolve.status,resolve.who)
+                                  this.changeTurn(resolve)
                               })
                           }
                           if (resolve.value === "promotion") {
