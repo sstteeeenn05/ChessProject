@@ -1,7 +1,7 @@
 const WS_URL="ws://localhost:1234";
 
 /**
- * @typedef {Object} Package
+ * @typedef {Object} HandshakePackage
  * @prop {string} header
  * @prop {string} ipaddr
  * @prop {string} nickname
@@ -36,8 +36,9 @@ export class Game{
             if(!this.ws) reject("Web Socket is not ready!");
             this.ws.onmessage=(event)=>{
                 let data=JSON.parse(event.data.toString());
-                data.value=valueLambda(data.value);
-                resolve(data);
+                if(!data.status.success) reject(data.status.message);
+                data.content.value=valueLambda(data.content.value);
+                resolve(data.content);
             }
             this.ws.onclose=()=>reject("Web Socket is closed!");
             this.ws.onerror=(event)=>reject(event);
@@ -51,7 +52,7 @@ export class Game{
         return this.generatePromise("command",command,valueLambda);
     }
     getState(){
-        return this.generatePromise("get","state");
+        return this.generatePromise("getArgs","state");
     }
     getBoard(){
         return this.sendCommand(

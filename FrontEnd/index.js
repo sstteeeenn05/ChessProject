@@ -1,3 +1,46 @@
+/**
+ * @typedef {Object} Player
+ * @prop {string} name
+ * @prop {WebSocket} ws
+ */
+
+/**
+ * @typedef {Object} Room
+ * @prop {string} type
+ * @prop {string} status
+ * @prop {Player} nowMoving
+ * @prop {Player} p0
+ * @prop {Player} p1
+ * @prop {pipe.ChildProcess} process
+ */
+
+/**
+ * @typedef {Object} HandshakePackage
+ * @prop {string} header
+ * @prop {string} ipaddr
+ * @prop {string} nickname
+ * @prop {boolean} isSingle
+ * @prop {string} roomId
+ */
+
+/**
+ * @typedef {Object} ClientRequest
+ * @prop {string} type
+ * @prop {string} value
+ */
+
+/**
+ * @typedef {Object} Status
+ * @prop {boolean} success
+ * @prop {string} message
+ */
+
+/**
+ * @typedef {Object} ServerResponse
+ * @prop {Status} status
+ * @prop {Object} content
+ */
+
 const express = require('express');
 const app = express();
 const SocketServer = require('ws').Server;
@@ -8,35 +51,16 @@ app.use(express.static(__dirname+"\\www"));
 const PORT=1234;
 const server=app.listen(PORT);
 
-/**
- * @typedef {Object} Room
- * @prop {string} type
- * @prop {string} status
- * @prop {WebSocket} nowMoving
- * @prop {WebScoket} p0
- * @prop {WebScoket} p1
- * @prop {pipe.ChildProcess} process
- * @prop {Array} queue
- */
-
 let wss=new SocketServer({server});
 /** @type {Map<string,Room>} */
 let roomList=new Map();
-
-/**
- * @typedef {Object} Package
- * @prop {string} header
- * @prop {string} ipaddr
- * @prop {string} nickname
- * @prop {boolean} isSingle
- * @prop {string} roomId
- */
 
 wss.on('connection',(ws)=>{
     console.log(`web socket connected! (${ws.protocol})`);
     if(ws.protocol!="protocol-chess-game") return ws.close();
     ws.onmessage=(e)=>{
         ws.onmessage=undefined;
+        /** @type {HandshakePackage} */
         let package=JSON.parse(e.data.toString());
         switch(package.header){
             case "create":
@@ -49,11 +73,25 @@ wss.on('connection',(ws)=>{
     }
 })
 
+/**
+ * 
+ * @param {WebSocket} ws 
+ * @param {HandshakePackage} package 
+ */
 function createGame(ws,package){
-    let room={p0:ws,nowMoving:ws,queue:new Array()}
+    let room={
+        p0:{
+            name:package.nickname,
+            ws:ws
+        }
+    }
+    room.nowMoving=room.p0;
     if(package.isSingle){
         room.type="single";
-        room.p1=ws;
+        room.p1={
+            name:"black",
+            ws:ws
+        };
         room.process=pipe.execFile("application\\chess.exe");
     }else room.type="multiple"
     room.status="waiting";
@@ -62,29 +100,36 @@ function createGame(ws,package){
     if(package.isSingle) startGame("123");
 }
 
+/**
+ * 
+ * @param {WebSocket} ws 
+ * @param {HandshakePackage} package 
+ */
 function joinGame(ws,package){
     if(room.type!="multiple") return ws.close();
     if(!roomList.has(package.roomId)) return ws.close();
     let room=roomList.get(package.roomId);
     if(room.status!="waiting") return ws.close();
-    new Promise((resolve,reject)=>{
-        room.p0.onmessage=(e)=>{
-            let data=JSON.parse(e.data.toString());
-            console.log(`receive:${data.type} > ${data.value}`);
-            if(data.value=="Y") resolve();
-            else reject();
+    room.p0.ws.onmessage=(e)=>{
+        let data=JSON.parse(e.data.toString());
+        console.log(`receive:${data.type} > ${data.value}`);
+        if(data.value=="Y"){
+            room.p1={
+                name:package.nickname,
+                ws:ws
+            };
+            room.process=pipe.execFile("application\\chess.exe");
+            startGame(package.roomId);
         }
-        room.p0.send(package);
-    }).then(()=>{
-        room.p1=ws;
-        room.process=pipe.execFile("application\\chess.exe");
-        startGame(package.roomId);
-    })
+        else reject();
+    }
+    room.p0.ws.send(package);
 }
 
 function startGame(roomId){
     let room=roomList.get(roomId);
-    let queue=room.queue;
+    let p0=room.p0;
+    let p1=room.p1;
     let process=room.process;
 
     if(!process) wsClose();
@@ -92,32 +137,46 @@ function startGame(roomId){
     room.status="playing";
 
     let wsMessageCallback=(e)=>{
-        let data=JSON.parse(e.data.toString());
-        console.log(`receive:${data.type} > ${data.value}`);
-        switch(data.type){
-            case "getState":
-                e.target.send(JSON.stringify({
-                    status:room.status,
-                    who:room.nowMoving
-                }))
+        /** @type {ClientRequest} */
+        let request=JSON.parse(e.data.toString());
+        console.log(`receive:${request.type} > ${request.value}`);
+        switch(request.type){
+            case "getArgs":
+                if(request.value=="state"){
+                    e.target.send(JSON.stringify({
+                        status:{
+                            success:true
+                        },
+                        content:{
+                            status:room.status,
+                            who:room.nowMoving
+                        }
+                    }))
+                }
                 break;
             case "command":
-                console.log("push to queue");
-                queue.push({
-                    who:e.target,
-                    value:data.value
-                });
+                if(e.target==room.nowMoving.ws){
+                    execute(request.value.toString());
+                }else{
+                    e.target.send(JSON.stringify({
+                        status:{
+                            success:false,
+                            message:"not-your-turn"
+                        }
+                    }));
+                }
                 break;
         }
     }
 
-    room.p0.onmessage=wsMessageCallback;
-    room.p1.onmessage=wsMessageCallback;
+    p0.ws.onmessage=wsMessageCallback;
+    p1.ws.onmessage=wsMessageCallback;
 
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
         data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
         if(data.length!=5) return wsClose();
+        /** @type {ServerResponse} */
         let obj={
             status:data[0],
             who:data[1],
@@ -126,27 +185,26 @@ function startGame(roomId){
             value:data[4]
         }
         console.log(`send:${obj.value} > ${obj.status}`);
-        room.nowMoving.send(JSON.stringify(obj));
-        room.nowMoving=obj.who=="white"?room.p0:room.p1;
+        room.nowMoving.ws.send(JSON.stringify({
+            status:{success:true},
+            content:obj
+        }));
+        room.nowMoving=obj.who=="white"?p0:p1;
         room.status=obj.status;
         //if(room.status!="playing") return wsClose();
     })
 
-    let queueTimer=setInterval(()=>{
-        if(queue.length&&queue.at(0).who==room.nowMoving){
-            let commands=queue.shift().value.toString();
-            console.log("execute:",commands);
-            commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
-            process.stdin.write("\n");
-        }
-    },20)
+    let execute=(commands)=>{
+        console.log("execute:",commands);
+        commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
+        process.stdin.write("\n");
+    }
 
     let wsClose=()=>{
         console.log("onclose!");
-        clearInterval(queueTimer);
         process.kill();
-        room.p0.close();
-        room.p1.close();
+        p0.close();
+        p1.close();
     }
 }
 
