@@ -30,6 +30,9 @@ Chess::Chess(Position pos, Type label, Color color)
 	moved = false;
 }
 
+Position Chess::whiteKing = Position(4, 7);
+Position Chess::blackKing = Position(4, 0);
+
 //intent:set position
 //pre:a position
 //post:none
@@ -78,6 +81,16 @@ void Chess::setMoved()
 	moved = true;
 }
 
+void Chess::setWhiteKingPos(Position pos)
+{
+	whiteKing = pos;
+}
+
+void Chess::setBlackKingPos(Position pos)
+{
+	blackKing = pos;
+}
+
 //intent:get the Position of this class
 //pre:none
 //post:return the Promotion
@@ -105,6 +118,16 @@ Color Chess::getColor()
 bool Chess::getMoved()
 {
 	return moved;
+}
+
+Position Chess::getWhiteKingPos()
+{
+	return whiteKing;
+}
+
+Position Chess::getBlackKingPos()
+{
+	return blackKing;
 }
 
 //intent:check and change if the pawn is at the end

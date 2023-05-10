@@ -20,8 +20,7 @@ private:
 	Type type;
 	Color color;
 	bool moved;
-	//Player& player;
-
+	static Position whiteKing, blackKing;
 public:
 	Chess(); //constructor and initialize the chess
 	Chess(Position pos, Type type, Color color); //constructor and initialize the chess
@@ -33,11 +32,15 @@ public:
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
 	void setMoved();
+	static void setWhiteKingPos(Position pos);
+	static void setBlackKingPos(Position pos);
 
 	Position getPos(); //get position
 	Type getType(); //get type
 	Color getColor(); //get color
 	bool getMoved();
+	static Position getWhiteKingPos();
+	static Position getBlackKingPos();
 
 	void checkPawn(); //check and change if the pawn is at end lines
 
