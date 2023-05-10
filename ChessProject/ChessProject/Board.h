@@ -37,6 +37,9 @@ public:
 
 	bool castling(Chess& chess, Position target);
 	bool enPassant(Chess& chess, Position target, Log record);
+
+	bool checkMovement(Player player);
+	bool checkWin(Player player);
 };
 
 // moveAvalible ¦b Board.h

@@ -378,6 +378,62 @@ bool Board::enPassant(Chess& chess, Position target, Log record)
 	}
 }
 
+bool Board::checkMovement(Player player)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (board[i][j].getColor() != player.getColor())
+			{
+				continue;
+			}
+			else
+			{
+				std::vector<Position> validPos;
+				validPos.clear();
+				validPos = board[i][j].getValidPos(board);
+				if (validPos.size() != 0)
+				{
+					validPos.clear();
+					return true;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool Board::checkWin(Player player)
+{
+	Player enemy;
+	Chess enemyKing;
+	if (player.getColor() == WHITE)
+	{
+		enemy.setColor(BLACK);
+		enemyKing.setPos(Chess::getBlackKingPos());
+		enemyKing.setChess(KING, BLACK);
+	}
+	else
+	{
+		enemy.setColor(WHITE);
+		enemyKing.setPos(Chess::getWhiteKingPos());
+		enemyKing.setChess(KING, WHITE);
+	}
+	if (!checkMovement(enemy))
+	{
+		if (enemyKing.checkCheck(enemyKing.getColor(), enemyKing.getPos(), board))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 Color Board::colorOfPosition(int x, int y)
 {
 	return board[y][x].getColor();

@@ -12,7 +12,7 @@ int main()
 	clock_t startTime, endTime;
 	startTime = clock();
 	Board board;
-	Player p1, p2;
+	Player player, p1, p2;
 	int checkFirst;
 	std::cout << "Who goes first? 1.BLACK 2.WHITE" << std::endl;
 	std::cin >> checkFirst;
@@ -33,6 +33,19 @@ int main()
 	board.printBoard();
 	while (true)
 	{
+		if (count % 2 == 1)
+		{
+			player = p2;
+		}
+		else
+		{
+			player = p1;
+		}
+		if (!board.checkMovement(player))
+		{
+			std::cout << "Draw!" << std::endl;
+			break;
+		}
 		char choose;
 		std::cout << "u:undo r:redo" << std::endl;
 		std::cin >> choose;
@@ -54,14 +67,7 @@ int main()
 			target.x = b[0] - 'a';
 			target.y = 8 - (b[1] - '0');
 			bool validMotion = false;
-			if (count % 2 == 1)
-			{
-				validMotion = board.move(p2, source, target, count);
-			}
-			else
-			{
-				validMotion = board.move(p1, source, target, count);
-			}
+			validMotion = board.move(player, source, target, count);
 			if (validMotion)
 			{
 				std::cout << "Success" << std::endl;
@@ -78,6 +84,19 @@ int main()
 		endTime = clock();
 		std::cout << "Time : " << ((endTime - startTime) / CLOCKS_PER_SEC) / 60 << " min ";
 		std::cout << ((endTime - startTime) / CLOCKS_PER_SEC) % 60 << " sec" << std::endl;
+		if (board.checkWin(player))
+		{
+			if (player.getColor() == WHITE)
+			{
+				std::cout << "White win!" << std::endl;
+			}
+			else
+			{
+				std::cout << "Black win!" << std::endl;
+			}
+			break;
+		}
 	}
+	
 }
 
