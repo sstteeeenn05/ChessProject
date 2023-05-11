@@ -11,7 +11,6 @@
 
 #include "Chess.h"
 #include "Log.h";
-#include "Player.h"
 #include "Header.h"
 
 
@@ -28,14 +27,14 @@ public:
 	void printBoard();
 
 	bool move(Player& player, Position source, Position target, const int& count); //move
-	bool moveAvalible(Chess chess, Position target); //check if can move
+	bool moveAvalible(Chess& source, Chess& target); //check if can move
 
-	Color colorOfPosition(int x, int y);
+	Player colorOfPosition(int x, int y);
 
 	void undo(int& count); //undo
 	void redo(int& count); //redo
 
-	bool castling(Chess& chess, Position target);
+	bool castling(Position source, Position target);
 	bool enPassant(Chess& chess, Position target, Log record);
 
 	bool checkMovement(Player player);

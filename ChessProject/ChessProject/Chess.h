@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Header.h"
-#include "Player.h"
 #include "Position.h"
 
 class Chess
@@ -18,16 +17,16 @@ class Chess
 private:
 	Position pos;
 	Type type;
-	Color color;
+	Player player;
 	bool moved;
 	static Position whiteKing, blackKing;
 public:
 	Chess(); //constructor and initialize the chess
-	Chess(Position pos, Type type, Color color); //constructor and initialize the chess
+	Chess(Position pos, Type type, Player player); //constructor and initialize the chess
 	//Chess(Chess baseChess);
 	
 	void setPos(Position pos); //set position
-	void setChess(Type type, Color color); //set chess type and color
+	void setChess(Type type, Player player); //set chess type and color
 	void setType(Type type); //set type
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
@@ -37,16 +36,16 @@ public:
 
 	Position getPos(); //get position
 	Type getType(); //get type
-	Color getColor(); //get color
+	Player getPlayer(); //get color
 	bool getMoved();
 	static Position getWhiteKingPos();
 	static Position getBlackKingPos();
 
-	void checkPawn(); //check and change if the pawn is at end lines
+	void checkPromotion(); //check and change if the pawn is at end lines
 
 	std::vector<Position>getValidPos(Chess board[8][8]);
 
-	bool checkCheck(Color color, Position pos, Chess board[8][8]);
+	bool checkCheck(Player color, Position pos, Chess board[8][8]);
 
 	void strightLine(Chess board[8][8], std::vector<Position>& validPos);
 	void crossLine(Chess board[8][8], std::vector<Position>& validPos);

@@ -25,7 +25,7 @@ enum Type
 	EMPTY
 };
 
-enum Color
+enum Player
 {
 	WHITE,
 	BLACK,

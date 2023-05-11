@@ -16,17 +16,17 @@ Chess::Chess()
 {
 	pos = Position(0, 0);
 	type = EMPTY;
-	color = NONE;
+	player = NONE;
 }
 
 //intent:constructor and initialize the chess
 //pre:a Position a Label and a Color
 //post:a object of Chess
-Chess::Chess(Position pos, Type label, Color color)
+Chess::Chess(Position pos, Type label, Player color)
 {
 	this->pos = pos;
 	this->type = label;
-	this->color = color;
+	this->player = color;
 	moved = false;
 }
 
@@ -44,10 +44,10 @@ void Chess::setPos(Position pos)
 //intent:set chess label and color
 //pre: a Label and a Color
 //post:none
-void Chess::setChess(Type label, Color color) 
+void Chess::setChess(Type label, Player color) 
 {
 	this->type = label;
-	this->color = color;
+	this->player = color;
 }
 
 //intent:set the Label
@@ -63,7 +63,7 @@ void Chess::setType(Type label)
 //post:none
 void Chess::setSpace(Chess chess) 
 {
-	this->color = chess.color;
+	this->player = chess.player;
 	this->type = chess.type;
 }
 
@@ -72,7 +72,7 @@ void Chess::setSpace(Chess chess)
 //post:none
 void Chess::setEmpty() 
 {
-	this->color = NONE;
+	this->player = NONE;
 	this->type = EMPTY;
 }
 
@@ -110,9 +110,9 @@ Type Chess::getType()
 //intent:get the color of this chess
 //pre:none
 //post:return the object of Color
-Color Chess::getColor() 
+Player Chess::getPlayer() 
 {
-	return color;
+	return player;
 }
 
 bool Chess::getMoved()
@@ -133,10 +133,10 @@ Position Chess::getBlackKingPos()
 //intent:check and change if the pawn is at the end
 //pre: none
 //post:none
-void Chess::checkPawn() 
+void Chess::checkPromotion() 
 {
 	//if the color is black
-	if (this->color == BLACK) 
+	if (this->player == BLACK) 
 	{
 		//pawn at the end
 		if (this->pos.y == 7) 
@@ -228,9 +228,9 @@ void Chess::checkPawn()
 	}
 }
 
-bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
+bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 {
-	Color enemy;
+	Player enemy;
 	int side;
 	if (color == BLACK)
 	{
@@ -247,7 +247,7 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 		for (int j = -1; j <= 1; j++)
 		{
 			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
-				&& color != board[pos.y + j][pos.x + i].getColor() && board[pos.y + j][pos.x + i].getType() == KING)
+				&& color != board[pos.y + j][pos.x + i].getPlayer() && board[pos.y + j][pos.x + i].getType() == KING)
 			{
 				return true;
 			}
@@ -257,20 +257,20 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	for (int i = 0; i < 8; i++)
 	{
 		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
-			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getColor() && board[pos.y + turn[i][1]][pos.x + turn[i][0]].getType() == KNIGHT)
+			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getPlayer() && board[pos.y + turn[i][1]][pos.x + turn[i][0]].getType() == KNIGHT)
 		{
 			return true;
 		}
 	}
 	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x + i].getColor())
+		&& color != board[pos.y + i][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
 		{
 			return true;
 		}
-		if (board[pos.y + i][pos.x + i].getColor() == enemy)
+		if (board[pos.y + i][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -278,13 +278,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x + i].getColor())
+		&& color != board[pos.y - i][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x + i].getType() == QUEEN || board[pos.y - i][pos.x + i].getType() == BISHOP))
 		{
 			return true;
 		}
-		if (board[pos.y - i][pos.x + i].getColor() == enemy)
+		if (board[pos.y - i][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -292,13 +292,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x - i].getColor())
+		&& color != board[pos.y - i][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x - i].getType() == QUEEN || board[pos.y - i][pos.x - i].getType() == BISHOP))
 		{
 			return true;
 		}
-		if (board[pos.y - i][pos.x - i].getColor() == enemy)
+		if (board[pos.y - i][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -306,13 +306,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x - i].getColor())
+		&& color != board[pos.y + i][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x - i].getType() == QUEEN || board[pos.y + i][pos.x - i].getType() == BISHOP))
 		{
 			return true;
 		}
-		if (board[pos.y + i][pos.x - i].getColor() == enemy)
+		if (board[pos.y + i][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -320,13 +320,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0
-		&& color != board[pos.y][pos.x + i].getColor())
+		&& color != board[pos.y][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y][pos.x + i].getType() == QUEEN || board[pos.y][pos.x + i].getType() == ROOK))
 		{
 			return true;
 		}
-		if (board[pos.y][pos.x + i].getColor() == enemy)
+		if (board[pos.y][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -334,13 +334,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x].getColor())
+		&& color != board[pos.y + i][pos.x].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x].getType() == QUEEN || board[pos.y + i][pos.x].getType() == ROOK))
 		{
 			return true;
 		}
-		if (board[pos.y + i][pos.x].getColor() == enemy)
+		if (board[pos.y + i][pos.x].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -348,13 +348,13 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0
-		&& color != board[pos.y][pos.x - i].getColor())
+		&& color != board[pos.y][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y][pos.x - i].getType() == QUEEN || board[pos.y][pos.x - i].getType() == ROOK))
 		{
 			return true;
 		}
-		if (board[pos.y][pos.x - i].getColor() == enemy)
+		if (board[pos.y][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -362,23 +362,23 @@ bool Chess::checkCheck(Color color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x].getColor())
+		&& color != board[pos.y - i][pos.x].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x].getType() == QUEEN || board[pos.y - i][pos.x].getType() == ROOK))
 		{
 			return true;
 		}
-		if (board[pos.y - i][pos.x].getColor() == enemy)
+		if (board[pos.y - i][pos.x].getPlayer() == enemy)
 		{
 			break;
 		}
 		i++;
 	}
-	if (board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy && board[pos.y + (1 * side)][pos.x + 1].getType() == PAWN)
+	if (board[pos.y + (1 * side)][pos.x + 1].getPlayer() == enemy && board[pos.y + (1 * side)][pos.x + 1].getType() == PAWN)
 	{
 		return true;
 	}
-	if (board[pos.y + (1 * side)][pos.x - 1].getColor() == enemy && board[pos.y + (1 * side)][pos.x - 1].getType() == PAWN)
+	if (board[pos.y + (1 * side)][pos.x - 1].getPlayer() == enemy && board[pos.y + (1 * side)][pos.x - 1].getType() == PAWN)
 	{
 		return true;
 	}
@@ -392,9 +392,9 @@ std::vector<Position> Chess::getValidPos(Chess gBoard[8][8])
 {
 	std::vector<Position> validPos;
 	validPos.clear();
-	Position targetPos;
-	int side, pawnOrigin;
-	Color enemy;
+	Position targetPos, kingPos;
+	int side, pawnOrigin, pawnEnd;
+	Player enemy;
 	Chess board[8][8];
 	for (int i = 0; i < 8; i++)
 	{
@@ -403,17 +403,19 @@ std::vector<Position> Chess::getValidPos(Chess gBoard[8][8])
 			board[i][j] = gBoard[i][j];
 		}
 	}
-	if (color == BLACK)
+	if (player == BLACK)
 	{
 		enemy = WHITE;
 		side = 1;
 		pawnOrigin = 1;
+		kingPos = blackKing;
 	}
-	else if (color == WHITE) //if the color is white
+	else if (player == WHITE) //if the color is white
 	{
 		enemy = BLACK;
 		side = -1;
 		pawnOrigin = 6;
+		kingPos = whiteKing;
 	}
 	//judge the label
 	switch (this->type)
@@ -453,9 +455,18 @@ std::vector<Position> Chess::getValidPos(Chess gBoard[8][8])
 				targetPos = Position(pos.x, (pos.y + (i * side)));
 
 				//if there is nothing in the space
-				if (board[pos.y + (i * side)][pos.x].getColor() == NONE)
+				if (board[pos.y + (i * side)][pos.x].getPlayer() == NONE)
 				{
-					validPos.push_back(targetPos);
+					Chess tmp;
+					tmp.setSpace(board[pos.y + (i * side)][pos.x]);
+					board[pos.y + (i * side)][pos.x].setSpace(board[pos.y][pos.x]);
+					board[pos.y][pos.x].setEmpty();
+					if (!checkCheck(player, kingPos, board))
+					{
+						validPos.push_back(targetPos);
+					}
+					board[pos.y][pos.x].setSpace(board[pos.y + (i * side)][pos.x]);
+					board[pos.y + (i * side)][pos.x].setSpace(tmp);
 				}
 				else //if there is something in the space
 				{
@@ -470,124 +481,150 @@ std::vector<Position> Chess::getValidPos(Chess gBoard[8][8])
 			targetPos = Position(pos.x, (pos.y + (1 * side)));
 
 			//if there is nothing in the sapce
-			if (board[pos.y + (1 * side)][pos.x].getColor() == NONE)
+			if (board[pos.y + (1 * side)][pos.x].getPlayer() == NONE)
 			{
-				validPos.push_back(targetPos);
+				Chess tmp;
+				tmp.setSpace(board[pos.y + (1 * side)][pos.x]);
+				board[pos.y + (1 * side)][pos.x].setSpace(board[pos.y][pos.x]);
+				board[pos.y][pos.x].setEmpty();
+				if (!checkCheck(player, kingPos, board))
+				{
+					validPos.push_back(targetPos);
+				}
+				board[pos.y][pos.x].setSpace(board[pos.y + (1 * side)][pos.x]);
+				board[pos.y + (1 * side)][pos.x].setSpace(tmp);
 			}
 
 			//if there is something can eat
-			if (pos.x + 1 < 8 && board[pos.y + (1 * side)][pos.x + 1].getColor() == enemy)
+			if (pos.x + 1 < 8 && board[pos.y + (1 * side)][pos.x + 1].getPlayer() == enemy)
 			{
 				targetPos = Position(pos.x + 1, pos.y + (1 * side));
-				validPos.push_back(targetPos);
+				Chess tmp;
+				tmp.setSpace(board[pos.y + (1 * side)][pos.x + 1]);
+				board[pos.y + (1 * side)][pos.x + 1].setSpace(board[pos.y][pos.x]);
+				board[pos.y][pos.x].setEmpty();
+				if (!checkCheck(player, kingPos, board))
+				{
+					validPos.push_back(targetPos);
+				}
+				board[pos.y][pos.x].setSpace(board[pos.y + (1 * side)][pos.x + 1]);
+				board[pos.y + (1 * side)][pos.x + 1].setSpace(tmp);
 			}
 
 			//if there is something can eat
-			if (pos.x - 1 >= 0 && board[pos.y + (1 * side)][pos.x - 1].getColor() == enemy)
+			if (pos.x - 1 >= 0 && board[pos.y + (1 * side)][pos.x - 1].getPlayer() == enemy)
 			{
 				targetPos = Position(pos.x - 1, pos.y + (1 * side));
-				validPos.push_back(targetPos);
+				Chess tmp;
+				tmp.setSpace(board[pos.y + (1 * side)][pos.x - 1]);
+				board[pos.y + (1 * side)][pos.x - 1].setSpace(board[pos.y][pos.x]);
+				board[pos.y][pos.x].setEmpty();
+				if (!checkCheck(player, kingPos, board))
+				{
+					validPos.push_back(targetPos);
+				}
+				board[pos.y][pos.x].setSpace(board[pos.y + (1 * side)][pos.x - 1]);
+				board[pos.y + (1 * side)][pos.x - 1].setSpace(tmp);
 			}
 		}
-		break;
 	}
 	return validPos;
 }
 
 void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 {
-	Color enemy;
+	Player enemy;
 	Position kingPos;
-	if (color == BLACK)
+	if (player == BLACK)
 	{
 		enemy = WHITE;
 		kingPos = blackKing;
 	}
-	else if (color == WHITE) //if the color is white
+	else if (player == WHITE) //if the color is white
 	{
 		enemy = BLACK;
 		kingPos = whiteKing;
 	}
 	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0
-		&& color != board[pos.y][pos.x + i].getColor())
+		&& player != board[pos.y][pos.x + i].getPlayer())
 	{
 		Position targetPos = Position(pos.x + i, pos.y);
 		Chess tmp;
 		tmp.setSpace(board[pos.y][pos.x + i]);
 		board[pos.y][pos.x + i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y][pos.x + i]);
 		board[pos.y][pos.x + i].setSpace(tmp);
 		i++;
-		if (board[pos.y][pos.x + i].getColor() == enemy)
+		if (board[pos.y][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x].getColor())
+		&& player != board[pos.y + i][pos.x].getPlayer())
 	{
 		Position targetPos = Position(pos.x, pos.y + i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y + i][pos.x]);
 		board[pos.y + i][pos.x].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y + i][pos.x]);
 		board[pos.y + i][pos.x].setSpace(tmp);
 		i++;
-		if (board[pos.y + i][pos.x].getColor() == enemy)
+		if (board[pos.y + i][pos.x].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0
-		&& color != board[pos.y][pos.x - i].getColor())
+		&& player != board[pos.y][pos.x - i].getPlayer())
 	{
 		Position targetPos = Position(pos.x - i, pos.y);
 		Chess tmp;
 		tmp.setSpace(board[pos.y][pos.x - i]);
 		board[pos.y][pos.x - i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y][pos.x - i]);
 		board[pos.y][pos.x - i].setSpace(tmp);
 		i++;
-		if (board[pos.y][pos.x - i].getColor() == enemy)
+		if (board[pos.y][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x].getColor())
+		&& player != board[pos.y - i][pos.x].getPlayer())
 	{
 		Position targetPos = Position(pos.x, pos.y - i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y - i][pos.x]);
 		board[pos.y - i][pos.x].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y - i][pos.x]);
 		board[pos.y - i][pos.x].setSpace(tmp);
 		i++;
-		if (board[pos.y - i][pos.x].getColor() == enemy)
+		if (board[pos.y - i][pos.x].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -596,98 +633,98 @@ void Chess::strightLine(Chess board[8][8], std::vector<Position>& validPos)
 
 void Chess::crossLine(Chess board[8][8], std::vector<Position>& validPos)
 {
-	Color enemy;
+	Player enemy;
 	Position kingPos;
-	if (color == BLACK)
+	if (player == BLACK)
 	{
 		enemy = WHITE;
 		kingPos = blackKing;
 	}
-	else if (color == WHITE) //if the color is white
+	else if (player == WHITE) //if the color is white
 	{
 		enemy = BLACK;
 		kingPos = whiteKing;
 	}
 	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x + i].getColor())
+		&& player != board[pos.y + i][pos.x + i].getPlayer())
 	{
 		Position targetPos = Position(pos.x + i, pos.y + i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y + i][pos.x + i]);
 		board[pos.y + i][pos.x + i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y + i][pos.x + i]);
 		board[pos.y + i][pos.x + i].setSpace(tmp);
 		i++;
-		if (board[pos.y + i][pos.x + i].getColor() == enemy)
+		if (board[pos.y + i][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x + i].getColor())
+		&& player != board[pos.y - i][pos.x + i].getPlayer())
 	{
 		Position targetPos = Position(pos.x + i, pos.y - i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y - i][pos.x + i]);
 		board[pos.y - i][pos.x + i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y - i][pos.x + i]);
 		board[pos.y - i][pos.x + i].setSpace(tmp);
 		i++;
-		if (board[pos.y - i][pos.x + i].getColor() == enemy)
+		if (board[pos.y - i][pos.x + i].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x - i].getColor())
+		&& player != board[pos.y - i][pos.x - i].getPlayer())
 	{
 		Position targetPos = Position(pos.x - i, pos.y - i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y - i][pos.x - i]);
 		board[pos.y - i][pos.x - i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y - i][pos.x - i]);
 		board[pos.y - i][pos.x - i].setSpace(tmp);
 		i++;
-		if (board[pos.y - i][pos.x - i].getColor() == enemy)
+		if (board[pos.y - i][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x - i].getColor())
+		&& player != board[pos.y + i][pos.x - i].getPlayer())
 	{
 		Position targetPos = Position(pos.x - i, pos.y + i);
 		Chess tmp;
 		tmp.setSpace(board[pos.y + i][pos.x - i]);
 		board[pos.y + i][pos.x - i].setSpace(board[pos.y][pos.x]);
 		board[pos.y][pos.x].setEmpty();
-		if (!checkCheck(color, kingPos, board))
+		if (!checkCheck(player, kingPos, board))
 		{
 			validPos.push_back(targetPos);
 		}
 		board[pos.y][pos.x].setSpace(board[pos.y + i][pos.x - i]);
 		board[pos.y + i][pos.x - i].setSpace(tmp);
 		i++;
-		if (board[pos.y + i][pos.x - i].getColor() == enemy)
+		if (board[pos.y + i][pos.x - i].getPlayer() == enemy)
 		{
 			break;
 		}
@@ -701,7 +738,7 @@ void Chess::nineSquare(Chess board[8][8], std::vector<Position>& validPos)
 		for (int j = -1; j <= 1; j++)
 		{
 			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
-				&& color != board[pos.y + j][pos.x + i].getColor() && !checkCheck(color, Position(pos.x + i, pos.y + j),board))
+				&& player != board[pos.y + j][pos.x + i].getPlayer() && !checkCheck(player, Position(pos.x + i, pos.y + j),board))
 			{
 				Position targetPos = Position(pos.x + i, pos.y + j);
 				validPos.push_back(targetPos);
@@ -713,11 +750,11 @@ void Chess::nineSquare(Chess board[8][8], std::vector<Position>& validPos)
 void Chess::lLine(Chess board[8][8], std::vector<Position>& validPos)
 {
 	Position kingPos;
-	if (color == BLACK)
+	if (player == BLACK)
 	{
 		kingPos = blackKing;
 	}
-	else if (color == WHITE) //if the color is white
+	else if (player == WHITE) //if the color is white
 	{
 		kingPos = whiteKing;
 	}
@@ -725,14 +762,14 @@ void Chess::lLine(Chess board[8][8], std::vector<Position>& validPos)
 	for (int i = 0; i < 8; i++)
 	{
 		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
-			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getColor())
+			&& player != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getPlayer())
 		{
 			Position targetPos = Position(pos.x + turn[i][0], pos.y + turn[i][1]);
 			Chess tmp;
 			tmp.setSpace(board[pos.y + turn[i][1]][pos.x + turn[i][0]]);
 			board[pos.y + turn[i][1]][pos.x + turn[i][0]].setSpace(board[pos.y][pos.x]);
 			board[pos.y][pos.x].setEmpty();
-			if (!checkCheck(color, kingPos, board))
+			if (!checkCheck(player, kingPos, board))
 			{
 				validPos.push_back(targetPos);
 			}

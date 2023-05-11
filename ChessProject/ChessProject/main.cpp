@@ -2,10 +2,8 @@
 #include "Header.h"
 #include "Board.h"
 #include "Chess.h"
-#include "Player.h"
 #include "Position.h"
 
-void printBoard(Chess* source); //print board
 
 int main()
 {
@@ -19,13 +17,13 @@ int main()
 	switch (checkFirst)
 	{
 	case 1:
-		p1.setColor(BLACK);
-		p2.setColor(WHITE);
+		p1 = BLACK;
+		p2 = WHITE;
 		break;
 	case 2:
 	default:
-		p1.setColor(WHITE);
-		p2.setColor(BLACK);
+		p1 = WHITE;
+		p2 = BLACK;
 		break;
 	}
 	int count = 0;
@@ -86,7 +84,7 @@ int main()
 		std::cout << ((endTime - startTime) / CLOCKS_PER_SEC) % 60 << " sec" << std::endl;
 		if (board.checkWin(player))
 		{
-			if (player.getColor() == WHITE)
+			if (player == WHITE)
 			{
 				std::cout << "White win!" << std::endl;
 			}
