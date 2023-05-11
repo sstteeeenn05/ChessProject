@@ -428,6 +428,7 @@ bool Board::checkWin(Player player)
 	{
 		if (enemyKing.checkCheck(enemyKing.getColor(), enemyKing.getPos(), board))
 		{
+			std::cout << "Checkmate!" << std::endl;
 			return true;
 		}
 	}
