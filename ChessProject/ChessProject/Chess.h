@@ -41,7 +41,8 @@ public:
 	static Position getWhiteKingPos();
 	static Position getBlackKingPos();
 
-	void checkPromotion(); //check and change if the pawn is at end lines
+	bool checkPromotion(); //check and change if the pawn is at end lines
+	void doPromotion();
 
 	std::vector<Position>getValidPos(Chess board[8][8]);
 

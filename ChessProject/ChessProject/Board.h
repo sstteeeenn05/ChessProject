@@ -19,20 +19,23 @@ class Board
 private:
 	Chess board[8][8];
 	std::vector<Log> logs;
+	int logIndex = 0;
 
 public:
 	Board(); //constructor and initialize the board
 	//Board(std::string fen);
 
-	void printBoard();
+	std::string getBoard();
+	std::string getMaskBoard(Position point);
 
-	bool move(Player& player, Position source, Position target, const int& count); //move
+	bool move(Player& player, Position source, Position target); //move
 	bool moveAvalible(Chess& source, Chess& target); //check if can move
 
-	Player colorOfPosition(int x, int y);
-
-	void undo(int& count); //undo
-	void redo(int& count); //redo
+	bool canUndo();
+	bool canRedo();
+	bool undo(); //undo
+	bool redo(); //redo
+	int getLogIndex();
 
 	bool castling(Position source, Position target);
 	bool enPassant(Chess& chess, Position target, Log record);

@@ -4,96 +4,45 @@
 #include "Chess.h"
 #include "Position.h"
 
-
 int main()
 {
-	clock_t startTime, endTime;
-	startTime = clock();
 	Board board;
-	Player player, p1, p2;
-	int checkFirst;
-	std::cout << "Who goes first? 1.BLACK 2.WHITE" << std::endl;
-	std::cin >> checkFirst;
-	switch (checkFirst)
-	{
-	case 1:
-		p1 = BLACK;
-		p2 = WHITE;
-		break;
-	case 2:
-	default:
-		p1 = WHITE;
-		p2 = BLACK;
-		break;
-	}
-	int count = 0;
-	system("cls");
-	board.printBoard();
+	Player player, enemy, p1 = WHITE, p2 = BLACK;
+	std::string status, who, canUndo, canRedo, value;
 	while (true)
 	{
-		if (count % 2 == 1)
-		{
-			player = p2;
+		player = board.getLogIndex() & 1 ? p2 : p1;
+		enemy = board.getLogIndex() & 1 ? p1 : p2;
+		std::string mode;
+		std::cin >> mode;
+
+		if (mode == "undo") value = board.undo() ? "success" : "failed";
+		if (mode == "redo") value = board.redo() ? "success" : "failed";
+		if (mode == "preview") {
+			Position point;
+			std::cin >> point.x >> point.y;
+			value = board.getMaskBoard(point);
 		}
-		else
-		{
-			player = p1;
-		}
-		if (!board.checkMovement(player))
-		{
-			std::cout << "Draw!" << std::endl;
-			break;
-		}
-		char choose;
-		std::cout << "u:undo r:redo" << std::endl;
-		std::cin >> choose;
-		switch (choose)
-		{
-		case 'u':
-			board.undo(count);
-			break;
-		case 'r':
-			board.redo(count);
-			break;
-		default:
-			std::string a, b;
+		if (mode == "move") {
 			Position source, target;
-			std::cin >> a >> b;
-			a = choose + a;
-			source.x = a[0] - 'a';
-			source.y = 8 - (a[1] - '0');
-			target.x = b[0] - 'a';
-			target.y = 8 - (b[1] - '0');
-			bool validMotion = false;
-			validMotion = board.move(player, source, target, count);
-			if (validMotion)
-			{
-				std::cout << "Success" << std::endl;
-				count++;
-			}
-			else
-			{
-				std::cout << "Fail" << std::endl;
-			}
-			break;
+			std::cin >> source.x >> source.y >> target.x >> target.y;
+			value = board.move(player, source, target) ? "success" : "failed";
 		}
-		system("cls");
-		board.printBoard();
-		endTime = clock();
-		std::cout << "Time : " << ((endTime - startTime) / CLOCKS_PER_SEC) / 60 << " min ";
-		std::cout << ((endTime - startTime) / CLOCKS_PER_SEC) % 60 << " sec" << std::endl;
-		if (board.checkWin(player))
-		{
-			if (player == WHITE)
-			{
-				std::cout << "White win!" << std::endl;
-			}
-			else
-			{
-				std::cout << "Black win!" << std::endl;
-			}
-			break;
-		}
+		if (mode == "print") value = board.getBoard();
+
+		if (!board.checkMovement(player)) status = "draw";
+		else if (!board.checkMovement(enemy)) status = "checkmate";
+		else if (board.checkWin(player)) status = "win";
+		else status = "playing";
+
+		canUndo = '0' + board.canUndo();
+		canRedo = '0' + board.canRedo();
+
+		bool changeRound = mode == "undo" || mode == "redo" || mode == "move";
+		if (changeRound) who = enemy == WHITE ? "white" : "black";
+		else who = player == WHITE ? "white" : "black";
+
+		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << std::endl;
 	}
 	
 }

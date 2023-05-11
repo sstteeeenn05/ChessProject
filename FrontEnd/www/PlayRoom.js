@@ -147,6 +147,7 @@ document.addEventListener('alpine:init', () => {
                     this.clickedY = y;
                     this.game.preview(x, y).then((resolve) => {
                         this.maskBoard = resolve.value;
+                        this.maskBoard[y*8+x] = 1;
                     })
                 }
             } else {

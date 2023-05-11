@@ -134,99 +134,21 @@ Position Chess::getBlackKingPos()
 //intent:check and change if the pawn is at the end
 //pre: none
 //post:none
-void Chess::checkPromotion() 
+bool Chess::checkPromotion() {
+	return type == PAWN && (player == WHITE && pos.y == 0 || player == BLACK && pos.y == 7);
+}
+void Chess::doPromotion() 
 {
-	//if the color is black
-	if (this->player == BLACK) 
-	{
-		//pawn at the end
-		if (this->pos.y == 7) 
-		{
-			//loop until promotion successfully
-			while (this->type == PAWN) 
-			{
-				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
-				int choose;
-				std::cin >> choose;
-
-				//what to chage to 
-				switch (choose) 
-				{
-
-				//change to queen
-				case 1: 
-					this->setType(QUEEN);
-					break;
-
-				//change to bishop
-				case 2: 
-					this->setType(BISHOP);
-					break;
-
-				//change to knight
-				case 3: 
-					this->setType(KNIGHT);
-					break;
-
-				//change to rook
-				case 4: 
-					this->setType(ROOK);
-					break;
-
-				//fail to change
-				default: 
-					std::cout << "Fail" << std::endl;
-					break;
-				}
-			}
-			std::cout << "Success" << std::endl;
-		}
-	}
-	else //if the color is white
-	{
-		//if at the end
-		if (this->pos.y == 0) 
-		{
-			//loop until promotion successfully
-			while (this->type == PAWN)
-			{
-				std::cout << "Promotion Pawn to 1.Queen 2.Bishop 3.Knight 4.Rook" << std::endl;
-				int choose;
-				std::cin >> choose;
-
-				//what to chage to 
-				switch (choose)
-				{
-
-				//change to queen
-				case 1:
-					this->setType(QUEEN);
-					break;
-
-				//change to bishop
-				case 2:
-					this->setType(BISHOP);
-					break;
-
-				//change to knight
-				case 3:
-					this->setType(KNIGHT);
-					break;
-
-				//change to rook
-				case 4:
-					this->setType(ROOK);
-					break;
-
-				//fail to change
-				default:
-					std::cout << "Fail" << std::endl;
-					break;
-				}
-			}
-			std::cout << "Success" << std::endl;
-		}
-	}
+	int choose = 0;
+	do {
+		std::cout << "playing;" << (player == WHITE ? "white" : "black") << ";;;promotion";
+		std::cin >> choose;
+		if (choose == 1) setType(QUEEN);
+		else if (choose == 2) setType(BISHOP);
+		else if (choose == 3) setType(KNIGHT);
+		else if (choose == 4) setType(ROOK);
+		else std::cout << "playing;" << (player == WHITE ? "white" : "black") << ";;;failed";
+	} while (choose < 1 && choose>4);
 }
 
 bool Chess::checkCheck(Player player, Position pos, Chess board[8][8])

@@ -67,100 +67,44 @@ Board::Board()
 	logs.clear();
 }
 
-void Board::printBoard()
+std::string Board::getBoard()
 {
-	std::cout << "  a b c d e f g h" << std::endl;
-	for (int i = 0; i < 8; i++) //output board
-	{
-		std::cout << 8 - i << " ";
-		for (int j = 0; j < 8; j++) //output board
-		{
-			switch (board[i][j].getType())
-			{
-			case KING:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "k ";
-				}
-				else
-				{
-					std::cout << "K ";
-				}
-				break;
-			case QUEEN:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "q ";
-				}
-				else
-				{
-					std::cout << "Q ";
-				}
-				break;
-			case BISHOP:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "b ";
-				}
-				else
-				{
-					std::cout << "B ";
-				}
-				break;
-			case KNIGHT:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "n ";
-				}
-				else
-				{
-					std::cout << "N ";
-				}
-				break;
-			case ROOK:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "r ";
-				}
-				else
-				{
-					std::cout << "R ";
-				}
-				break;
-			case PAWN:
-				if (board[i][j].getPlayer() == BLACK)
-				{
-					std::cout << "p ";
-				}
-				else
-				{
-					std::cout << "P ";
-				}
-				break;
-			case EMPTY:
-				std::cout << "  ";
-				break;
-			}
-		}
-		std::cout << std::endl;
+	std::string output;
+	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) {
+		Chess& c = board[i][j];
+		if (c.getType() == EMPTY || c.getPlayer() == WHITE) output += char(c.getType());
+		else output += char(c.getType() + ('a' - 'A'));
 	}
+	return output;
+}
+
+std::string Board::getMaskBoard(Position point) {
+	std::string output;
+	std::vector<Position> posList = board[point.y][point.x].getValidPos(board);
+	bool maskBoard[8][8] = { false };
+	for (const auto& pos : posList) {
+		maskBoard[pos.y][pos.x] = true;
+	}
+	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) {
+		if (maskBoard[i][j]) output += '1';
+		else output += '0';
+	}
+	return output;
 }
 
 //intent: move the chess
 //pre: whose turn
 //post: none
-bool Board::move(Player& player, Position source, Position target, const int& count)
+bool Board::move(Player& player, Position source, Position target)
 {
+	Chess& sChess = board[source.y][source.x], & tChess = board[target.y][target.x];
+
 	//if it is not this player's turn
-	if (player != board[source.y][source.x].getPlayer()) 
-	{
-		std::cout << "Fail" << std::endl;
-		return false;
-	}
+	if (player != sChess.getPlayer()) return false;
 
 	bool canCastle = false;
 
-	if (board[source.y][source.x].getType() == KING && (!board[source.y][source.x].getMoved()) && target.y == source.y && (target.x == 2 || target.x == 6))
+	if (sChess.getType() == KING && (!sChess.getMoved()) && target.y == source.y && (target.x == 2 || target.x == 6))
 	{
 		canCastle = castling(source, target);
 	}
@@ -168,48 +112,43 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 	bool EnPassant = false;
 
 	if (abs(target.y - source.y)==1 && abs(target.x - source.x) == 1 &&
-		board[source.y][source.x].getType() == PAWN && board[source.y][target.x].getType() == PAWN)
+		sChess.getType() == PAWN && board[source.y][target.x].getType() == PAWN)
 	{
-		EnPassant = enPassant(board[source.y][source.x], target, logs[count - 1]);
+		EnPassant = enPassant(sChess, target, logs[logIndex - 1]);
 	}
 
 	//if the target position is valid
-	if (moveAvalible(board[source.y][source.x], board[target.y][target.x]) || canCastle || EnPassant)
+	if (!moveAvalible(sChess, tChess) && !canCastle && !EnPassant) return false;
+
+	while (logIndex < logs.size())
 	{
-		while (count < logs.size())
-		{
-			logs.pop_back();
-		}
-		Log record(board[source.y][source.x], board[target.y][target.x], canCastle, EnPassant);
-		logs.push_back(record);
+		logs.pop_back();
+	}
+	Log record(sChess, tChess, canCastle, EnPassant);
+	logs.push_back(record);
+	logIndex++;
 		
-		if (board[source.y][target.x].getType() == KING)
-		{
-			if (player == WHITE)
-			{
-				Chess::setWhiteKingPos(target);
-			}
-			else
-			{
-				Chess::setBlackKingPos(target);
-			}
-		}
-
-		board[source.y][source.x].setMoved();
-		board[target.y][target.x].setSpace(board[source.y][source.x]);
-		board[source.y][source.x].setEmpty();
-
-		//if is pawn check if it can promotion
-		if (board[target.y][target.x].getType() == PAWN) 
-		{
-			board[target.y][target.x].checkPromotion();
-		}
-		return true;
-	}
-	else 
+	if (board[target.y][target.x].getType() == KING)
 	{
-		return false;
+		if (player == WHITE)
+		{
+			Chess::setWhiteKingPos(target);
+		}
+		else
+		{
+			Chess::setBlackKingPos(target);
+		}
 	}
+
+	sChess.setMoved();
+	tChess.setSpace(sChess);
+	sChess.setEmpty();
+
+	//if is pawn check if it can promotion
+	
+	if (tChess.checkPromotion()) tChess.doPromotion();
+
+	return true;
 }
 
 //intent: if this position is valid
@@ -237,86 +176,84 @@ bool Board::moveAvalible(Chess& source, Chess& target)
 	return false;
 }
 
-void Board::undo(int& count) //undo
-{
-	if (count == 0)
-	{
-		std::cout << "Fail" << std::endl;
-		return;
-	}
-	else
-	{
-		Log record(logs[count - 1].source, logs[count - 1].target, logs[count - 1].castling, logs[count - 1].enPassant);
-		if (record.castling)
-		{
-			if (record.target.getPos().x == 6)
-			{
-				board[record.source.getPos().y][7].setSpace(board[record.source.getPos().y][5]);
-				board[record.source.getPos().y][5].setEmpty();
-			}
-			else
-			{
-				board[record.source.getPos().y][0].setSpace(board[record.source.getPos().y][3]);
-				board[record.source.getPos().y][3].setEmpty();
-			}
-		}
-		if (record.enPassant)
-		{
-			if (record.source.getPos().y == 4)
-			{
-				board[4][record.target.getPos().x].setChess(PAWN, WHITE);
-			}
-			else
-			{
-				board[3][record.target.getPos().x].setChess(PAWN, BLACK);
-			}
-		}
-		board[record.source.getPos().y][record.source.getPos().x] = record.source;
-		board[record.target.getPos().y][record.target.getPos().x] = record.target;
-		count--;
-		std::cout << "Success" << std::endl;
-	}
+bool Board::canUndo() {
+	return logIndex;
 }
 
-void Board::redo(int& count) //redo
+bool Board::canRedo() {
+	return logIndex < logs.size();
+}
+
+bool Board::undo() //undo
 {
-	if (count >= logs.size())
+	if (!canUndo()) return false;
+	Log record(logs[logIndex - 1].source, logs[logIndex - 1].target, logs[logIndex - 1].castling, logs[logIndex - 1].enPassant);
+	if (record.castling)
 	{
-		std::cout << "Fail" << std::endl;
-		return;
+		if (record.target.getPos().x == 6)
+		{
+			board[record.source.getPos().y][7].setSpace(board[record.source.getPos().y][5]);
+			board[record.source.getPos().y][5].setEmpty();
+		}
+		else
+		{
+			board[record.source.getPos().y][0].setSpace(board[record.source.getPos().y][3]);
+			board[record.source.getPos().y][3].setEmpty();
+		}
 	}
-	else
+	if (record.enPassant)
 	{
-		Log record(logs[count].source, logs[count].target, logs[count].castling, logs[count].enPassant);
-		if (record.castling)
+		if (record.source.getPos().y == 4)
 		{
-			if (record.target.getPos().x == 6)
-			{
-				board[record.source.getPos().y][5].setSpace(board[record.source.getPos().y][7]);
-				board[record.source.getPos().y][7].setEmpty();
-			}
-			else
-			{
-				board[record.source.getPos().y][3].setSpace(board[record.source.getPos().y][0]);
-				board[record.source.getPos().y][0].setEmpty();
-			}
+			board[4][record.target.getPos().x].setChess(PAWN, WHITE);
 		}
-		if (record.enPassant)
+		else
 		{
-			if (record.source.getPos().y == 4)
-			{
-				board[4][record.target.getPos().x].setEmpty();
-			}
-			else
-			{
-				board[3][record.target.getPos().x].setEmpty();
-			}
+			board[3][record.target.getPos().x].setChess(PAWN, BLACK);
 		}
-		board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]);
-		board[record.source.getPos().y][record.source.getPos().x].setEmpty();
-		count++;
-		std::cout << "Success" << std::endl;
 	}
+	board[record.source.getPos().y][record.source.getPos().x] = record.source;
+	board[record.target.getPos().y][record.target.getPos().x] = record.target;
+	logIndex--;
+	return true;
+}
+
+bool Board::redo() //redo
+{
+	if (!canRedo()) return false;
+	Log record(logs[logIndex].source, logs[logIndex].target, logs[logIndex].castling, logs[logIndex].enPassant);
+	if (record.castling)
+	{
+		if (record.target.getPos().x == 6)
+		{
+			board[record.source.getPos().y][5].setSpace(board[record.source.getPos().y][7]);
+			board[record.source.getPos().y][7].setEmpty();
+		}
+		else
+		{
+			board[record.source.getPos().y][3].setSpace(board[record.source.getPos().y][0]);
+			board[record.source.getPos().y][0].setEmpty();
+		}
+	}
+	if (record.enPassant)
+	{
+		if (record.source.getPos().y == 4)
+		{
+			board[4][record.target.getPos().x].setEmpty();
+		}
+		else
+		{
+			board[3][record.target.getPos().x].setEmpty();
+		}
+	}
+	board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]);
+	board[record.source.getPos().y][record.source.getPos().x].setEmpty();
+	logIndex++;
+	return true;
+}
+
+int Board::getLogIndex() {
+	return logIndex;
 }
 
 bool Board::castling(Position source, Position target)
@@ -502,18 +439,7 @@ bool Board::checkWin(Player player)
 		enemyKing.setPos(Chess::getWhiteKingPos());
 		enemyKing.setChess(KING, WHITE);
 	}
-	if (!checkMovement(enemy))
-	{
-		if (enemyKing.checkCheck(enemyKing.getPlayer(), enemyKing.getPos(), board))
-		{
-			std::cout << "Checkmate!" << std::endl;
-			return true;
-		}
-	}
-	return false;
-}
+	if (checkMovement(enemy)) return false;
 
-Player Board::colorOfPosition(int x, int y)
-{
-	return board[y][x].getPlayer();
+	return enemyKing.checkCheck(enemyKing.getPlayer(), enemyKing.getPos(), board);
 }
