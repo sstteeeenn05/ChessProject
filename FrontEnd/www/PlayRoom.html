@@ -7,56 +7,72 @@
 </head>
 
 <body>
-  <div x-data="globalScope" x-cloak>
-    <button class="leave-button">
-      <img class="leave-button-image" src="./assets/exit.svg"
-           alt="leave">
-    </button>
+  <div x-data="{loading : true}">
+    <div x-data="globalScope" x-show="!loading"
+         x-init="()=>{setTimeout(()=>{loading = false;}, 1800)}" x-cloak>
+      <button class="leave-button"
+              @click="()=>{location.href = 'index.html';}">
+        <img class="leave-button-image" src="./assets/exit.svg"
+             alt="leave">
+      </button>
 
-    <div class="board">
-      <template x-for="(line, row) in board" :key="row">
-        <div class="row">
-          <template x-for="(item, column) in line" :key="column">
-            <div class="row-element"
-                 :style="{background: previewClass[maskBoard[row*8+column]]}"
-                 @click="click(column,row)">
-              <img class="image" x-show="calculateUrl(item)"
-                   :src="calculateUrl(item)" :alt="item"
-                   x-transition:enter.duration.500ms x-transition:leave.duration.0s>
-            </div>
-          </template>
-        </div>
-      </template>
-    </div>
-    <div class="bottom-info">
-      <button class="undo-button" :disabled="!canUndo" @click="readHistory('undo')">
-        <img class="undo-button-image" src="./assets/left.svg" alt="undo">
-      </button>
-      <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
-      <button class="redo-button" :disabled="!canRedo" @click="readHistory('redo')">
-        <img class="redo-button-image" src="./assets/right.svg" alt="undo">
-      </button>
-    </div>
-    <dialog class="lightbox" id="promotion"
-            @cancel="(event)=>{event.preventDefault()}"
-            x-show="isPromoting" x-transition>
-      <h2>Promotion!!!</h2>
-      <div class="select-div">
-        <template x-for="(item, index) in calculatePromotionChess()" :key="index">
-          <div class="promotion-container">
-            <img class="promotion-image" :src="calculateUrl(item)"
-                 :alt="item" @click="promotion(index)">
+      <div class="board">
+        <template x-for="(line, row) in board" :key="row">
+          <div class="row">
+            <template x-for="(item, column) in line" :key="column">
+              <div class="row-element"
+                   :style="{background: previewClass[maskBoard[row*8+column]]}"
+                   @click="click(column,row)">
+                <img class="image" x-show="calculateUrl(item)"
+                     :src="calculateUrl(item)" :alt="item"
+                     x-transition:enter.duration.500ms x-transition:leave.duration.0s>
+              </div>
+            </template>
           </div>
         </template>
       </div>
-    </dialog>
-    <dialog class="lightbox" id="messageBox"
-            @cancel="(event)=>{event.preventDefault()}"
-            x-show="isMessage" x-transition>
-      <h2 class="box-title" x-text="boxTitle"></h2>
-      <p class="box-content" x-text="boxContext"></p>
-      <button class="confirm-button" @click="closeMessage">OK</button>
-    </dialog>
+      <div class="bottom-info">
+        <button class="undo-button" :disabled="!canUndo" @click="readHistory('undo')">
+          <img class="undo-button-image" src="./assets/left.svg" alt="undo">
+        </button>
+        <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+        <button class="redo-button" :disabled="!canRedo" @click="readHistory('redo')">
+          <img class="redo-button-image" src="./assets/right.svg" alt="undo">
+        </button>
+      </div>
+      <dialog class="lightbox" id="promotion"
+              @cancel="(event)=>{event.preventDefault()}"
+              x-show="isPromoting" x-transition>
+        <h2>Promotion!!!</h2>
+        <div class="select-div">
+          <template x-for="(item, index) in calculatePromotionChess()" :key="index">
+            <div class="promotion-container" @click="promotion(index)">
+              <img class="promotion-image" :src="calculateUrl(item)"
+                   :alt="item">
+            </div>
+          </template>
+        </div>
+      </dialog>
+      <dialog class="lightbox" id="messageBox"
+              @cancel="(event)=>{event.preventDefault()}"
+              x-show="isMessage" x-transition>
+        <h2 class="box-title" x-text="boxTitle"></h2>
+        <p class="box-content" x-text="boxContext"></p>
+        <button class="confirm-button" @click="closeMessage">OK</button>
+      </dialog>
+    </div>
+    <div class="center" x-show="loading">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
   </div>
 </body>
 
