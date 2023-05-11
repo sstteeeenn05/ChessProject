@@ -9,7 +9,7 @@
 <body>
   <div x-data="{loading : true}">
     <div x-data="globalScope" x-show="!loading"
-         x-init="()=>{setTimeout(()=>{loading = false;}, 1800)}" x-cloak>
+        x-init="connectGame()" x-cloak>
       <button class="leave-button"
               @click="()=>{location.href = 'index.html';}">
         <img class="leave-button-image" src="./assets/exit.svg"
@@ -61,17 +61,26 @@
         <button class="confirm-button" @click="closeMessage">OK</button>
       </dialog>
     </div>
-    <div class="center" x-show="loading">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
+    <div class="center" x-show="loading" x-transition.duration.500ms>
+      <div class="wave" waveid="9"></div>
+      <div class="wave" waveid="8"></div>
+      <div class="wave" waveid="7"></div>
+      <div class="wave" waveid="6"></div>
+      <div class="wave" waveid="5"></div>
+      <div class="wave" waveid="4"></div>
+      <div class="wave" waveid="3"></div>
+      <div class="wave" waveid="2"></div>
+      <div class="wave" waveid="1"></div>
+      <div class="wave" waveid="0"></div>
+      <div class="wave" waveid="1"></div>
+      <div class="wave" waveid="2"></div>
+      <div class="wave" waveid="3"></div>
+      <div class="wave" waveid="4"></div>
+      <div class="wave" waveid="5"></div>
+      <div class="wave" waveid="6"></div>
+      <div class="wave" waveid="7"></div>
+      <div class="wave" waveid="8"></div>
+      <div class="wave" waveid="9"></div>
     </div>
   </div>
 </body>

@@ -10,15 +10,15 @@ const WS_URL="ws://localhost:1234";
  */
 
 export class Game{
-    constructor(){
+    connect(method,ip,name,isSingle){
         let ws=new WebSocket(WS_URL,"protocol-chess-game");
         let pckg={
-            header:"create",
-            ipaddr:"127.0.0.1",
-            nickname:"abc",
-            isSingle:true,
+            header:method,
+            ipaddr:ip,
+            nickname:name,
+            isSingle:isSingle,
         }
-        new Promise((resolve,reject)=>{
+        return new Promise((resolve,reject)=>{
             ws.onopen=()=>{
                 ws.onmessage=(e)=>{
                     this.ws=ws;

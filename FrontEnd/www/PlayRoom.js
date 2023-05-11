@@ -65,7 +65,6 @@ document.addEventListener('alpine:init', () => {
         changeTurn({status, who, canUndo, canRedo}) {
             this.canUndo = canUndo
             this.canRedo = canRedo
-            console.log(canUndo,canRedo);
             if (status === 'tie') {
                 this.showResult(this.nowMoving, 'tie')
             } else if (status === 'win') {
@@ -185,6 +184,18 @@ document.addEventListener('alpine:init', () => {
 
             }
         },
-        game: new Game()
+        game: new Game(),
+        roomId: "",
+        connectGame(){
+            this.game.connect(
+                "create",
+                "127.0.0.1",
+                "abc",
+                true
+            ).then((resolve)=>{
+                this.roomId=resolve;
+                setTimeout(()=>this.loading=false,1800);
+            })
+        }
     }))
 })
