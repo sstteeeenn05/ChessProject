@@ -8,13 +8,6 @@
  *********************************************************************/
 
 #include "Board.h"
-#include <map>
-
-/*std::map <char, std::string> charToLabel =
-{
-	'k' = "KING",
-
-}*/
 
 //intent:constructor and initialize the board
 //pre:none
@@ -167,7 +160,7 @@ bool Board::move(Player& player, Position source, Position target, const int& co
 
 	bool canCastle = false;
 
-	if (board[source.y][source.x].getType() == KING && target.y == source.y && (target.x == 2 || target.x == 6))
+	if (board[source.y][source.x].getType() == KING && (!board[source.y][source.x].getMoved()) && target.y == source.y && (target.x == 2 || target.x == 6))
 	{
 		canCastle = castling(source, target);
 	}
@@ -328,54 +321,68 @@ void Board::redo(int& count) //redo
 
 bool Board::castling(Position source, Position target)
 {
+	bool check;
 	if (!board[source.y][source.x].getMoved())
 	{
-		if (!(board[source.y][0].getMoved()) && target.x == 2
-			&&board[source.y][2].getPlayer() != board[source.y][source.x].getPlayer() && board[source.y][3].getPlayer() != board[source.y][source.x].getPlayer())
+		if (!(board[source.y][0].getMoved()) && target.x == 2) //long
 		{
-			board[source.y][3].setSpace(board[source.y][0]);
-			board[source.y][0].setEmpty();
-			Position temp(source.y, 2);
-			board[source.y][source.x].setPos(temp);
-		}
-		if ((!board[source.y][7].getMoved()) && target.x == 6
-			&&board[source.y][6].getPlayer() != board[source.y][source.x].getPlayer() && board[source.y][5].getPlayer() != board[source.y][source.x].getPlayer())
-		{
-			board[source.y][5].setSpace(board[source.y][7]);
-			board[source.y][7].setEmpty();
-			Position temp(source.y, 2);
-			board[source.y][source.x].setPos(temp);
-		}
-		if (board[source.y][source.x].checkCheck(board[source.y][source.x].getPlayer(), board[source.y][source.x].getPos(), board))
-		{
-			if (board[source.y][source.x].getPos().x == 2)
+			for (int i = 1; i <= 3; i++)
 			{
-				Position temp(board[source.y][source.x].getPos().y, 0);
-				board[source.y][source.x].setPos(temp);
+				if (board[source.y][i].getType() != EMPTY)
+				{
+					return false;
+				}
+			}
+			board[source.y][2].setSpace(board[source.y][4]);
+			board[source.y][3].setSpace(board[source.y][0]);
+			board[source.y][4].setEmpty();
+			board[source.y][0].setEmpty();
+			check = board[source.y][2].checkCheck(board[source.y][2].getPlayer(), board[source.y][2].getPos(), board);
+			board[source.y][4].setSpace(board[source.y][2]);
+			board[source.y][2].setEmpty();
+			if (!check)
+			{
+				return true;
 			}
 			else
 			{
-				Position temp(board[source.y][source.x].getPos().y, 6);
-				board[source.y][source.x].setPos(temp);
+				board[source.y][0].setSpace(board[source.y][3]);
+				board[source.y][3].setEmpty();
+				return false;
 			}
-			return true;
+		}
+		else if ((!board[source.y][7].getMoved()) && target.x == 6)
+		{
+			for (int i = 5; i <= 6; i++)
+			{
+				if (board[source.y][i].getType() != EMPTY)
+				{
+					return false;
+				}
+			}
+			board[source.y][6].setSpace(board[source.y][4]);
+			board[source.y][5].setSpace(board[source.y][7]);
+			board[source.y][4].setEmpty();
+			board[source.y][7].setEmpty();
+			check = board[source.y][6].checkCheck(board[source.y][6].getPlayer(), board[source.y][6].getPos(), board);
+			board[source.y][4].setSpace(board[source.y][6]);
+			board[source.y][6].setEmpty();
+			if (!check)
+			{
+				return true;
+			}
+			else
+			{
+				board[source.y][7].setSpace(board[source.y][5]);
+				board[source.y][5].setEmpty();
+				return false;
+			}
 		}
 		else
 		{
-			if (board[source.y][source.x].getPos().x == 2)
-			{
-				board[board[source.y][source.x].getPos().y][0].setSpace(board[board[source.y][source.x].getPos().y][3]);
-				board[board[source.y][source.x].getPos().y][3].setEmpty();
-			}
-			else
-			{
-				board[board[source.y][source.x].getPos().y][7].setSpace(board[board[source.y][source.x].getPos().y][5]);
-				board[board[source.y][source.x].getPos().y][5].setEmpty();
-			}
 			return false;
 		}
 	}
-	return false;
 }
 
 bool Board::enPassant(Chess& chess, Position target, Log record)
@@ -510,33 +517,3 @@ Player Board::colorOfPosition(int x, int y)
 {
 	return board[y][x].getPlayer();
 }
-
-/*Board::Board(std::string fen)
-{
-	int i, j = 0;
-	for (int i = 0; i < 8; i++)
-	{
-		for (; j < fen.length(); j++)
-		{
-			if (fen[j] == '/')
-			{
-				break;
-			}
-			else if (fen[j] >= 'a' && fen[j] <= 'z')
-			{
-				board[j/8][j%8]=
-			}
-		}
-	}
-
-	for (i = 0; i < fen.length(); i++)
-	{
-		if (fen[i] != '/')
-		{
-			if (fen[i] >= 'a' && fen[i] <= 'a') //black chess
-			{
-
-			}
-		}
-	}
-}*/

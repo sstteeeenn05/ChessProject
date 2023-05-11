@@ -17,6 +17,7 @@ Chess::Chess()
 	pos = Position(0, 0);
 	type = EMPTY;
 	player = NONE;
+	moved = false;
 }
 
 //intent:constructor and initialize the chess
@@ -228,16 +229,16 @@ void Chess::checkPromotion()
 	}
 }
 
-bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
+bool Chess::checkCheck(Player player, Position pos, Chess board[8][8])
 {
 	Player enemy;
 	int side;
-	if (color == BLACK)
+	if (player == BLACK)
 	{
 		enemy = WHITE;
 		side = 1;
 	}
-	else if (color == WHITE) //if the color is white
+	else if (player == WHITE) //if the color is white
 	{
 		enemy = BLACK;
 		side = -1;
@@ -247,7 +248,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 		for (int j = -1; j <= 1; j++)
 		{
 			if (pos.x + i < 8 && pos.x + i >= 0 && pos.y + j < 8 && pos.y + j >= 0
-				&& color != board[pos.y + j][pos.x + i].getPlayer() && board[pos.y + j][pos.x + i].getType() == KING)
+				&& player != board[pos.y + j][pos.x + i].getPlayer() && board[pos.y + j][pos.x + i].getType() == KING)
 			{
 				return true;
 			}
@@ -257,14 +258,14 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	for (int i = 0; i < 8; i++)
 	{
 		if (pos.x + turn[i][0] < 8 && pos.x + turn[i][0] >= 0 && pos.y + turn[i][1] < 8 && pos.y + turn[i][1] >= 0
-			&& color != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getPlayer() && board[pos.y + turn[i][1]][pos.x + turn[i][0]].getType() == KNIGHT)
+			&& player != board[pos.y + turn[i][1]][pos.x + turn[i][0]].getPlayer() && board[pos.y + turn[i][1]][pos.x + turn[i][0]].getType() == KNIGHT)
 		{
 			return true;
 		}
 	}
 	int i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x + i].getPlayer())
+		&& player != board[pos.y + i][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x + i].getType() == QUEEN || board[pos.y + i][pos.x + i].getType() == BISHOP))
 		{
@@ -278,7 +279,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x + i].getPlayer())
+		&& player != board[pos.y - i][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x + i].getType() == QUEEN || board[pos.y - i][pos.x + i].getType() == BISHOP))
 		{
@@ -292,7 +293,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x - i].getPlayer())
+		&& player != board[pos.y - i][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x - i].getType() == QUEEN || board[pos.y - i][pos.x - i].getType() == BISHOP))
 		{
@@ -306,7 +307,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0 && pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x - i].getPlayer())
+		&& player != board[pos.y + i][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x - i].getType() == QUEEN || board[pos.y + i][pos.x - i].getType() == BISHOP))
 		{
@@ -320,7 +321,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x + i < 8 && pos.x + i >= 0
-		&& color != board[pos.y][pos.x + i].getPlayer())
+		&& player != board[pos.y][pos.x + i].getPlayer())
 	{
 		if ((board[pos.y][pos.x + i].getType() == QUEEN || board[pos.y][pos.x + i].getType() == ROOK))
 		{
@@ -334,7 +335,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.y + i < 8 && pos.y + i >= 0
-		&& color != board[pos.y + i][pos.x].getPlayer())
+		&& player != board[pos.y + i][pos.x].getPlayer())
 	{
 		if ((board[pos.y + i][pos.x].getType() == QUEEN || board[pos.y + i][pos.x].getType() == ROOK))
 		{
@@ -348,7 +349,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.x - i < 8 && pos.x - i >= 0
-		&& color != board[pos.y][pos.x - i].getPlayer())
+		&& player != board[pos.y][pos.x - i].getPlayer())
 	{
 		if ((board[pos.y][pos.x - i].getType() == QUEEN || board[pos.y][pos.x - i].getType() == ROOK))
 		{
@@ -362,7 +363,7 @@ bool Chess::checkCheck(Player color, Position pos, Chess board[8][8])
 	}
 	i = 1;
 	while (pos.y - i < 8 && pos.y - i >= 0
-		&& color != board[pos.y - i][pos.x].getPlayer())
+		&& player != board[pos.y - i][pos.x].getPlayer())
 	{
 		if ((board[pos.y - i][pos.x].getType() == QUEEN || board[pos.y - i][pos.x].getType() == ROOK))
 		{
