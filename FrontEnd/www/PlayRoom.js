@@ -3,6 +3,12 @@ import {Game} from "./api/Game.js"
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
+        isupper(input){
+            return (input === input.toUpperCase() && input !== '.');
+        },
+        islower(input){
+            return (input === input.toLowerCase() && input !== '.');
+        },
         board: [
             'rnbqkbnr',
             'pppppppp',
@@ -20,9 +26,9 @@ document.addEventListener('alpine:init', () => {
             'indianred'
         ],
         nowMoving: 'white',
-        calculateUrl: (input) => {
+        calculateUrl(input) {
             if (input !== '.') {
-                if (input === input.toLowerCase())
+                if (this.islower(input))
                     return './assets/b' + input + '.svg';
                 return './assets/w' + input.toLowerCase() + '.svg';
             }
@@ -90,6 +96,7 @@ document.addEventListener('alpine:init', () => {
                 this.game.readHistory(option).then(() => {
                     this.game.getBoard().then((resolve) => {
                         this.board = resolve.value
+                        this.resetXY()
                         this.changeTurn(resolve)
                     })
                 })
@@ -134,15 +141,17 @@ document.addEventListener('alpine:init', () => {
         clickingX: -1,
         clickingY: -1,
         click(x, y) {
-            if (this.clickedX === -1 && this.clickedY === -1) {
-                let canMove = false
-                if(this.board[y][x] === this.board[y][x].toUpperCase()
-                  && this.board[y][x] !== '.' && this.nowMoving === 'white')
-                    canMove = true;
-                if(this.board[y][x] === this.board[y][x].toLowerCase()
-                  && this.board[y][x] !== '.' && this.nowMoving === 'black')
-                    canMove = true;
-                if(canMove){
+            if ((this.clickedX === -1 && this.clickedY === -1) ||
+                (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
+                (this.islower(this.board[y][x]) && this.nowMoving === 'black')) {
+
+                if(this.clickedX === x && this.clickedY === y) {
+                    this.resetXY()
+                }
+
+                else if(this.board[y][x] !== '.' &&
+                    (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
+                    (this.islower(this.board[y][x]) && this.nowMoving === 'black')){
                     this.clickedX = x;
                     this.clickedY = y;
                     this.game.preview(x, y).then((resolve) => {
