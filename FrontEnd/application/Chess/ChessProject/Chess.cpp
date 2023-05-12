@@ -70,12 +70,12 @@ bool Chess::undo() {
 
 bool Chess::redo() {
 	if (!canRedo) return false;
-	logIndex++;
 	for (const auto& change : logList[logIndex].changeList) {
 		const auto& before = change.first;
 		const auto& after = change.second;
 		board[before.position.y][before.position.x].data = after;
 	}
+	logIndex++;
 	return true;
 }
 
