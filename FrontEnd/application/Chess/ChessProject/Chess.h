@@ -18,6 +18,7 @@ public:
 	static void init();
 	static std::string getBoard();
 	static std::string getMaskBoard(Position);
+	static Chess& getChess(Position);
 
 	static bool canUndo();
 	static bool canRedo();
@@ -31,6 +32,10 @@ public:
 	void checkSquare(std::vector<Position>&);
 	void checkL(std::vector<Position>&);
 	void checkPawn(std::vector<Position>&);
+	Position generatePosByPlayer(Position);
+	bool onRiver();
+	std::pair<Position, Position> getSidePos();
+	std::pair<bool, bool> getEnPassant();
 
 	static bool canMove(Position, Position);
 	static bool move(Player, Position, Position);

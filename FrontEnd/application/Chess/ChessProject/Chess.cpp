@@ -45,6 +45,10 @@ std::string Chess::getMaskBoard(Position target){
 	return output;
 }
 
+Chess& Chess::getChess(Position pos) {
+	return board[pos.y][pos.x];
+}
+
 bool Chess::canUndo() {
 	return logIndex > 0;
 }
@@ -166,17 +170,43 @@ void Chess::checkL(std::vector<Position>& output) {
 }
 
 void Chess::checkPawn(std::vector<Position>& output) {
-	const auto generatePosByPlayer = [&](int x, int y)->Position {
-		return data.position + Position{ x, data.player == WHITE ? y * -1 : y };
+	if (getChess(generatePosByPlayer({ 0, 1 })).data.type == EMPTY) {
+		output.push_back(generatePosByPlayer({ 0, 1 }));
+		if (!data.moved && getChess(generatePosByPlayer({ 0, 2 })).data.type == EMPTY)
+			output.push_back(generatePosByPlayer({ 0, 2 }));
+	}
+
+	Position leftUp = generatePosByPlayer({ -1, 1 });
+	Position rightUp = generatePosByPlayer({ 1, 1 });
+	bool leftUpEatable = leftUp.valid() && getChess(leftUp).data.type != EMPTY;
+	bool rightUpEatable = rightUp.valid() && getChess(rightUp).data.type != EMPTY;
+	const auto [leftEnPassant, rightEnPassant] = getEnPassant();
+
+	if (leftUpEatable || leftEnPassant) checkValid(leftUp, output);
+	if (rightUpEatable || rightEnPassant) checkValid(rightUp, output);
+}
+
+Position Chess::generatePosByPlayer(Position pos) {
+	return data.position + Position{pos.x, data.player == WHITE ? -pos.y : pos.y};
+}
+
+bool Chess::onRiver() {
+	return (data.player == WHITE && data.position.y == 3) || (data.player == BLACK && data.position.y == 4);
+}
+
+std::pair<Position, Position> Chess::getSidePos() {
+	return{
+		data.position - Position{ 1, 0 },
+		data.position + Position{ 1, 0 }
 	};
-	if (!data.moved) checkValid(generatePosByPlayer(0, 2), output);
-	checkValid(generatePosByPlayer(0, 1), output);
-	Position leftUp = generatePosByPlayer(1, 1);
-	Position rightUp = generatePosByPlayer(-1, 1);
-	if (leftUp.valid() && board[leftUp.y][leftUp.x].data.type != EMPTY)
-		checkValid(leftUp, output);
-	if (rightUp.valid() && board[rightUp.y][rightUp.x].data.type != EMPTY)
-		checkValid(rightUp, output);
+}
+
+std::pair<bool, bool> Chess::getEnPassant() {
+	auto [left, right] = getSidePos();
+	return {
+		!data.enPassanted && left.valid() && getChess(left).data.type == PAWN && getChess(left).data.player != data.player && onRiver(),
+		!data.enPassanted && right.valid() && getChess(right).data.type == PAWN && getChess(right).data.player != data.player && onRiver()
+	};
 }
 
 bool Chess::canMove(Position source, Position target) {
@@ -193,25 +223,20 @@ bool Chess::move(Player player, Position source, Position target) {
 	Chess& sChess = board[source.y][source.x];
 	Chess& tChess = board[target.y][target.x];
 
-	const auto generatePosByPlayer = [&](int x, int y)->Position {
-		return sChess.data.position + Position{ x, sChess.data.player == WHITE ? y * -1 : y };
-	};
-	if (sChess.data.type==PAWN && !sChess.data.enPassanted) {
-		if ((sChess.data.player == WHITE && sChess.data.position.y == 3) ||
-			(sChess.data.player == BLACK && sChess.data.position.y == 4)) {
-			Chess& left = board[sChess.data.position.y][sChess.data.position.x - 1];
-			Chess&right = board[sChess.data.position.y][sChess.data.position.x + 1];
-			if (left.data.type == PAWN || right.data.type == PAWN) {
-				sChess.data.enPassanted = true;
-				if (target == generatePosByPlayer(0, 1) + left.data.position) {
-					log.changeList.push_back({ left.data, left.data.previewClear() });
-					left.data.clear();
-				}
-				if (target == generatePosByPlayer(0, 1) + right.data.position) {
-					log.changeList.push_back({ right.data, right.data.previewClear() });
-					right.data.clear();
-				}
-			}
+	if (sChess.data.type == PAWN) {
+		const auto [leftEnPassant, rightEnPassant] = sChess.getEnPassant();
+		auto [left, right] = sChess.getSidePos();
+		Chess& lChess = getChess(left);
+		Chess& rChess = getChess(right);
+		if (leftEnPassant && target == sChess.generatePosByPlayer({ -1, 1 })) {
+			sChess.data.enPassanted = true;
+			log.changeList.push_back({ lChess.data,lChess.data.previewClear() });
+			lChess.data.clear();
+		}
+		if (rightEnPassant && target == sChess.generatePosByPlayer({ 1, 1 })) {
+			sChess.data.enPassanted = true;
+			log.changeList.push_back({ rChess.data,rChess.data.previewClear() });
+			rChess.data.clear();
 		}
 	}
 
@@ -229,6 +254,8 @@ bool Chess::move(Player player, Position source, Position target) {
 	tChess.data.moved = true;
 
 	logList.push_back(log);
+
+	logIndex = logList.size();
 
 	return true;
 }

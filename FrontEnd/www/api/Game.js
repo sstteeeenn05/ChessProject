@@ -74,4 +74,7 @@ export class Game{
             }
         )
     }
+    readHistory(option){
+        return this.sendCommand(option);
+    }
 }

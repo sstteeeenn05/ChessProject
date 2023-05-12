@@ -75,7 +75,7 @@ document.addEventListener('alpine:init', () => {
         },
         canUndo: false,
         canRedo: false,
-        readHistory(option) { // TODO : add undo redo when API is done
+        readHistory(option) {
             this.board = [
                 '........',
                 '........',
@@ -87,12 +87,12 @@ document.addEventListener('alpine:init', () => {
                 '........'
             ]
             setTimeout(()=>{
-                this.game.getBoard().then(
-                  (resolve) => {
-                      this.board = resolve.value
-                      this.changeTurn(resolve)
-                  }
-                )
+                this.game.readHistory(option).then(() => {
+                    this.game.getBoard().then((resolve) => {
+                        this.board = resolve.value
+                        this.changeTurn(resolve)
+                    })
+                })
             },30)
 
         },
