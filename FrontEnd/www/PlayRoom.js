@@ -26,7 +26,7 @@ document.addEventListener('alpine:init', () => {
                     return './assets/b' + input + '.svg';
                 return './assets/w' + input.toLowerCase() + '.svg';
             }
-            return false;
+            return './assets/nothing.png';
         },
         calculatePromotionChess() {
             const options = ['q', 'b', 'n', 'r']

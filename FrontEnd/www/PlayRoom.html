@@ -11,7 +11,8 @@
     <div x-data="globalScope" x-show="!loading"
         x-init="connectGame()" x-cloak>
       <button class="leave-button"
-              @click="()=>{location.href = 'index.html';}">
+              @click="loading = true;
+                      setTimeout(()=>{location.href = 'index.html';}, 1000)">
         <img class="leave-button-image" src="./assets/exit.svg"
              alt="leave">
       </button>
@@ -23,7 +24,7 @@
               <div class="row-element"
                    :style="{background: previewClass[maskBoard[row*8+column]]}"
                    @click="click(column,row)">
-                <img class="image" x-show="calculateUrl(item)"
+                <img class="image" x-show="calculateUrl(item) !== './assets/nothing.png'"
                      :src="calculateUrl(item)" :alt="item"
                      x-transition:enter.duration.500ms x-transition:leave.duration.0s>
               </div>
