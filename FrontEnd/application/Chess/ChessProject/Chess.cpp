@@ -1,6 +1,6 @@
 #include "Chess.h"
 
-std::vector<Log> Chess::logList;
+std::vector<std::vector<std::pair<ChessData, ChessData>>> Chess::logList;
 int Chess::logIndex = 0;
 Position Chess::wKing, Chess::bKing;
 Chess Chess::board[8][8];
@@ -60,9 +60,9 @@ bool Chess::canRedo(){
 bool Chess::undo() {
 	if (!canUndo()) return false;
 	logIndex--;
-	for (const auto& change : logList[logIndex].changeList) {
-		const auto& before = change.first;
-		const auto& after = change.second;
+	for(auto& change=logList[logIndex].rbegin();change!= logList[logIndex].rend();change++){
+		const auto& before = change->first;
+		const auto& after = change->second;
 		board[after.position.y][after.position.x].data = before;
 	}
 	return true;
@@ -70,7 +70,7 @@ bool Chess::undo() {
 
 bool Chess::redo() {
 	if (!canRedo) return false;
-	for (const auto& change : logList[logIndex].changeList) {
+	for (const auto& change : logList[logIndex]) {
 		const auto& before = change.first;
 		const auto& after = change.second;
 		board[before.position.y][before.position.x].data = after;
@@ -219,7 +219,7 @@ bool Chess::move(Player player, Position source, Position target) {
 	if (player != getNowPlayer()) return false;
 	if (!canMove(source, target)) return false;
 	while (logList.size() > logIndex) logList.pop_back();
-	Log log;
+	std::vector<std::pair<ChessData,ChessData>> log;
 	Chess& sChess = board[source.y][source.x];
 	Chess& tChess = board[target.y][target.x];
 
@@ -229,28 +229,31 @@ bool Chess::move(Player player, Position source, Position target) {
 		Chess& lChess = getChess(left);
 		Chess& rChess = getChess(right);
 		if (leftEnPassant && target == sChess.generatePosByPlayer({ -1, 1 })) {
+			log.push_back({ sChess.data, sChess.data.previewEnPassant() });
 			sChess.data.enPassanted = true;
-			log.changeList.push_back({ lChess.data,lChess.data.previewClear() });
+			log.push_back({ lChess.data, lChess.data.previewClear() });
 			lChess.data.clear();
 		}
 		if (rightEnPassant && target == sChess.generatePosByPlayer({ 1, 1 })) {
+			log.push_back({ sChess.data, sChess.data.previewEnPassant() });
 			sChess.data.enPassanted = true;
-			log.changeList.push_back({ rChess.data,rChess.data.previewClear() });
+			log.push_back({ rChess.data, rChess.data.previewClear() });
 			rChess.data.clear();
 		}
 	}
 
-	log.changeList.push_back({ sChess.data, sChess.data.previewClear()});
-	log.changeList.push_back({ tChess.data, tChess.data.previewSet(sChess.data) });
+	log.push_back({ sChess.data, sChess.data.previewClear() });
+	log.push_back({ tChess.data, tChess.data.previewSet(sChess.data) });
 	tChess.data.set(sChess.data);
 	sChess.data.clear();
 
 	if (tChess.checkPromotion()) {
 		Type promotion = tChess.doPromotion();
-		log.changeList.push_back({ tChess.data, tChess.data.previewSetType(promotion) });
+		log.push_back({ tChess.data, tChess.data.previewSetType(promotion) });
 		tChess.data.setType(promotion);
 	}
 
+	log.push_back({ tChess.data, tChess.data.previewMoved()});
 	tChess.data.moved = true;
 
 	logList.push_back(log);

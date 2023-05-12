@@ -4,11 +4,9 @@
 #include <string>
 #include <vector>
 #include "DataType.h"
-#include "Log.h"
-#include "Position.h"
 
 class Chess {
-	static std::vector<Log> logList;
+	static std::vector<std::vector<std::pair<ChessData,ChessData>>> logList;
 	static int logIndex;
 	static Position wKing, bKing;
 	static Chess board[8][8];
