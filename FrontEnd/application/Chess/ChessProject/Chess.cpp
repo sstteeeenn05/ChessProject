@@ -4,12 +4,18 @@ std::vector<std::vector<std::pair<ChessData, ChessData>>> Chess::logList;
 int Chess::logIndex = 0;
 Position Chess::wKing, Chess::bKing;
 Chess Chess::board[8][8];
+bool Chess::isCheckmated[2];
+bool Chess::isCheckmating;
+std::vector<std::vector<bool>> Chess::checkmateRoute;
 
 Chess::Chess(Position pos):data(ChessData(pos)) {}
 
 Chess::Chess(Player p, Position pos, Type t) :data(p, pos, t) {}
 
 void Chess::init() {
+    memset(isCheckmated, false, sizeof(bool)*2);
+    isCheckmating = false;
+    checkmateRoute.assign(8,std::vector<bool>(8, false));
 	Type typeList[8] = {ROOK,KNIGHT,BISHOP,QUEEN,KING,BISHOP,KNIGHT,ROOK};
 	for (int i = 0; i < 8; i++) board[0][i] = Chess(BLACK, { i, 0 }, typeList[i]);
 	for (int i = 0; i < 8; i++) board[1][i] = Chess(BLACK, { i, 1 }, PAWN);
@@ -60,7 +66,7 @@ bool Chess::canRedo(){
 bool Chess::undo() {
 	if (!canUndo()) return false;
 	logIndex--;
-	for(auto& change=logList[logIndex].rbegin();change!= logList[logIndex].rend();change++){
+	for(auto change=logList[logIndex].rbegin();change!= logList[logIndex].rend();change++){
 		const auto& before = change->first;
 		const auto& after = change->second;
 		board[after.position.y][after.position.x].data = before;
@@ -108,8 +114,21 @@ std::vector<Position> Chess::getValidPos(Position target){
 
 bool Chess::checkValid(Position pos, std::vector<Position>& output) {
 	const Chess& chess = board[pos.y][pos.x];
-	if (chess.data.player != data.player)
+	if (chess.data.player != data.player) {
 		output.push_back({ pos.x, pos.y });
+        if(chess.data.type == KING) {
+            if(chess.data.player == WHITE) {
+                isCheckmated[0] = true;
+            }
+            else {
+                isCheckmated[1] = true;
+            }
+            isCheckmating = true;
+        }
+        else {
+            isCheckmating = false;
+        }
+    }
 	return chess.data.player == NONE;
 }
 
@@ -190,7 +209,7 @@ Position Chess::generatePosByPlayer(Position pos) {
 	return data.position + Position{pos.x, data.player == WHITE ? -pos.y : pos.y};
 }
 
-bool Chess::onRiver() {
+bool Chess::onRiver() const {
 	return (data.player == WHITE && data.position.y == 3) || (data.player == BLACK && data.position.y == 4);
 }
 
@@ -279,7 +298,7 @@ Type Chess::doPromotion() {
 		if (choose == 3) return KNIGHT;
 		if (choose == 4) return ROOK;
 		std::cout << "playing;" << (data.player == WHITE ? "white" : "black") << ";;;failed";
-	} while (choose < 1 && choose>4);
+	} while (choose < 1 || choose>4);
 }
 
 Player Chess::getNowPlayer() {
@@ -288,4 +307,8 @@ Player Chess::getNowPlayer() {
 
 Player Chess::getNowEnemy(){
 	return logIndex & 1 ? WHITE : BLACK;
+}
+
+bool Chess::isCheckmate(Player) {
+    return false;
 }

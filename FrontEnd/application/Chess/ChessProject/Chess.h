@@ -6,49 +6,76 @@
 #include "DataType.h"
 
 class Chess {
-	static std::vector<std::vector<std::pair<ChessData,ChessData>>> logList;
-	static int logIndex;
-	static Position wKing, bKing;
-	static Chess board[8][8];
+    static std::vector<std::vector<std::pair<ChessData, ChessData>>> logList;
+    static int logIndex;
+    static Position wKing, bKing;
+    static Chess board[8][8];
 
-	ChessData data;
+    // 0-white, 1-black
+    static bool isCheckmated[2];
+    // 0-white, 1-black
+    static bool isCheckmating;
+    static std::vector<std::vector<bool>> checkmateRoute;
+
+    ChessData data;
 public:
-	static void init();
-	static std::string getBoard();
-	static std::string getMaskBoard(Position);
-	static Chess& getChess(Position);
+    static void init();
 
-	static bool canUndo();
-	static bool canRedo();
-	static bool undo();
-	static bool redo();
+    static std::string getBoard();
 
-	static std::vector<Position> getValidPos(Position);
-	bool checkValid(Position, std::vector<Position>&);
-	void checkStraight(std::vector<Position>&);
-	void checkCross(std::vector<Position>&);
-	void checkSquare(std::vector<Position>&);
-	void checkL(std::vector<Position>&);
-	void checkPawn(std::vector<Position>&);
-	Position generatePosByPlayer(Position);
-	bool onRiver();
-	std::pair<Position, Position> getSidePos();
-	std::pair<bool, bool> getEnPassant();
+    static std::string getMaskBoard(Position);
 
-	static bool canMove(Position, Position);
-	static bool move(Player, Position, Position);
+    static Chess &getChess(Position);
 
-	bool checkPromotion();
-	Type doPromotion();
+    static bool canUndo();
 
-	/*static bool checkMovement(Player);
-	static bool isCheckmate(Player);
-	static bool checkWin(Player);*/
+    static bool canRedo();
 
-	static Player getNowPlayer();
-	static Player getNowEnemy();
+    static bool undo();
 
-	Chess() = default;
-	Chess(Position);
-	Chess(Player, Position, Type);
+    static bool redo();
+
+    static std::vector<Position> getValidPos(Position);
+
+    bool checkValid(Position, std::vector<Position> &);
+
+    void checkStraight(std::vector<Position> &);
+
+    void checkCross(std::vector<Position> &);
+
+    void checkSquare(std::vector<Position> &);
+
+    void checkL(std::vector<Position> &);
+
+    void checkPawn(std::vector<Position> &);
+
+    Position generatePosByPlayer(Position);
+
+    bool onRiver() const;
+
+    std::pair<Position, Position> getSidePos();
+
+    std::pair<bool, bool> getEnPassant();
+
+    static bool canMove(Position, Position);
+
+    static bool move(Player, Position, Position);
+
+    bool checkPromotion();
+
+    Type doPromotion();
+
+    //static bool checkMovement(Player);
+    static bool isCheckmate(Player);
+    //static bool checkWin(Player);
+
+    static Player getNowPlayer();
+
+    static Player getNowEnemy();
+
+    Chess() = default;
+
+    Chess(Position);
+
+    Chess(Player, Position, Type);
 };
