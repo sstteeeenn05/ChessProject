@@ -71,6 +71,7 @@ document.addEventListener('alpine:init', () => {
         changeTurn({status, who, canUndo, canRedo}) {
             this.canUndo = canUndo
             this.canRedo = canRedo
+            if (status === 'check') alert('check')
             if (status === 'tie') {
                 this.showResult(this.nowMoving, 'tie')
             } else if (status === 'win') {
