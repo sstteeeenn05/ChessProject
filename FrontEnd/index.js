@@ -1,13 +1,14 @@
 /**
  * @typedef {Object} Player
+ * @prop {string} ip
  * @prop {string} name
  * @prop {WebSocket} ws
  */
 
 /**
  * @typedef {Object} Room
- * @prop {string} type
  * @prop {string} status
+ * @prop {string} name
  * @prop {Player} nowMoving
  * @prop {Player} p0
  * @prop {Player} p1
@@ -61,8 +62,13 @@ wss.on('connection',(ws)=>{
     ws.onmessage=(e)=>{
         ws.onmessage=undefined;
         /** @type {HandshakePackage} */
-        let package=JSON.parse(e.data.toString());
+        let request=JSON.parse(e.data.toString());
+        if(request.type!="handshake") return ws.close();
+        let package=request.value;
         switch(package.header){
+            case "getRoomList":
+                getRoomList(ws);
+                break;
             case "create":
                 createGame(ws,package);
                 break;
@@ -76,28 +82,52 @@ wss.on('connection',(ws)=>{
 /**
  * 
  * @param {WebSocket} ws 
+ */
+function getRoomList(ws){
+    /** @type {ServerResponse} */
+    if(roomList.size==0) return ws.close(400,"empty-roomList");
+    let list=new Array();
+    roomList.forEach((id,room)=>{
+        list.push({
+            id:id,
+            status:room.status,
+            name:room.name,
+            ip:room.p0.ip,
+            who:room.p0.name
+        })
+    })
+    ws.close(200,JSON.stringify(list));
+}
+
+/**
+ * 
+ * @param {WebSocket} ws 
  * @param {HandshakePackage} package 
  */
 function createGame(ws,package){
     let room={
         p0:{
-            name:package.nickname,
+            ip:package.ipaddr,
             ws:ws
         }
     }
     room.nowMoving=room.p0;
     if(package.isSingle){
-        room.type="single";
+        room.p0.name="white";
         room.p1={
             name:"black",
+            ip:package.ipaddr,
             ws:ws
         };
         room.process=pipe.execFile("application\\chess.exe");
-    }else room.type="multiple"
-    room.status="waiting";
-    roomList.set("123",room);
-    ws.send("123");
-    if(package.isSingle) startGame("123");
+        startGame(room);
+    }else{
+        room.p0.name=package.nickname;
+        room.status="waiting";
+        if(roomList.has(package.roomId)) return ws.close();
+        roomList.set(package.roomId,room);
+    }
+    ws.send();
 }
 
 /**
@@ -106,28 +136,30 @@ function createGame(ws,package){
  * @param {HandshakePackage} package 
  */
 function joinGame(ws,package){
-    if(room.type!="multiple") return ws.close();
-    if(!roomList.has(package.roomId)) return ws.close();
+    if(!roomList.has(package.roomId)) return ws.close(400,"room-not-found");
     let room=roomList.get(package.roomId);
-    if(room.status!="waiting") return ws.close();
+    if(room.status!="waiting") return ws.close(400,"room-is-full");
     room.p0.ws.onmessage=(e)=>{
-        let data=JSON.parse(e.data.toString());
+        let request=JSON.parse(e.data.toString());
         console.log(`receive:${data.type} > ${data.value}`);
-        if(data.value=="Y"){
+        if(request.value=="Y"){
             room.p1={
                 name:package.nickname,
+                ip:package.ip,
                 ws:ws
             };
             room.process=pipe.execFile("application\\chess.exe");
-            startGame(package.roomId);
+            startGame(roomList.get(package.roomId));
         }
-        else reject();
+        else ws.close(400,"reject");
     }
-    room.p0.ws.send(package);
+    room.p0.ws.send(JSON.stringify({
+        type:"join",
+        value:package
+    }));
 }
 
-function startGame(roomId){
-    let room=roomList.get(roomId);
+function startGame(room){
     let p0=room.p0;
     let p1=room.p1;
     let process=room.process;

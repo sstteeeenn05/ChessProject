@@ -10,24 +10,20 @@ const WS_URL="ws://localhost:1234";
  */
 
 export class Game{
-    connect(method,ip,name,isSingle){
+    connect(pckg){
         let ws=new WebSocket(WS_URL,"protocol-chess-game");
-        let pckg={
-            header:method,
-            ipaddr:ip,
-            nickname:name,
-            isSingle:isSingle,
-        }
         return new Promise((resolve,reject)=>{
             ws.onopen=()=>{
-                ws.onmessage=(e)=>{
+                ws.onmessage=()=>{
                     this.ws=ws;
-                    this.roomId=e.data.toString();
                     resolve("Web Socket is ready!");
                 }
                 ws.onclose=()=>reject("Web Socket is closed!");
                 ws.onerror=(event)=>reject(event);
-                ws.send(JSON.stringify(pckg));
+                ws.send(JSON.stringify({
+                    type:"handshake",
+                    value:pckg
+                }));
             }
         })
     }
