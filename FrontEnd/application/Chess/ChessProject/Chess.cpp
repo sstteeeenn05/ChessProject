@@ -2,10 +2,10 @@
 
 std::vector<std::vector<std::pair<ChessData, ChessData>>> Chess::logList;
 int Chess::logIndex = 0;
-Position Chess::wKing, Chess::bKing;
+Position Chess::kingsPos[2];
 Chess Chess::board[8][8];
-bool Chess::isCheckmated[2];
-bool Chess::isCheckmating;
+bool Chess::isChecked[2];
+bool Chess::isChecking;
 std::vector<std::vector<bool>> Chess::checkmateRoute;
 
 Chess::Chess(Position pos):data(ChessData(pos)) {}
@@ -13,8 +13,10 @@ Chess::Chess(Position pos):data(ChessData(pos)) {}
 Chess::Chess(Player p, Position pos, Type t) :data(p, pos, t) {}
 
 void Chess::init() {
-    memset(isCheckmated, false, sizeof(bool)*2);
-    isCheckmating = false;
+    memset(isChecked, false, sizeof(bool) * 2);
+    isChecking = false;
+    kingsPos[0]={0,4};
+    kingsPos[1]={7,4};
     checkmateRoute.assign(8,std::vector<bool>(8, false));
 	Type typeList[8] = {ROOK,KNIGHT,BISHOP,QUEEN,KING,BISHOP,KNIGHT,ROOK};
 	for (int i = 0; i < 8; i++) board[0][i] = Chess(BLACK, { i, 0 }, typeList[i]);
@@ -26,11 +28,10 @@ void Chess::init() {
 
 std::string Chess::getBoard(){
 	std::string output;
-	for (int i = 0; i < 8; i++){
-		for (int j = 0; j < 8; j++) {
-			Chess& c = board[i][j];
-			if (c.data.type == EMPTY || c.data.player == WHITE) output += char(c.data.type);
-			else output += char(c.data.type + ('a' - 'A'));
+	for (auto & i : board){
+		for (auto & c : i) {
+            if (c.data.type == EMPTY || c.data.player == WHITE) output += char(c.data.type);
+            else output += char(c.data.type + ('a' - 'A'));
 		}
 		//output += '\n';
 	}
@@ -44,8 +45,8 @@ std::string Chess::getMaskBoard(Position target){
 	for (const auto& pos : posList) {
 		maskBoard[pos.y][pos.x] = true;
 	}
-	for (int i = 0; i < 8; i++){
-		for (int j = 0; j < 8; j++) output += '0' + maskBoard[i][j];
+	for (auto & i : maskBoard){
+		for (bool j : i) output += char('0' + j);
 		//output += '\n';
 	}
 	return output;
@@ -70,16 +71,22 @@ bool Chess::undo() {
 		const auto& before = change->first;
 		const auto& after = change->second;
 		board[after.position.y][after.position.x].data = before;
+        if(before.type == KING) {
+            kingsPos[before.player] = before.position;
+        }
 	}
 	return true;
 }
 
 bool Chess::redo() {
-	if (!canRedo) return false;
+	if (!canRedo()) return false;
 	for (const auto& change : logList[logIndex]) {
 		const auto& before = change.first;
 		const auto& after = change.second;
 		board[before.position.y][before.position.x].data = after;
+        if(after.type == KING) {
+            kingsPos[after.player] = after.position;
+        }
 	}
 	logIndex++;
 	return true;
@@ -112,22 +119,10 @@ std::vector<Position> Chess::getValidPos(Position target){
 	return output;
 }
 
-bool Chess::checkValid(Position pos, std::vector<Position>& output) {
+bool Chess::checkValid(Position pos, std::vector<Position>& output) const {
 	const Chess& chess = board[pos.y][pos.x];
 	if (chess.data.player != data.player) {
 		output.push_back({ pos.x, pos.y });
-        if(chess.data.type == KING) {
-            if(chess.data.player == WHITE) {
-                isCheckmated[0] = true;
-            }
-            else {
-                isCheckmated[1] = true;
-            }
-            isCheckmating = true;
-        }
-        else {
-            isCheckmating = false;
-        }
     }
 	return chess.data.player == NONE;
 }
@@ -163,12 +158,14 @@ void Chess::checkCross(std::vector<Position>& output) {
 }
 
 void Chess::checkSquare(std::vector<Position>& output) {
-	for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
-		if (dy || dx) {
-			Position p = data.position + Position{ dx, dy };
-			if(p.valid()) checkValid(p, output);
-		}
-	}
+	for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (dy || dx) {
+                Position p = data.position + Position{ dx, dy };
+                if(p.valid()) checkValid(p, output);
+            }
+	    }
+    }
 }
 
 void Chess::checkL(std::vector<Position>& output) {
@@ -230,8 +227,8 @@ std::pair<bool, bool> Chess::getEnPassant() {
 
 bool Chess::canMove(Position source, Position target) {
 	std::vector<Position> validPos = getValidPos(source);
-	for (const auto& pos : validPos) if (target == pos) return true;
-	return false;
+	return std::any_of(validPos.begin(), validPos.end(),
+                       [&](const auto &pos) {return pos == target;});
 }
 
 bool Chess::move(Player player, Position source, Position target) {
@@ -242,38 +239,44 @@ bool Chess::move(Player player, Position source, Position target) {
 	Chess& sChess = board[source.y][source.x];
 	Chess& tChess = board[target.y][target.x];
 
+    if(sChess.data.type == KING) {
+        kingsPos[sChess.data.player] = sChess.data.position;
+    }
+
 	if (sChess.data.type == PAWN) {
 		const auto [leftEnPassant, rightEnPassant] = sChess.getEnPassant();
 		auto [left, right] = sChess.getSidePos();
 		Chess& lChess = getChess(left);
 		Chess& rChess = getChess(right);
 		if (leftEnPassant && target == sChess.generatePosByPlayer({ -1, 1 })) {
-			log.push_back({ sChess.data, sChess.data.previewEnPassant() });
+			log.emplace_back( sChess.data, sChess.data.previewEnPassant() );
 			sChess.data.enPassanted = true;
-			log.push_back({ lChess.data, lChess.data.previewClear() });
+			log.emplace_back( lChess.data, lChess.data.previewClear() );
 			lChess.data.clear();
 		}
 		if (rightEnPassant && target == sChess.generatePosByPlayer({ 1, 1 })) {
-			log.push_back({ sChess.data, sChess.data.previewEnPassant() });
+			log.emplace_back( sChess.data, sChess.data.previewEnPassant() );
 			sChess.data.enPassanted = true;
-			log.push_back({ rChess.data, rChess.data.previewClear() });
+			log.emplace_back( rChess.data, rChess.data.previewClear() );
 			rChess.data.clear();
 		}
 	}
 
-	log.push_back({ sChess.data, sChess.data.previewClear() });
-	log.push_back({ tChess.data, tChess.data.previewSet(sChess.data) });
+	log.emplace_back( sChess.data, sChess.data.previewClear() );
+	log.emplace_back( tChess.data, tChess.data.previewSet(sChess.data) );
 	tChess.data.set(sChess.data);
 	sChess.data.clear();
 
 	if (tChess.checkPromotion()) {
 		Type promotion = tChess.doPromotion();
-		log.push_back({ tChess.data, tChess.data.previewSetType(promotion) });
+		log.emplace_back( tChess.data, tChess.data.previewSetType(promotion) );
 		tChess.data.setType(promotion);
 	}
 
-	log.push_back({ tChess.data, tChess.data.previewMoved()});
+	log.emplace_back( tChess.data, tChess.data.previewMoved());
 	tChess.data.moved = true;
+
+    calculateCheck();
 
 	logList.push_back(log);
 
@@ -282,13 +285,13 @@ bool Chess::move(Player player, Position source, Position target) {
 	return true;
 }
 
-bool Chess::checkPromotion(){
+bool Chess::checkPromotion() const{
 	return data.type == PAWN && 
 		(data.player == WHITE && data.position.y == 0 ||
 			data.player == BLACK && data.position.y == 7);
 }
 
-Type Chess::doPromotion() {
+Type Chess::doPromotion() const {
 	int choose = 0;
 	do {
 		std::cout << "playing;" << (data.player == WHITE ? "white" : "black") << ";;;promotion";
@@ -305,10 +308,25 @@ Player Chess::getNowPlayer() {
 	return logIndex & 1 ? BLACK : WHITE;
 }
 
-Player Chess::getNowEnemy(){
-	return logIndex & 1 ? WHITE : BLACK;
+Player Chess::getNowEnemy() {
+    return logIndex & 1 ? WHITE : BLACK;
 }
 
-bool Chess::isCheckmate(Player) {
-    return false;
+
+
+bool Chess::isCheck() {
+    return isChecking;
+}
+
+void Chess::calculateCheck() {
+    for(auto &rowElement : board) {
+        for(auto &element : rowElement) {
+            if(element.data.player == getNowPlayer()) {
+                std::vector<Position> validPositions = getValidPos(element.data.position);
+                isChecking |= std::any_of(validPositions.begin(), validPositions.end(),
+                                          [&](auto& pos){return pos == kingsPos[getNowEnemy()];});
+                isChecked[element.data.player] |= isChecking;
+            }
+        }
+    }
 }

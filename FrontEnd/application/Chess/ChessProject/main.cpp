@@ -27,10 +27,10 @@ int main() {
 		}
 		if (mode == "print") value = Chess::getBoard();
 
-		/*if (!board.checkMovement(player)) status = "draw";
-		else if (!board.checkMovement(enemy)) status = "checkmate";
-		else if (board.checkWin(player)) status = "win";
-		else*/ status = "playing";
+		// if (!board.checkMovement(player)) status = "draw";
+        /*else*/ if (Chess::isCheck()) status = "check";
+		// else if (board.checkWin(player)) status = "win";
+		else status = "playing";
 
 		canUndo = '0' + Chess::canUndo();
 		canRedo = '0' + Chess::canRedo();

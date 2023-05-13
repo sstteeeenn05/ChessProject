@@ -3,18 +3,21 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstring>
+#include <algorithm>
 #include "DataType.h"
 
 class Chess {
     static std::vector<std::vector<std::pair<ChessData, ChessData>>> logList;
     static int logIndex;
-    static Position wKing, bKing;
     static Chess board[8][8];
 
     // 0-white, 1-black
-    static bool isCheckmated[2];
+    static Position kingsPos[2];
     // 0-white, 1-black
-    static bool isCheckmating;
+    static bool isChecked[2];
+    // 0-white, 1-black
+    static bool isChecking;
     static std::vector<std::vector<bool>> checkmateRoute;
 
     ChessData data;
@@ -37,7 +40,7 @@ public:
 
     static std::vector<Position> getValidPos(Position);
 
-    bool checkValid(Position, std::vector<Position> &);
+    bool checkValid(Position, std::vector<Position> &) const;
 
     void checkStraight(std::vector<Position> &);
 
@@ -51,7 +54,7 @@ public:
 
     Position generatePosByPlayer(Position);
 
-    bool onRiver() const;
+    [[nodiscard]] bool onRiver() const;
 
     std::pair<Position, Position> getSidePos();
 
@@ -61,12 +64,13 @@ public:
 
     static bool move(Player, Position, Position);
 
-    bool checkPromotion();
+    bool checkPromotion() const;
 
-    Type doPromotion();
+    Type doPromotion() const;
 
     //static bool checkMovement(Player);
-    static bool isCheckmate(Player);
+    static void calculateCheck();
+    static bool isCheck();
     //static bool checkWin(Player);
 
     static Player getNowPlayer();

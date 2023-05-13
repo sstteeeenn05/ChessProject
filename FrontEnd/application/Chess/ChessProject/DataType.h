@@ -5,7 +5,7 @@
 #include "Position.h"
 
 enum Player {
-    WHITE,
+    WHITE = 0,
     BLACK,
     NONE
 };
