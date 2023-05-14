@@ -66,8 +66,8 @@ bool Chess::canRedo(){
 
 bool Chess::undo() {
 	if (!canUndo()) return false;
-	logIndex--;
-	for(auto change=logList[logIndex].rbegin();change!= logList[logIndex].rend();change++){
+	int tempIndex = logIndex - 1;
+	for(auto change=logList[tempIndex].rbegin();change!= logList[tempIndex].rend();change++){
 		const auto& before = change->first;
 		const auto& after = change->second;
 		board[after.position.y][after.position.x].data = before;
@@ -75,6 +75,8 @@ bool Chess::undo() {
             kingsPos[before.player] = before.position;
         }
 	}
+    logIndex--;
+    calculateCheck();
 	return true;
 }
 
@@ -89,6 +91,7 @@ bool Chess::redo() {
         }
 	}
 	logIndex++;
+    calculateCheck();
 	return true;
 }
 
@@ -240,7 +243,7 @@ bool Chess::move(Player player, Position source, Position target) {
 	Chess& tChess = board[target.y][target.x];
 
     if(sChess.data.type == KING) {
-        kingsPos[sChess.data.player] = sChess.data.position;
+        kingsPos[sChess.data.player] = tChess.data.position;
     }
 
 	if (sChess.data.type == PAWN) {
