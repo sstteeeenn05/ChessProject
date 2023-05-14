@@ -81,12 +81,6 @@ export class Game{
     getState(){
         return this.sendCommand("get");
     }
-    getBoard(){
-        return this.sendCommand(
-            "print",
-            (value)=>{return value.match(/.{1,8}/g)}
-        )
-    }
     promotion(choice){
         return this.sendCommand(choice)
     }

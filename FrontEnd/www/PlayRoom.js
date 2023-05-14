@@ -5,7 +5,6 @@ function getUrlQuery(key){
     let query=location.search;
     let arr=query.split(key);
     if(arr.length<2) return false;
-    if(!arr[1].length) return true;
     return arr[1].replace('=','').split('&')[0];
 }
 
@@ -17,22 +16,14 @@ document.addEventListener('alpine:init', () => {
         islower(input){
             return (input === input.toLowerCase() && input !== '.');
         },
-        board: [
-            'rnbqkbnr',
-            'pppppppp',
-            '........',
-            '........',
-            '........',
-            '........',
-            'PPPPPPPP',
-            'RNBQKBNR'
-        ],
+        board: [],
         maskBoard: [],
         isPromoting: false,
         previewClass: [
             '',
             'indianred'
         ],
+        player:"",
         nowMoving: 'white',
         calculateUrl(input) {
             if (input !== '.') {
@@ -86,6 +77,7 @@ document.addEventListener('alpine:init', () => {
                 this.showResult(who, status);
             } else {
                 this.nowMoving = who
+                if(getUrlQuery("single")!==false) this.player = who
             }
         },
         canUndo: false,
@@ -149,6 +141,16 @@ document.addEventListener('alpine:init', () => {
         clickedY: -1,
         clickingX: -1,
         clickingY: -1,
+        updateStatus(){
+            let interval=setInterval(()=>{
+                this.game.getState().then((resolve) => {
+                    this.board = resolve.board;
+                    this.resetXY()
+                    this.changeTurn(resolve)
+                    if(this.nowMoving==this.player) clearInterval(interval);
+                })
+            },100)
+        },
         click(x, y) {
             if ((this.clickedX === -1 && this.clickedY === -1) ||
                 (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
@@ -172,33 +174,27 @@ document.addEventListener('alpine:init', () => {
 
                 if (x !== this.clickedX || y !== this.clickedY) {
                     this.game.move(
-                      this.clickedX,
-                      this.clickedY,
-                      x,
-                      y
-                    ).then(
-                      (resolve) => {
-                          if (resolve.value === 'failed') {
-                              this.showMessage('Alert!!', 'invalid move')
-                              return;
-                          }
-                          this.clickingX = x;
-                          this.clickingY = y;
-                          if (resolve.value === "success") {
-                              this.maskChess()
-                              this.game.getBoard().then((resolve) => {
-                                  this.board = resolve.value;
-                                  this.resetXY()
-                                  this.changeTurn(resolve)
-                              })
-                          }
-                          if (resolve.value === "promotion") {
-                              let lightbox = document.getElementById('promotion')
-                              lightbox.showModal();
-                              this.isPromoting = true
-                          }
-                      }
-                    )
+                        this.clickedX,
+                        this.clickedY,
+                        x,
+                        y
+                    ).then((resolve) => {
+                        if (resolve.value === 'failed') {
+                            this.showMessage('Alert!!', 'invalid move')
+                            return;
+                        }
+                        this.clickingX = x;
+                        this.clickingY = y;
+                        if (resolve.value === "success") {
+                            this.maskChess()
+                            this.updateStatus();
+                        }
+                        if (resolve.value === "promotion") {
+                            let lightbox = document.getElementById('promotion')
+                            lightbox.showModal();
+                            this.isPromoting = true
+                        }
+                    })
                 } else this.resetXY()
 
             }
@@ -206,31 +202,36 @@ document.addEventListener('alpine:init', () => {
         game: new Game(),
         roomId: "",
         connectGame(){
-            let pckg={
-                header:getUrlQuery("header")
-            };
-            switch(pckg.header){
-                case "create":
-                    if(getUrlQuery("single")) pckg.isSingle=true;
-                    else{
-                        pckg.isSingle=false;
-                        pckg.nickname=getUrlQuery("nickname");
-                        pckg.roomId=getUrlQuery("roomId");
-                    }
-                    break;
-                case "join":
-                    pckg.nickname=getUrlQuery("nickname");
-                    pckg.roomId=getUrlQuery("roomId");
-                    break;
-                default:
-                    this.loadingMessage="missing header";
+            let pckg=new Object();
+
+            if(getUrlQuery("create")!==false){
+                this.player="white";
+                pckg.header="create";
+                if(getUrlQuery("single")!==false){
+                    pckg.isSingle=true;
+                }else{
+                    pckg.isSingle=false;
+                    pckg.roomId=getUrlQuery("create");
+                    pckg.nickname=getUrlQuery("nickname")??"Unknown";
+                }
+            }else if(getUrlQuery("join")!==false){
+                this.player="black";
+                pckg.header="join";
+                pckg.roomId=getUrlQuery("join");
+                pckg.nickname=getUrlQuery("nickname")??"Unknown";
+            }else{
+                this.loadingMessage="missing header";
+                return;
             }
+
+            console.log(pckg);
+
             this.game.connect(pckg).then(()=>{
-                console.log("hi")
                 let count=0;
                 let interval=setInterval(()=>{
                     if(this.game.isStart){
                         clearInterval(interval);
+                        this.updateStatus();
                         setTimeout(()=>this.loading=false,1800);
                         return;
                     }
@@ -240,6 +241,7 @@ document.addEventListener('alpine:init', () => {
                         let pckg=this.game.joinRequestQueue.shift();
                         if(confirm(`${pckg.nickname} wants to join!`)){
                             this.game.acceptJoinRequest();
+                            this.loadingMessage=`${pckg.nickname} Joining`
                         }
                         else{
                             this.game.rejectJoinRequest();
