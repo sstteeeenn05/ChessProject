@@ -13,6 +13,8 @@
  * @prop {Player} p1
  * @prop {pipe.ChildProcess} process
  * @prop {Array<string>} board
+ * @prop {boolean} canUndo
+ * @prop {boolean} canRedo
  */
 
 /**
@@ -213,7 +215,9 @@ function startGame(room){
                 content:{
                     status:room.status,
                     who:room.nowMoving===p0?"white":"black",
-                    board:room.board
+                    board:room.board,
+                    canUndo:room.canUndo,
+                    canRedo:room.canRedo
                 }
             }))
         }else if(e.target==room.nowMoving.ws){
@@ -252,6 +256,8 @@ function startGame(room){
         room.nowMoving=obj.who=="white"?p0:p1;
         room.status=obj.status;
         room.board=obj.board;
+        room.canUndo=obj.canUndo;
+        room.canRedo=obj.canRedo;
         //if(room.status!="playing") return wsClose();
     })
 

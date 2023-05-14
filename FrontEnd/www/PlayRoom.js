@@ -116,8 +116,8 @@ document.addEventListener('alpine:init', () => {
             ]
             setTimeout(()=>{
                 this.game.readHistory(option).then(() => {
-                    this.game.getBoard().then((resolve) => {
-                        this.board = resolve.value
+                    this.game.getState().then((resolve) => {
+                        this.board = resolve.board
                         this.resetXY()
                         this.changeTurn(resolve)
                     })
