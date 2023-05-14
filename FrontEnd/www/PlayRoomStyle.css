@@ -195,6 +195,10 @@ img{
     align-items: center;
     background: rgb(56, 56, 56);
 }
+.waveGroup{
+    display: flex;
+    align-items: center;
+}
 .wave {
     width: 10px;
     height: 120px;
@@ -248,4 +252,8 @@ img{
         opacity: 1;
         transform: scaleY(.1);
     }
+}
+
+.loadingMessage{
+    color:white;
 }

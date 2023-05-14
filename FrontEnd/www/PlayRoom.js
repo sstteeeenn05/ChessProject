@@ -1,6 +1,14 @@
 import "./api/Alpine.js";
 import {Game} from "./api/Game.js"
 
+function getUrlQuery(key){
+    let query=location.search;
+    let arr=query.split(key);
+    if(arr.length<2) return false;
+    if(!arr[1].length) return true;
+    return arr[1].replace('=','').split('&')[0];
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
         isupper(input){
@@ -197,39 +205,37 @@ document.addEventListener('alpine:init', () => {
         },
         game: new Game(),
         roomId: "",
-        getUrlQuery:(key)=>{
-            let query=location.search;
-            let arr=query.split(key);
-            if(arr.length<2) return false;
-            if(!arr[1].length) return true;
-            return arr[1].replace('=','').split('&')[0];
-        },
         connectGame(){
             let pckg={
-                header:this.getUrlQuery("header")
+                header:getUrlQuery("header")
             };
             switch(pckg.header){
                 case "create":
-                    if(this.getUrlQuery("single")) pckg.isSingle=true;
+                    if(getUrlQuery("single")) pckg.isSingle=true;
                     else{
                         pckg.isSingle=false;
-                        pckg.nickname=this.getUrlQuery("nickname");
+                        pckg.nickname=getUrlQuery("nickname");
+                        pckg.roomId=getUrlQuery("roomId");
                     }
                     break;
                 case "join":
-                    pckg.nickname=this.getUrlQuery("nickname");
-                    pckg.roomId=this.getUrlQuery("roomId");
+                    pckg.nickname=getUrlQuery("nickname");
+                    pckg.roomId=getUrlQuery("roomId");
                     break;
                 default:
-                    alert("missing header");
+                    this.loadingMessage="missing header";
             }
             this.game.connect(pckg).then(()=>{
+                console.log("hi")
+                let count=0;
                 let interval=setInterval(()=>{
                     if(this.game.isStart){
                         clearInterval(interval);
                         setTimeout(()=>this.loading=false,1800);
                         return;
                     }
+                    this.loadingMessage="Wating for Player's Joining"+".".repeat(count++);
+                    if(count>=4) count=0;
                     if(this.game.joinRequestQueue.length){
                         let pckg=this.game.joinRequestQueue.shift();
                         if(confirm(`${pckg.nickname} wants to join!`)){
@@ -240,7 +246,7 @@ document.addEventListener('alpine:init', () => {
                         }
                     }
                 },1000)
-            })
+            }).catch((msg)=>this.loadingMessage=msg)
         }
     }))
 })

@@ -21,18 +21,16 @@ export class Game{
             let ws=new WebSocket(WS_URL,"protocol-chess-game");
             ws.onopen=()=>{
                 ws.onmessage=()=>{
+                    this.ws=ws;
                     if(pckg.isSingle||pckg.header=="join"){
-                        this.ws=ws;
                         this.isStart=true;
                         resolve();
                     }
                     ws.onmessage=(e)=>{
-                        this.ws.onmessage=(e)=>{
-                            let request=JSON.parse(e.data.toString());
-                            if(request.type=="join-request") this.joinRequestQueue.push(request.package);
-                        }
-                        resolve(JSON.parse(e.data.toString()));
+                        let request=JSON.parse(e.data.toString());
+                        if(request.type=="join-request") this.joinRequestQueue.push(request.package);
                     }
+                    resolve();
                 }
                 ws.onclose=(e)=>reject(e.reason);
                 ws.onerror=(event)=>reject(event);

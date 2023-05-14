@@ -71,6 +71,7 @@ wss.on('connection',
         let request=JSON.parse(e.data.toString());
         if(request.type!="handshake") return ws.close();
         let package=request.package;
+        console.log(package);
         switch(package.header){
             case "getRoomList":
                 getRoomList(ws);
@@ -122,6 +123,9 @@ function createGame(ws,package){
         room.process=pipe.execFile("application\\chess.exe");
         startGame(room);
     }else{
+        ws.on('close',()=>{
+            roomList.delete(package.roomId);
+        })
         room.p0.name=package.nickname;
         room.status="waiting";
         if(roomList.has(package.roomId)) return ws.close();
@@ -145,6 +149,9 @@ function joinGame(ws,package){
         let response=JSON.parse(e.data.toString());
         console.log(`receive:${data.type} > ${data.value}`);
         if(response.content=="join-accepted"){
+            ws.on('close',()=>{
+                roomList.delete(package.roomId);
+            })
             room.p1={
                 name:package.nickname,
                 ws:ws
