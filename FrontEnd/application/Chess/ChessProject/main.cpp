@@ -5,7 +5,7 @@
 int main() {
 	Chess::init();
 	Player player, enemy, p1 = WHITE, p2 = BLACK;
-	std::string status, who, canUndo, canRedo, value;
+	std::string status, who, canUndo, canRedo, value, board;
 	while (true)
 	{
 		player = Chess::getNowPlayer();
@@ -25,7 +25,6 @@ int main() {
 			std::cin >> source.x >> source.y >> target.x >> target.y;
 			value = Chess::move(player, source, target) ? "success" : "failed";
 		}
-		if (mode == "print") value = Chess::getBoard();
 
 		// if (!board.checkMovement(player)) status = "draw";
         /*else*/ if (Chess::isCheck()) status = "check";
@@ -38,7 +37,8 @@ int main() {
 		bool changeRound = value == "success";
 		if (changeRound) who = enemy == WHITE ? "white" : "black";
 		else who = player == WHITE ? "white" : "black";
+		board = Chess::getBoard();
 
-		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << std::endl;
+		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << board << std::endl;
 	}
 }
