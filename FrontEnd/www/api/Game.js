@@ -3,52 +3,85 @@ const WS_URL="ws://localhost:1234";
 /**
  * @typedef {Object} HandshakePackage
  * @prop {string} header
- * @prop {string} ipaddr
  * @prop {string} nickname
  * @prop {boolean} isSingle
  * @prop {string} roomId
  */
 
 export class Game{
+    isStart=false;
+    joinRequestQueue=new Array();
+    /**
+     * 
+     * @param {HandshakePackage} pckg 
+     * @returns {Promise}
+     */
     connect(pckg){
-        let ws=new WebSocket(WS_URL,"protocol-chess-game");
         return new Promise((resolve,reject)=>{
+            let ws=new WebSocket(WS_URL,"protocol-chess-game");
             ws.onopen=()=>{
                 ws.onmessage=()=>{
-                    this.ws=ws;
-                    resolve("Web Socket is ready!");
+                    if(pckg.isSingle||pckg.header=="join"){
+                        this.ws=ws;
+                        this.isStart=true;
+                        resolve();
+                    }
+                    ws.onmessage=(e)=>{
+                        this.ws.onmessage=(e)=>{
+                            let request=JSON.parse(e.data.toString());
+                            if(request.type=="join-request") this.joinRequestQueue.push(request.package);
+                        }
+                        resolve(JSON.parse(e.data.toString()));
+                    }
                 }
-                ws.onclose=()=>reject("Web Socket is closed!");
+                ws.onclose=(e)=>reject(e.reason);
                 ws.onerror=(event)=>reject(event);
                 ws.send(JSON.stringify({
                     type:"handshake",
-                    value:pckg
+                    package:pckg
                 }));
             }
         })
     }
-    generatePromise(type,value,valueLambda=(value)=>{return value}){
+    /**
+     * 
+     * @param {*} request 
+     * @param {?(string)=>string|string[]|int[]} valueLambda 
+     * @returns {Promise}
+     */
+    generatePromise(request,valueLambda){
         return new Promise((resolve,reject)=>{
             if(!this.ws) reject("Web Socket is not ready!");
             this.ws.onmessage=(event)=>{
-                let data=JSON.parse(event.data.toString());
-                if(!data.status.success) reject(data.status.message);
-                data.content.value=valueLambda(data.content.value);
-                resolve(data.content);
+                let response=JSON.parse(event.data.toString());
+                if(!response.status.success) reject(response.status.message);
+                if(valueLambda) response.content.value=valueLambda(response.content.value);
+                resolve(response.content);
             }
-            this.ws.onclose=()=>reject("Web Socket is closed!");
-            this.ws.onerror=(event)=>reject(event);
-            this.ws.send(JSON.stringify({
-                type:type,
-                value:value
-            }));
+            this.ws.send(JSON.stringify(request));
         })
     }
+    acceptJoinRequest(){
+        this.isStart=true;
+        this.ws.send(JSON.stringify({
+            type:"join-request",
+            content:"join-accepted"
+        }));
+    }
+    rejectJoinRequest(){
+        this.ws.send(JSON.stringify({
+            type:"join-request",
+            content:"join-rejected"
+        }));
+    }
     sendCommand(command,valueLambda=(value)=>{return value}){
-        return this.generatePromise("command",command,valueLambda);
+        return this.generatePromise({
+            type:"command",
+            command:command
+        },valueLambda)
     }
     getState(){
-        return this.generatePromise("getArgs","state");
+        return this.sendCommand("get");
     }
     getBoard(){
         return this.sendCommand(

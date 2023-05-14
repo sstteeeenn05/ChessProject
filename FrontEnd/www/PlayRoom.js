@@ -197,15 +197,49 @@ document.addEventListener('alpine:init', () => {
         },
         game: new Game(),
         roomId: "",
+        getUrlQuery:(key)=>{
+            let query=location.search;
+            let arr=query.split(key);
+            if(arr.length<2) return false;
+            if(!arr[1].length) return true;
+            return arr[1].replace('=','').split('&')[0];
+        },
         connectGame(){
-            this.game.connect(
-                "create",
-                "127.0.0.1",
-                "abc",
-                true
-            ).then((resolve)=>{
-                this.roomId=resolve;
-                setTimeout(()=>this.loading=false,1800);
+            let pckg={
+                header:this.getUrlQuery("header")
+            };
+            switch(pckg.header){
+                case "create":
+                    if(this.getUrlQuery("single")) pckg.isSingle=true;
+                    else{
+                        pckg.isSingle=false;
+                        pckg.nickname=this.getUrlQuery("nickname");
+                    }
+                    break;
+                case "join":
+                    pckg.nickname=this.getUrlQuery("nickname");
+                    pckg.roomId=this.getUrlQuery("roomId");
+                    break;
+                default:
+                    alert("missing header");
+            }
+            this.game.connect(pckg).then(()=>{
+                let interval=setInterval(()=>{
+                    if(this.game.isStart){
+                        clearInterval(interval);
+                        setTimeout(()=>this.loading=false,1800);
+                        return;
+                    }
+                    if(this.game.joinRequestQueue.length){
+                        let pckg=this.game.joinRequestQueue.shift();
+                        if(confirm(`${pckg.nickname} wants to join!`)){
+                            this.game.acceptJoinRequest();
+                        }
+                        else{
+                            this.game.rejectJoinRequest();
+                        }
+                    }
+                },1000)
             })
         }
     }))

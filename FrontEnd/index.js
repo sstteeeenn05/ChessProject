@@ -1,6 +1,5 @@
 /**
  * @typedef {Object} Player
- * @prop {string} ip
  * @prop {string} name
  * @prop {WebSocket} ws
  */
@@ -18,16 +17,16 @@
 /**
  * @typedef {Object} HandshakePackage
  * @prop {string} header
- * @prop {string} ipaddr
  * @prop {string} nickname
  * @prop {boolean} isSingle
  * @prop {string} roomId
  */
 
 /**
- * @typedef {Object} ClientRequest
+ * @typedef {Object} Request
  * @prop {string} type
- * @prop {string} value
+ * @prop {HandshakePackage} package
+ * @prop {string} command
  */
 
 /**
@@ -37,7 +36,7 @@
  */
 
 /**
- * @typedef {Object} ServerResponse
+ * @typedef {Object} Response
  * @prop {Status} status
  * @prop {Object} content
  */
@@ -56,15 +55,22 @@ let wss=new SocketServer({server});
 /** @type {Map<string,Room>} */
 let roomList=new Map();
 
-wss.on('connection',(ws)=>{
+
+wss.on('connection',
+/**
+ * 
+ * @param {WebSocket} ws 
+ * @returns {void}
+ */
+(ws)=>{
     console.log(`web socket connected! (${ws.protocol})`);
     if(ws.protocol!="protocol-chess-game") return ws.close();
     ws.onmessage=(e)=>{
-        ws.onmessage=undefined;
-        /** @type {HandshakePackage} */
+        ws.onmessage=null;
+        /** @type {Request} */
         let request=JSON.parse(e.data.toString());
         if(request.type!="handshake") return ws.close();
-        let package=request.value;
+        let package=request.package;
         switch(package.header){
             case "getRoomList":
                 getRoomList(ws);
@@ -84,15 +90,13 @@ wss.on('connection',(ws)=>{
  * @param {WebSocket} ws 
  */
 function getRoomList(ws){
-    /** @type {ServerResponse} */
     if(roomList.size==0) return ws.close(400,"empty-roomList");
     let list=new Array();
-    roomList.forEach((id,room)=>{
+    roomList.forEach((room,id)=>{
         list.push({
             id:id,
             status:room.status,
             name:room.name,
-            ip:room.p0.ip,
             who:room.p0.name
         })
     })
@@ -106,17 +110,13 @@ function getRoomList(ws){
  */
 function createGame(ws,package){
     let room={
-        p0:{
-            ip:package.ipaddr,
-            ws:ws
-        }
+        p0:{ws:ws}
     }
     room.nowMoving=room.p0;
     if(package.isSingle){
         room.p0.name="white";
         room.p1={
             name:"black",
-            ip:package.ipaddr,
             ws:ws
         };
         room.process=pipe.execFile("application\\chess.exe");
@@ -127,7 +127,7 @@ function createGame(ws,package){
         if(roomList.has(package.roomId)) return ws.close();
         roomList.set(package.roomId,room);
     }
-    ws.send();
+    ws.send(JSON.stringify({status:{success:true}}));
 }
 
 /**
@@ -140,25 +140,31 @@ function joinGame(ws,package){
     let room=roomList.get(package.roomId);
     if(room.status!="waiting") return ws.close(400,"room-is-full");
     room.p0.ws.onmessage=(e)=>{
-        let request=JSON.parse(e.data.toString());
+        e.target.onmessage=null;
+        /** @type {Response} */
+        let response=JSON.parse(e.data.toString());
         console.log(`receive:${data.type} > ${data.value}`);
-        if(request.value=="Y"){
+        if(response.content=="join-accepted"){
             room.p1={
                 name:package.nickname,
-                ip:package.ip,
                 ws:ws
-            };
+            }
             room.process=pipe.execFile("application\\chess.exe");
             startGame(roomList.get(package.roomId));
+            ws.send(JSON.stringify({status:{success:true}}));
         }
-        else ws.close(400,"reject");
+        else ws.close(400,response.content);
     }
     room.p0.ws.send(JSON.stringify({
-        type:"join",
-        value:package
+        type:"join-request",
+        package:package
     }));
 }
 
+/**
+ * 
+ * @param {Room} room 
+ */
 function startGame(room){
     let p0=room.p0;
     let p1=room.p1;
@@ -169,35 +175,37 @@ function startGame(room){
     room.status="playing";
 
     let wsMessageCallback=(e)=>{
-        /** @type {ClientRequest} */
+        /** @type {Request} */
         let request=JSON.parse(e.data.toString());
         console.log(`receive:${request.type} > ${request.value}`);
-        switch(request.type){
-            case "getArgs":
-                if(request.value=="state"){
-                    e.target.send(JSON.stringify({
-                        status:{
-                            success:true
-                        },
-                        content:{
-                            status:room.status,
-                            who:room.nowMoving
-                        }
-                    }))
+        if(request.type!="command"){
+            e.target.send(JSON.stringify({
+                status:{
+                    success:false,
+                    message:"should-be-command"
                 }
-                break;
-            case "command":
-                if(e.target==room.nowMoving.ws){
-                    execute(request.value.toString());
-                }else{
-                    e.target.send(JSON.stringify({
-                        status:{
-                            success:false,
-                            message:"not-your-turn"
-                        }
-                    }));
+            }))
+        }
+        if(request.command=="get"){
+            e.target.send(JSON.stringify({
+                status:{
+                    success:true
+                },
+                content:{
+                    status:room.status,
+                    who:room.nowMoving===p0?"white":"black"
                 }
-                break;
+            }))
+        }
+        else if(e.target==room.nowMoving.ws){
+            execute(request.command.toString());
+        }else{
+            e.target.send(JSON.stringify({
+                status:{
+                    success:false,
+                    message:"not-your-turn"
+                }
+            }));
         }
     }
 
@@ -208,7 +216,6 @@ function startGame(room){
         console.log("ondata!");
         data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
         if(data.length!=5) return wsClose();
-        /** @type {ServerResponse} */
         let obj={
             status:data[0],
             who:data[1],
