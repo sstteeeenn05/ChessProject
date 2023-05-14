@@ -62,13 +62,13 @@ export class Game{
     acceptJoinRequest(){
         this.isStart=true;
         this.ws.send(JSON.stringify({
-            type:"join-request",
+            type:"join-response",
             content:"join-accepted"
         }));
     }
     rejectJoinRequest(){
         this.ws.send(JSON.stringify({
-            type:"join-request",
+            type:"join-response",
             content:"join-rejected"
         }));
     }

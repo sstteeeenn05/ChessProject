@@ -7,8 +7,8 @@
 </head>
 
 <body>
-  <div x-data="{loading : true, loadingMessage : ''}">
-    <div x-data="globalScope" x-show="!loading"
+  <div x-data="globalScope">
+    <div x-show="!loading"
         x-init="connectGame()" x-cloak>
       <button class="leave-button"
               @click="loading = true;
@@ -41,26 +41,6 @@
           <img class="redo-button-image" src="./assets/right.svg" alt="undo">
         </button>
       </div>
-      <dialog class="lightbox" id="promotion"
-              @cancel="(event)=>{event.preventDefault()}"
-              x-show="isPromoting" x-transition>
-        <h2>Promotion!!!</h2>
-        <div class="select-div">
-          <template x-for="(item, index) in calculatePromotionChess()" :key="index">
-            <div class="promotion-container" @click="promotion(index)">
-              <img class="promotion-image" :src="calculateUrl(item)"
-                   :alt="item">
-            </div>
-          </template>
-        </div>
-      </dialog>
-      <dialog class="lightbox" id="messageBox"
-              @cancel="(event)=>{event.preventDefault()}"
-              x-show="isMessage" x-transition>
-        <h2 class="box-title" x-text="boxTitle"></h2>
-        <p class="box-content" x-text="boxContext"></p>
-        <button class="confirm-button" @click="closeMessage">OK</button>
-      </dialog>
     </div>
     <div class="center" x-show="loading" x-transition.duration.500ms>
       <div>
@@ -88,6 +68,36 @@
         <h2 class="loadingMessage" x-show="loadingMessage" x-text="loadingMessage"></h2>
       </div>
     </div>
+    <dialog class="lightbox" id="promotion"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isPromoting" x-transition>
+      <h2>Promotion!!!</h2>
+      <div class="select-div">
+        <template x-for="(item, index) in calculatePromotionChess()" :key="index">
+          <div class="promotion-container" @click="promotion(index)">
+            <img class="promotion-image" :src="calculateUrl(item)"
+                 :alt="item">
+          </div>
+        </template>
+      </div>
+    </dialog>
+    <dialog class="lightbox" id="messageBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isMessage" x-transition>
+      <h2 class="box-title" x-text="boxTitle"></h2>
+      <p class="box-content" x-text="boxContext"></p>
+      <button class="confirm-button" @click="closeMessage">OK</button>
+    </dialog>
+    <dialog class="lightbox" id="confirmBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isConfirm" x-transition>
+      <h2 class="box-title" x-text="confirmTitle"></h2>
+      <p class="box-content" x-text="confirmContext"></p>
+      <div style="display: flex;">
+        <button class="confirm-button" @click="closeConfirm(true)">Yes</button>
+        <button class="confirm-button" @click="closeConfirm(false)">NO</button>
+      </div>
+    </dialog>
   </div>
 </body>
 

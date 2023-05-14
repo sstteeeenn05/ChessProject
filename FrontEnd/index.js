@@ -92,7 +92,7 @@ wss.on('connection',
  * @param {WebSocket} ws 
  */
 function getRoomList(ws){
-    if(roomList.size==0) return ws.close(400,"empty-roomList");
+    if(roomList.size==0) return ws.close(1000,"empty-roomList");
     let list=new Array();
     roomList.forEach((room,id)=>{
         list.push({
@@ -142,14 +142,14 @@ function createGame(ws,package){
  * @param {HandshakePackage} package 
  */
 function joinGame(ws,package){
-    if(!roomList.has(package.roomId)) return ws.close(400,"room-not-found");
+    if(!roomList.has(package.roomId)) return ws.close(1000,"room-not-found");
     let room=roomList.get(package.roomId);
-    if(room.status!="waiting") return ws.close(400,"room-is-full");
+    if(room.status!="waiting") return ws.close(1000,"room-is-full");
     room.p0.ws.onmessage=(e)=>{
         e.target.onmessage=null;
         /** @type {Response} */
         let response=JSON.parse(e.data.toString());
-        console.log(`receive:${response.type} > ${response.value}`);
+        console.log(`receive:${response.type} > ${response.content}`);
         if(response.content=="join-accepted"){
             ws.on('close',()=>{
                 roomList.delete(package.roomId);
@@ -162,7 +162,7 @@ function joinGame(ws,package){
             startGame(roomList.get(package.roomId));
             ws.send(JSON.stringify({status:{success:true}}));
         }
-        else ws.close(400,response.content);
+        else ws.close(1000,response.content);
     }
     room.p0.ws.send(JSON.stringify({
         type:"join-request",

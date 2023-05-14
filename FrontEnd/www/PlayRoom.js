@@ -10,6 +10,8 @@ function getUrlQuery(key){
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
+        loading:true,
+        loadingMessage:"",
         isupper(input){
             return (input === input.toUpperCase() && input !== '.');
         },
@@ -66,6 +68,25 @@ document.addEventListener('alpine:init', () => {
                 document.getElementById('messageBox').close()
             }, 75)
 
+        },
+        isConfirm: false,
+        confirmTitle: "",
+        confirmContext: "",
+        confirmChoice: false,
+        showConfirm(title, message){
+            this.confirmTitle = title
+            this.confirmContext = message
+            document.getElementById('confirmBox').showModal()
+            this.isConfirm = true
+        },
+        closeConfirm(bool){
+            this.confirmChoice=bool;
+            this.isConfirm = false;
+            setTimeout(() => {
+                this.confirmTitle = ''
+                this.confirmContext = ''
+                document.getElementById('confirmBox').close()
+            }, 75)
         },
         changeTurn({status, who, canUndo, canRedo}) {
             this.canUndo = canUndo
@@ -201,6 +222,37 @@ document.addEventListener('alpine:init', () => {
         },
         game: new Game(),
         roomId: "",
+        waitJoin(){
+            let count=0;
+            let interval=setInterval(()=>{
+                if(this.game.isStart){
+                    clearInterval(interval);
+                    this.updateStatus();
+                    setTimeout(()=>this.loading=false,1800);
+                    return;
+                }
+                this.loadingMessage="Wating for Player's Joining"+".".repeat(count++);
+                if(count>=4) count=0;
+                if(this.game.joinRequestQueue.length){
+                    clearInterval(interval);
+                    let pckg=this.game.joinRequestQueue.shift();
+                    this.showConfirm("Join Request",`${pckg.nickname} wants to join!`);
+                    let jnterval=setInterval(()=>{
+                        if(!this.isConfirm){
+                            clearInterval(jnterval);
+                            if(this.confirmChoice){
+                                this.game.acceptJoinRequest();
+                                this.loadingMessage=`${pckg.nickname} Joining`
+                            }
+                            else{
+                                this.game.rejectJoinRequest();
+                            }
+                            this.waitJoin();
+                        }
+                    },100)
+                }
+            },1000)
+        },
         connectGame(){
             let pckg=new Object();
 
@@ -227,27 +279,7 @@ document.addEventListener('alpine:init', () => {
             console.log(pckg);
 
             this.game.connect(pckg).then(()=>{
-                let count=0;
-                let interval=setInterval(()=>{
-                    if(this.game.isStart){
-                        clearInterval(interval);
-                        this.updateStatus();
-                        setTimeout(()=>this.loading=false,1800);
-                        return;
-                    }
-                    this.loadingMessage="Wating for Player's Joining"+".".repeat(count++);
-                    if(count>=4) count=0;
-                    if(this.game.joinRequestQueue.length){
-                        let pckg=this.game.joinRequestQueue.shift();
-                        if(confirm(`${pckg.nickname} wants to join!`)){
-                            this.game.acceptJoinRequest();
-                            this.loadingMessage=`${pckg.nickname} Joining`
-                        }
-                        else{
-                            this.game.rejectJoinRequest();
-                        }
-                    }
-                },1000)
+                this.waitJoin();
             }).catch((msg)=>this.loadingMessage=msg)
         }
     }))
