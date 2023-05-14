@@ -6,7 +6,7 @@
 
 enum Player {
     WHITE = 0,
-    BLACK,
+    BLACK = 1,
     NONE
 };
 

@@ -15,8 +15,8 @@ Chess::Chess(Player p, Position pos, Type t) :data(p, pos, t) {}
 void Chess::init() {
     memset(isChecked, false, sizeof(bool) * 2);
     isChecking = false;
-    kingsPos[0]={0,4};
-    kingsPos[1]={7,4};
+    kingsPos[0]={4,0};
+    kingsPos[1]={4,7};
     checkmateRoute.assign(8,std::vector<bool>(8, false));
 	Type typeList[8] = {ROOK,KNIGHT,BISHOP,QUEEN,KING,BISHOP,KNIGHT,ROOK};
 	for (int i = 0; i < 8; i++) board[0][i] = Chess(BLACK, { i, 0 }, typeList[i]);
@@ -305,11 +305,11 @@ Type Chess::doPromotion() const {
 }
 
 Player Chess::getNowPlayer() {
-	return logIndex & 1 ? BLACK : WHITE;
+	return (logIndex & 1) ? BLACK : WHITE;
 }
 
 Player Chess::getNowEnemy() {
-    return logIndex & 1 ? WHITE : BLACK;
+    return (logIndex & 1) ? WHITE : BLACK;
 }
 
 
@@ -319,6 +319,7 @@ bool Chess::isCheck() {
 }
 
 void Chess::calculateCheck() {
+    isChecking = false;
     for(auto &rowElement : board) {
         for(auto &element : rowElement) {
             if(element.data.player == getNowPlayer()) {
@@ -326,6 +327,7 @@ void Chess::calculateCheck() {
                 isChecking |= std::any_of(validPositions.begin(), validPositions.end(),
                                           [&](auto& pos){return pos == kingsPos[getNowEnemy()];});
                 isChecked[element.data.player] |= isChecking;
+                //std::cout << isCheck() << " " << element.data.type << std::endl;
             }
         }
     }
