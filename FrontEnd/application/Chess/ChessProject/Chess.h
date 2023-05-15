@@ -9,6 +9,7 @@
 
 class Chess {
     static std::vector<std::vector<std::pair<ChessData, ChessData>>> logList;
+    static std::vector<std::pair<bool, bool>> isCheckedLogList;
     static int logIndex;
     static Chess board[8][8];
 
@@ -68,8 +69,10 @@ public:
 
     Type doPromotion() const;
 
-    //static bool checkMovement(Player);
-    static void calculateCheck();
+    static void checkMovement(Position& target, std::vector<Position> &validPos);
+
+    [[nodiscard]] static bool calculateCheck(Player);
+
     static bool isCheck();
     //static bool checkWin(Player);
 
