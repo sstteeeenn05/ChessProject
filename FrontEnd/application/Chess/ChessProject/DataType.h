@@ -20,6 +20,12 @@ enum Type {
     EMPTY = '.'
 };
 
+enum Status {
+    PLAYING,
+    WIN,
+    TIE
+};
+
 struct ChessData {
     Player player = NONE, enemy = NONE;
     Position position;

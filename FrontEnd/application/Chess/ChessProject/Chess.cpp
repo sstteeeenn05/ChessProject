@@ -7,7 +7,7 @@ Position Chess::kingsPos[2];
 Chess Chess::board[8][8];
 bool Chess::isChecked[2];
 bool Chess::isChecking;
-std::vector<std::vector<bool>> Chess::checkmateRoute;
+Status Chess::status;
 
 Chess::Chess(Position pos) : data(ChessData(pos)) {}
 
@@ -16,9 +16,9 @@ Chess::Chess(Player p, Position pos, Type t) : data(p, pos, t) {}
 void Chess::init() {
     memset(isChecked, false, sizeof(bool) * 2);
     isChecking = false;
+    status = PLAYING;
     kingsPos[0] = {4, 7};
     kingsPos[1] = {4, 0};
-    checkmateRoute.assign(8, std::vector<bool>(8, false));
     Type typeList[8] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
     for (int i = 0; i < 8; i++) board[0][i] = Chess(BLACK, {i, 0}, typeList[i]);
     for (int i = 0; i < 8; i++) board[1][i] = Chess(BLACK, {i, 1}, PAWN);
@@ -304,6 +304,8 @@ bool Chess::move(Player player, Position source, Position target) {
     isChecking = calculateCheck(getNowPlayer());
     isChecked[getNowEnemy()] |= isChecking;
 
+    status = calculateWinOrTie(getNowEnemy());
+
     logList.push_back(log);
     isCheckedLogList.emplace_back(isChecked[0], isChecked[1]);
 
@@ -356,22 +358,53 @@ bool Chess::calculateCheck(Player player) {
                 std::vector<Position> validPositions = getValidPos(element.data.position);
                 result |= std::any_of(validPositions.begin(), validPositions.end(),
                                           [&](auto &pos) { return pos == kingsPos[element.data.enemy]; });
+                if(result) return true;
             }
         }
     }
-    return result;
+    return false;
 }
 
-void Chess::checkMovement(Position& target, std::vector<Position> &validPos) {
+void Chess::checkMovement(const Position& target, std::vector<Position> &validPos) {
     for(auto &pos : validPos) {
         Chess sChess = board[target.y][target.x];
         Chess tChess = board[pos.y][pos.x];
+
         board[pos.y][pos.x] = sChess;
         board[pos.y][pos.x].data.position = pos;
         board[target.y][target.x] = Chess(target);
-        bool result = calculateCheck(getNowEnemy());
+
+        if(sChess.data.type == KING) kingsPos[sChess.data.player] = tChess.data.position;
+
+        bool result = calculateCheck(sChess.data.enemy);
+
         board[pos.y][pos.x] = tChess;
         board[target.y][target.x] = sChess;
+
+        if(sChess.data.type == KING) kingsPos[sChess.data.player] = sChess.data.position;
+
         if(result) pos = {-1, -1};
     }
+}
+
+Status Chess::calculateWinOrTie(Player enemy) {
+
+    for (auto &rowElement: board) {
+        for (auto &element: rowElement) {
+            if (element.data.player == enemy) {
+                std::vector<Position> validPositions = getValidPos(element.data.position);
+                checkMovement(element.data.position, validPositions);
+                bool haveStep = std::any_of(validPositions.begin(), validPositions.end(),
+                                      [](auto &pos) { return (pos.x != -1 || pos.y != -1); });
+                if(haveStep) return PLAYING;
+            }
+        }
+    }
+
+    if(isChecking) return WIN;
+    return TIE;
+}
+
+Status Chess::isWinOrTie() {
+    return status;
 }

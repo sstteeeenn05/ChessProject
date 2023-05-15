@@ -19,7 +19,8 @@ class Chess {
     static bool isChecked[2];
     // 0-white, 1-black
     static bool isChecking;
-    static std::vector<std::vector<bool>> checkmateRoute;
+
+    static Status status;
 
     ChessData data;
 public:
@@ -69,12 +70,15 @@ public:
 
     Type doPromotion() const;
 
-    static void checkMovement(Position& target, std::vector<Position> &validPos);
+    static void checkMovement(const Position& target, std::vector<Position> &validPos);
 
     [[nodiscard]] static bool calculateCheck(Player);
 
     static bool isCheck();
-    //static bool checkWin(Player);
+
+    static Status isWinOrTie();
+
+    [[nodiscard]] static Status calculateWinOrTie(Player);
 
     static Player getNowPlayer();
 

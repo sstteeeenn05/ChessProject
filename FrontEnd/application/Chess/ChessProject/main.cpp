@@ -13,6 +13,7 @@ int main() {
 		std::string mode;
 		std::cin >> mode;
 
+        if (mode == "exit") exit(0);
 		if (mode == "undo") value = Chess::undo() ? "success" : "failed";
 		if (mode == "redo") value = Chess::redo() ? "success" : "failed";
 		if (mode == "preview") {
@@ -26,16 +27,16 @@ int main() {
 			value = Chess::move(player, source, target) ? "success" : "failed";
 		}
 
-		// if (!board.checkMovement(player)) status = "draw";
-        /*else*/ if (Chess::isCheck()) status = "check";
-		// else if (board.checkWin(player)) status = "win";
-		else status = "playing";
+        if (Chess::isWinOrTie() == WIN) status = "win";
+        else if (Chess::isWinOrTie() == TIE) status = "tie";
+        else if (Chess::isCheck()) status = "check";
+        else status = "playing";
 
 		canUndo = '0' + Chess::canUndo();
 		canRedo = '0' + Chess::canRedo();
 
 		bool changeRound = value == "success";
-		if (changeRound) who = enemy == WHITE ? "white" : "black";
+		if (changeRound && Chess::isWinOrTie() == PLAYING) who = enemy == WHITE ? "white" : "black";
 		else who = player == WHITE ? "white" : "black";
 		board = Chess::getBoard();
 
