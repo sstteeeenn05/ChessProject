@@ -8,6 +8,7 @@ Log::Log(Chess source, Chess target, bool castling, bool enPassant)
 	this->enPassant = enPassant;
 }
 
+
 Log& Log::getLog()
 {
 	return *this;

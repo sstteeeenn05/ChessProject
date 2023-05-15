@@ -107,9 +107,10 @@ bool Board::move(Player& player, Position source, Position target)
 
 	bool canCastle = false;
 
+	//if the chess is king and wants to castling
 	if (sChess.getType() == KING && (!sChess.getMoved()) && target.y == source.y && (target.x == 2 || target.x == 6))
 	{
-		canCastle = castling(source, target);
+		canCastle = castling(source, target); //call the function to check if it can castling
 	}
 	
 	bool EnPassant = false;
@@ -165,10 +166,9 @@ bool Board::moveAvalible(Chess& source, Chess& target)
 
 	if (target.getPlayer() != source.getPlayer())
 	{
-		//run int the vector saved valid positions
+		//run in the vector saved valid positions
 		for (auto& i : validPos)
 		{
-
 			//if the position if found
 			if (i == targetPos)
 			{
@@ -259,59 +259,83 @@ int Board::getLogIndex() {
 	return logIndex;
 }
 
+//intent:check if king can castling and move the pawn
+//pre:position of source and target
+//post:true if it can castling
 bool Board::castling(Position source, Position target)
 {
 	bool check;
+
+	//if king hasn't moved before
 	if (!board[source.y][source.x].getMoved())
 	{
-		if (!(board[source.y][0].getMoved()) && target.x == 2) //long
+		//if it is the long castling and the castle hasn't moved
+		if (!(board[source.y][0].getMoved()) && target.x == 2)
 		{
+			//loop all the space between them
 			for (int i = 1; i <= 3; i++)
 			{
+				//make sure all are empty
 				if (board[source.y][i].getType() != EMPTY)
 				{
 					return false;
 				}
 			}
+
+			//simulate the change
 			board[source.y][2].setSpace(board[source.y][4]);
 			board[source.y][3].setSpace(board[source.y][0]);
 			board[source.y][4].setEmpty();
 			board[source.y][0].setEmpty();
+
+			//call the checkCheck function to mke sure the king won't be check
 			check = board[source.y][2].checkCheck(board[source.y][2].getPlayer(), board[source.y][2].getPos(), board);
-			board[source.y][4].setSpace(board[source.y][2]);
+
+			board[source.y][4].setSpace(board[source.y][2]); //return the king back to the origin
 			board[source.y][2].setEmpty();
+
+			//if the king won't be check
 			if (!check)
 			{
 				return true;
 			}
-			else
+			else //return the castle back
 			{
 				board[source.y][0].setSpace(board[source.y][3]);
 				board[source.y][3].setEmpty();
 				return false;
 			}
 		}
-		else if ((!board[source.y][7].getMoved()) && target.x == 6)
+		else if ((!board[source.y][7].getMoved()) && target.x == 6) //if it is the short castling and the castle hasn't moved
 		{
+			//loop all the space between them
 			for (int i = 5; i <= 6; i++)
 			{
+				//make sure all are empty
 				if (board[source.y][i].getType() != EMPTY)
 				{
 					return false;
 				}
 			}
+
+			//simulate the change
 			board[source.y][6].setSpace(board[source.y][4]);
 			board[source.y][5].setSpace(board[source.y][7]);
 			board[source.y][4].setEmpty();
 			board[source.y][7].setEmpty();
+
+			//call the checkCheck function to mke sure the king won't be check
 			check = board[source.y][6].checkCheck(board[source.y][6].getPlayer(), board[source.y][6].getPos(), board);
-			board[source.y][4].setSpace(board[source.y][6]);
+
+			board[source.y][4].setSpace(board[source.y][6]);//return the king back to the origin
 			board[source.y][6].setEmpty();
+
+			//if the king won't be check
 			if (!check)
 			{
 				return true;
 			}
-			else
+			else  //return the castle back
 			{
 				board[source.y][7].setSpace(board[source.y][5]);
 				board[source.y][5].setEmpty();

@@ -20,6 +20,7 @@ private:
 	Player player;
 	bool moved;
 	static Position whiteKing, blackKing;
+
 public:
 	Chess(); //constructor and initialize the chess
 	Chess(Position pos, Type type, Player player); //constructor and initialize the chess
@@ -29,23 +30,23 @@ public:
 	void setType(Type type); //set type
 	void setSpace(Chess chess); //set the space to the chess
 	void setEmpty(); //set the space to empty
-	void setMoved(); 
-	static void setWhiteKingPos(Position pos);
-	static void setBlackKingPos(Position pos);
+	void setMoved(); //if the chess have moved set moved to true
+	static void setWhiteKingPos(Position pos); //set the white king to the position
+	static void setBlackKingPos(Position pos); //set the black king to the position
 
 	Position getPos(); //get position
 	Type getType(); //get type
 	Player getPlayer(); //get color
-	bool getMoved();
-	static Position getWhiteKingPos();
-	static Position getBlackKingPos();
+	bool getMoved(); //check if this chess has moved before
+	static Position getWhiteKingPos(); //get the position of the white king
+	static Position getBlackKingPos(); //get the position of the black king
 
 	bool checkPromotion(); //check and change if the pawn is at end lines
-	void doPromotion();
+	void doPromotion(); //check and change if the pawn is at the end
 
-	std::vector<Position>getValidPos(Chess board[8][8]);
+	std::vector<Position>getValidPos(Chess board[8][8]); //get all the valid position
 
-	bool checkCheck(Player player, Position pos, Chess board[8][8]);
+	bool checkCheck(Player player, Position pos, Chess board[8][8]); //check if the king is being check from the king's perspective
 
 	void strightLine(Chess board[8][8], std::vector<Position>& validPos); //find all the valid places on the straight line
 	void crossLine(Chess board[8][8], std::vector<Position>& validPos); //find all the valid places on the cross line

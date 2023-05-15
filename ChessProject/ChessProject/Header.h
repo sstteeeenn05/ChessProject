@@ -16,13 +16,13 @@
 
 enum Type
 {
-	KING='K',
-	QUEEN='Q',
-	BISHOP='B',
-	KNIGHT='N',
-	ROOK='R',
-	PAWN='P',
-	EMPTY=' '
+	KING = 'K',
+	QUEEN = 'Q',
+	BISHOP = 'B',
+	KNIGHT = 'N',
+	ROOK = 'R',
+	PAWN = 'P',
+	EMPTY = ' '
 };
 
 enum Player
