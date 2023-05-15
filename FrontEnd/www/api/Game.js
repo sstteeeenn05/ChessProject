@@ -9,8 +9,41 @@ const WS_URL="ws://localhost:1234";
  */
 
 export class Game{
+    isReady=false;
     isStart=false;
     joinRequestQueue=new Array();
+    /**
+     * 
+     * @param {Object} request 
+     * @param {string} responseType
+     * @returns {Promise}
+     */
+    generatePromise(request,responseType){
+        return new Promise((resolve,reject)=>{
+            if(!this.isReady) reject("Web Socket is not ready!");
+            this.ws.onmessage=(e)=>{
+                let response=JSON.parse(e.data.toString());
+                if(response.type==responseType)
+                    switch(responseType){
+                        case "room-response":
+                            if(request.content.isSingle||request.content.header=="join"){
+                                this.isStart=true;
+                                resolve();
+                            }
+                            this.ws.onmessage=(e)=>{
+                                let request=JSON.parse(e.data.toString());
+                                if(request.type=="join-request") this.joinRequestQueue.push(request.content);
+                            }
+                            resolve();
+                        case "game-args":
+                            resolve(response.content)
+                    }
+            }
+            this.ws.onclose=(e)=>reject(e.reason);
+            this.ws.onerror=(event)=>reject(event);
+            this.ws.send(JSON.stringify(request));
+        })
+    }
     /**
      * 
      * @param {HandshakePackage} pckg 
@@ -18,82 +51,58 @@ export class Game{
      */
     connect(pckg){
         return new Promise((resolve,reject)=>{
-            let ws=new WebSocket(WS_URL,"protocol-chess-game");
-            ws.onopen=()=>{
-                ws.onmessage=()=>{
-                    this.ws=ws;
-                    if(pckg.isSingle||pckg.header=="join"){
-                        this.isStart=true;
-                        resolve();
-                    }
-                    ws.onmessage=(e)=>{
-                        let request=JSON.parse(e.data.toString());
-                        if(request.type=="join-request") this.joinRequestQueue.push(request.package);
-                    }
-                    resolve();
-                }
-                ws.onclose=(e)=>reject(e.reason);
-                ws.onerror=(event)=>reject(event);
-                ws.send(JSON.stringify({
+            this.ws=new WebSocket(WS_URL,"protocol-chess-game");
+            this.ws.addEventListener('close',(e)=>{
+                alert("The room is closed!");
+            })
+            this.ws.onopen=()=>{
+                this.isReady=true;
+                this.generatePromise({
                     type:"handshake",
-                    package:pckg
-                }));
+                    content:pckg
+                },"room-response").then(
+                    ()=>resolve(),
+                    ()=>reject()
+                )
             }
         })
     }
-    /**
-     * 
-     * @param {*} request 
-     * @param {?(string)=>string|string[]|int[]} valueLambda 
-     * @returns {Promise}
-     */
-    generatePromise(request,valueLambda){
-        return new Promise((resolve,reject)=>{
-            if(!this.ws) reject("Web Socket is not ready!");
-            this.ws.onmessage=(event)=>{
-                let response=JSON.parse(event.data.toString());
-                if(!response.status.success) reject(response.status.message);
-                if(valueLambda) response.content.value=valueLambda(response.content.value);
-                resolve(response.content);
-            }
-            this.ws.send(JSON.stringify(request));
-        })
-    }
-    acceptJoinRequest(){
+    acceptJoinRequest(who){
         this.isStart=true;
         this.ws.send(JSON.stringify({
             type:"join-response",
-            content:"join-accepted"
+            content:{
+                who:who,
+                canJoin:true
+            }
         }));
     }
-    rejectJoinRequest(){
+    rejectJoinRequest(who){
         this.ws.send(JSON.stringify({
             type:"join-response",
-            content:"join-rejected"
+            content:{
+                who:who,
+                canJoin:false
+            }
         }));
     }
-    sendCommand(command,valueLambda=(value)=>{return value}){
+    sendCommand(command){
         return this.generatePromise({
             type:"command",
-            command:command
-        },valueLambda)
+            content:command
+        },"game-args")
     }
     getState(){
         return this.sendCommand("get");
     }
     promotion(choice){
-        return this.sendCommand(choice)
+        return this.sendCommand(choice);
     }
     move(x1,y1,x2,y2){
-        return this.sendCommand(`move ${x1} ${y1} ${x2} ${y2}`)
+        return this.sendCommand(`move ${x1} ${y1} ${x2} ${y2}`);
     }
     preview(x,y){
-        return this.sendCommand(
-            `preview ${x} ${y}`,
-            (value)=>{
-                return value.split("").map(char=>{return parseInt(char)})
-            }
-        )
+        return this.sendCommand( `preview ${x} ${y}`);
     }
     readHistory(option){
         return this.sendCommand(option);

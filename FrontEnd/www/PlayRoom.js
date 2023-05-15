@@ -12,6 +12,14 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
         loading:true,
         loadingMessage:"",
+        loadingDot:"",
+        setLoadingDotInterval(){
+            let count=0;
+            setInterval(()=>{
+                this.loadingDot=".".repeat(count++);
+                if(count>=4) count=0;
+            },500)
+        },
         isupper(input){
             return (input === input.toUpperCase() && input !== '.');
         },
@@ -128,9 +136,9 @@ document.addEventListener('alpine:init', () => {
         promotion(option) {
             this.game.promotion(option + 1).then(() => {
                 this.maskChess()
-                this.game.getBoard().then(
+                this.game.getState().then(
                   (resolve) => {
-                      this.board = resolve.value
+                      this.board = resolve.board
                       this.resetXY()
                       this.isPromoting = false;
                       setTimeout(() => {
@@ -187,7 +195,7 @@ document.addEventListener('alpine:init', () => {
                     this.clickedX = x;
                     this.clickedY = y;
                     this.game.preview(x, y).then((resolve) => {
-                        this.maskBoard = resolve.value;
+                        this.maskBoard = resolve.maskBoard;
                         this.maskBoard[y*8+x] = 1;
                     })
                 }
@@ -223,29 +231,30 @@ document.addEventListener('alpine:init', () => {
         game: new Game(),
         roomId: "",
         waitJoin(){
-            let count=0;
             let interval=setInterval(()=>{
                 if(this.game.isStart){
                     clearInterval(interval);
+                    this.loadingMessage="Joining"
                     this.updateStatus();
                     setTimeout(()=>this.loading=false,1800);
                     return;
                 }
-                this.loadingMessage="Wating for Player's Joining"+".".repeat(count++);
-                if(count>=4) count=0;
                 if(this.game.joinRequestQueue.length){
                     clearInterval(interval);
                     let pckg=this.game.joinRequestQueue.shift();
-                    this.showConfirm("Join Request",`${pckg.nickname} wants to join!`);
+                    this.showConfirm("Join Request",`"${pckg.nickname}" wants to join!`);
                     let jnterval=setInterval(()=>{
                         if(!this.isConfirm){
                             clearInterval(jnterval);
                             if(this.confirmChoice){
-                                this.game.acceptJoinRequest();
-                                this.loadingMessage=`${pckg.nickname} Joining`
+                                this.game.acceptJoinRequest(pckg.nickname);
+                                while(this.game.joinRequestQueue.length){
+                                    this.game.rejectJoinRequest(this.joinRequestQueue.shift().nickname);
+                                }
+                                this.loadingMessage=`"${pckg.nickname}" Joining`
                             }
                             else{
-                                this.game.rejectJoinRequest();
+                                this.game.rejectJoinRequest(pckg.nickname);
                             }
                             this.waitJoin();
                         }
@@ -254,6 +263,7 @@ document.addEventListener('alpine:init', () => {
             },1000)
         },
         connectGame(){
+            this.setLoadingDotInterval();
             let pckg=new Object();
 
             if(getUrlQuery("create")!==false){
@@ -265,12 +275,14 @@ document.addEventListener('alpine:init', () => {
                     pckg.isSingle=false;
                     pckg.roomId=getUrlQuery("create");
                     pckg.nickname=getUrlQuery("nickname")??"Unknown";
+                    this.loadingMessage="Wating for Player's Joining";
                 }
             }else if(getUrlQuery("join")!==false){
                 this.player="black";
                 pckg.header="join";
                 pckg.roomId=getUrlQuery("join");
                 pckg.nickname=getUrlQuery("nickname")??"Unknown";
+                this.loadingMessage="Wating for Room Leader's Reply"
             }else{
                 this.loadingMessage="missing header";
                 return;

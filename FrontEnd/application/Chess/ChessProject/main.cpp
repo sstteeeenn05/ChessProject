@@ -5,9 +5,9 @@
 int main() {
 	Chess::init();
 	Player player, enemy, p1 = WHITE, p2 = BLACK;
-	std::string status, who, canUndo, canRedo, value, board;
 	while (true)
 	{
+		std::string status, who, canUndo, canRedo, value, maskBoard, board;
 		player = Chess::getNowPlayer();
 		enemy = Chess::getNowEnemy();
 		std::string mode;
@@ -18,7 +18,7 @@ int main() {
 		if (mode == "preview") {
 			Position point;
 			std::cin >> point.x >> point.y;
-			value = Chess::getMaskBoard(point);
+			maskBoard = Chess::getMaskBoard(point);
 		}
 		if (mode == "move") {
 			Position source, target;
@@ -39,6 +39,6 @@ int main() {
 		else who = player == WHITE ? "white" : "black";
 		board = Chess::getBoard();
 
-		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << board << std::endl;
+		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << maskBoard << ";" << board << std::endl;
 	}
 }

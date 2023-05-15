@@ -7,14 +7,11 @@
 /**
  * @typedef {Object} Room
  * @prop {string} status
- * @prop {string} name
  * @prop {Player} nowMoving
  * @prop {Player} p0
  * @prop {Player} p1
  * @prop {pipe.ChildProcess} process
- * @prop {Array<string>} board
- * @prop {boolean} canUndo
- * @prop {boolean} canRedo
+ * @prop {GameArgs} gameArgs
  */
 
 /**
@@ -23,6 +20,35 @@
  * @prop {string} nickname
  * @prop {boolean} isSingle
  * @prop {string} roomId
+ */
+
+/**
+ * @typedef {Object} GameArgs
+ * @prop {string} status
+ * @prop {string} who
+ * @prop {boolean} canUndo
+ * @prop {boolean} canRedo
+ * @prop {string} value
+ * @prop {Array<boolean>} maskBoard
+ * @prop {Array<string>} board
+ */
+
+/**
+ * @typedef {Object} JoinResponse
+ * @prop {string} who
+ * @prop {boolean} canJoin
+ */
+
+/**
+ * @typedef {Object} ServerResponse
+ * @prop {boolean} success
+ * @prop {string} message
+ */
+
+/**
+ * @typedef {Object} Package
+ * @prop {string} type
+ * @prop {HandshakePackage|GameArgs|JoinResponse|ServerResponse|string} content
  */
 
 /**
@@ -73,7 +99,8 @@ wss.on('connection',
         /** @type {Request} */
         let request=JSON.parse(e.data.toString());
         if(request.type!="handshake") return ws.close();
-        let package=request.package;
+        /** @type {HandshakePackage} */
+        let package=request.content;
         console.log(package);
         switch(package.header){
             case "getRoomList":
@@ -114,7 +141,8 @@ function getRoomList(ws){
  */
 function createGame(ws,package){
     let room={
-        p0:{ws:ws}
+        p0:{ws:ws},
+        gameArgs:{}
     }
     room.nowMoving=room.p0;
     if(package.isSingle){
@@ -131,11 +159,14 @@ function createGame(ws,package){
         })
         room.p0.name=package.nickname;
         room.status="waiting";
-        if(roomList.has(package.roomId)) return ws.close();
+        if(roomList.has(package.roomId)) return ws.close(1000,"room-existed");
         roomList.set(package.roomId,room);
     }
     console.log("created!");
-    ws.send(JSON.stringify({status:{success:true}}));
+    ws.send(JSON.stringify({
+        type:"room-response",
+        content:{success:true}
+    }))
 }
 
 /**
@@ -147,28 +178,38 @@ function joinGame(ws,package){
     if(!roomList.has(package.roomId)) return ws.close(1000,"room-not-found");
     let room=roomList.get(package.roomId);
     if(room.status!="waiting") return ws.close(1000,"room-is-full");
-    room.p0.ws.onmessage=(e)=>{
-        e.target.onmessage=null;
-        /** @type {Response} */
+    room.p0.ws.addEventListener('message',(e)=>{
+        /** @type {Package} */
         let response=JSON.parse(e.data.toString());
-        console.log(`receive:${response.type} > ${response.content}`);
-        if(response.content=="join-accepted"){
-            ws.on('close',()=>{
-                roomList.delete(package.roomId);
-            })
-            room.p1={
-                name:package.nickname,
-                ws:ws
+        if(response.type!="join-response") return;
+        /** @type {JoinResponse} */
+        let joinResponse=response.content;
+        console.log(`receive:${joinResponse.who} > ${joinResponse.canJoin}`);
+        if(joinResponse.who==package.nickname){
+            if(joinResponse.canJoin){
+                ws.on('close',()=>{
+                    roomList.delete(package.roomId);
+                })
+                room.p1={
+                    name:package.nickname,
+                    ws:ws
+                }
+                room.process=pipe.execFile("application\\chess.exe");
+                startGame(roomList.get(package.roomId));
+                ws.send(JSON.stringify({
+                    type:"room-response",
+                    content:{success:true}
+                }))
             }
-            room.process=pipe.execFile("application\\chess.exe");
-            startGame(roomList.get(package.roomId));
-            ws.send(JSON.stringify({status:{success:true}}));
+            else{
+                console.log(package.nickname+"closed");
+                ws.close(1000,"join-rejected");
+            }
         }
-        else ws.close(1000,response.content);
-    }
+    })
     room.p0.ws.send(JSON.stringify({
         type:"join-request",
-        package:package
+        content:package
     }));
 }
 
@@ -180,52 +221,55 @@ function startGame(room){
     let p0=room.p0;
     let p1=room.p1;
     let process=room.process;
+    let gameArgs=room.gameArgs;
 
     if(!process) wsClose();
 
     room.status="playing";
-    room.board=[
-        'rnbqkbnr',
-        'pppppppp',
-        '........',
-        '........',
-        '........',
-        '........',
-        'PPPPPPPP',
-        'RNBQKBNR'
-    ];
+    gameArgs={
+        status:"playing",
+        who:"white",
+        canUndo:false,
+        canRedo:false,
+        value:"",
+        maskBoard:[],
+        board:[
+            'rnbqkbnr',
+            'pppppppp',
+            '........',
+            '........',
+            '........',
+            '........',
+            'PPPPPPPP',
+            'RNBQKBNR'
+        ]
+    }
 
     let wsMessageCallback=(e)=>{
         /** @type {Request} */
         let request=JSON.parse(e.data.toString());
         if(request.type!="command"){
             e.target.send(JSON.stringify({
-                status:{
+                type:"server-response",
+                content:{
                     success:false,
                     message:"should-be-command"
                 }
             }))
             return;
         }
-        if(request.command=="get"){
+        if(request.content=="get"){
             e.target.send(JSON.stringify({
-                status:{
-                    success:true
-                },
-                content:{
-                    status:room.status,
-                    who:room.nowMoving===p0?"white":"black",
-                    board:room.board,
-                    canUndo:room.canUndo,
-                    canRedo:room.canRedo
-                }
+                type:"game-args",
+                content:gameArgs
             }))
         }else if(e.target==room.nowMoving.ws){
-            console.log(`receive from ${e.target==p0?"white":"black"}:${request.type} > ${request.command}`);
-            execute(request.command.toString());
+            console.log(`receive from ${e.target==p0?"white":"black"}:${request.type} > ${request.content}`);
+            execute(request.content.toString());
         }else{
             e.target.send(JSON.stringify({
-                status:{
+                type:"server-response",
+                content:{
                     success:false,
                     message:"not-your-turn"
                 }
@@ -239,25 +283,22 @@ function startGame(room){
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
         data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
-        if(data.length!=6) return wsClose();
-        let obj={
+        if(data.length!=7) return wsClose();
+        gameArgs={
             status:data[0],
             who:data[1],
             canUndo:data[2]==='1',
             canRedo:data[3]==='1',
             value:data[4],
-            board:data[5].match(/.{1,8}/g)
+            maskBoard:data[5].toString().split("").map((c)=>{return parseInt(c)}),
+            board:data[6].match(/.{1,8}/g)
         }
-        console.log(`send:${obj.value} > ${obj.status}`);
+        console.log(`send:${gameArgs.value}${gameArgs.maskBoard} > ${gameArgs.status}`);
         room.nowMoving.ws.send(JSON.stringify({
-            status:{success:true},
-            content:obj
+            type:"game-args",
+            content:gameArgs
         }));
-        room.nowMoving=obj.who=="white"?p0:p1;
-        room.status=obj.status;
-        room.board=obj.board;
-        room.canUndo=obj.canUndo;
-        room.canRedo=obj.canRedo;
+        room.nowMoving=gameArgs.who=="white"?p0:p1;
         //if(room.status!="playing") return wsClose();
     })
 
