@@ -11,8 +11,8 @@ function getUrlQuery(key){
 document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
         loading:true,
-        loadingMessage:"Initializing...",
-        loadingDot:"",
+        loadingMessage:"Initializing",
+        loadingDot:"...",
         setLoadingDotInterval(){
             let count=0;
             setInterval(()=>{
@@ -237,10 +237,10 @@ document.addEventListener('alpine:init', () => {
             },100)
         },
         addCloseEvent(){
-            this.game.ws.addEventListener('close',closeEvent);
+            this.game.ws.addEventListener('close',this.closeEvent);
         },
         removeCloseEvent(){
-            this.game.ws.removeEventListener('close',closeEvent);
+            this.game.ws.removeEventListener('close',this.closeEvent);
         },
         waitJoin(){
             let interval=setInterval(()=>{
