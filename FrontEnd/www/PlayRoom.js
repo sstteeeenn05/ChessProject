@@ -58,7 +58,9 @@ document.addEventListener('alpine:init', () => {
             } else {
                 this.showMessage('Game Over', 'the game tied')
             }
-
+            setInterval(()=>{
+                if(!this.isMessage) location.href="/";
+            },100)
         },
         isMessage: false,
         boxTitle: '',
