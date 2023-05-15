@@ -32,13 +32,13 @@ img{
     box-sizing: border-box;
     aspect-ratio: 1;
     width: 100%;
-    background: #008dcd;
+    background: deepskyblue;
     cursor: pointer;
 }
 
 .row:nth-child(odd) > .row-element:nth-child(even),
 .row:nth-child(even) > .row-element:nth-child(odd) {
-    background: deepskyblue;
+    background: #008dcd;
 }
 
 .image {
@@ -128,6 +128,11 @@ img{
 .bottom-info{
     display: flex;
     justify-content: space-between;
+    text-align: center;
+}
+
+.round-message{
+    width:100%;
 }
 
 .undo-button, .redo-button{
@@ -197,16 +202,17 @@ img{
 }
 .waveGroup{
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    height: 100px;
 }
 .wave {
     width: 10px;
-    height: 120px;
+    height: 100px;
     background: linear-gradient(135deg,deepskyblue,#005b9b);
     margin: 10px;
     animation: wave 1s linear infinite;
     border-radius: 5px;
-    transform: scaleY(.1);
+    transform: scaleY(.1) translateY(-10%);
 }
 .wave[waveid="0"] {
     animation-delay: 0s;
@@ -241,19 +247,21 @@ img{
 
 @keyframes wave {
     0% {
-        opacity: 1;
-        transform: scaleY(.1);
+        transform: scaleY(.1) translateY(0%);
+    }
+    25% {
+        transform: scaleY(1) translateY(-50%);
     }
     50% {
-        opacity: 1;
-        transform: scaleY(1);
+        transform: scaleY(.5) translateY(0%);
     }
-    100% {
-        opacity: 1;
-        transform: scaleY(.1);
+    80% {
+        transform: scaleY(.2) translateY(-20%);
     }
 }
 
 .loadingMessage{
     color:white;
+    width: 100%;
+    text-align: center;
 }

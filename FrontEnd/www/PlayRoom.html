@@ -33,16 +33,16 @@
         </template>
       </div>
       <div class="bottom-info">
-        <button class="undo-button" :disabled="!canUndo" @click="readHistory('undo')">
+        <button class="undo-button" x-show="pckg.isSingle" :disabled="!canUndo" @click="readHistory('undo')">
           <img class="undo-button-image" src="./assets/left.svg" alt="undo">
         </button>
         <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
-        <button class="redo-button" :disabled="!canRedo" @click="readHistory('redo')">
+        <button class="redo-button" x-show="pckg.isSingle" :disabled="!canRedo" @click="readHistory('redo')">
           <img class="redo-button-image" src="./assets/right.svg" alt="undo">
         </button>
       </div>
     </div>
-    <div class="center" x-show="loading" x-transition.duration.500ms>
+    <div class="center" x-show="loading" x-init="setLoadingDotInterval()" x-transition.duration.500ms>
       <div>
         <div class="waveGroup">
           <div class="wave" waveid="9"></div>

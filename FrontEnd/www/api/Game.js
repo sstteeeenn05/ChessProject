@@ -12,6 +12,7 @@ export class Game{
     isReady=false;
     isStart=false;
     joinRequestQueue=new Array();
+    ws=new WebSocket(WS_URL,"protocol-chess-game");
     /**
      * 
      * @param {Object} request 
@@ -51,20 +52,19 @@ export class Game{
      */
     connect(pckg){
         return new Promise((resolve,reject)=>{
-            this.ws=new WebSocket(WS_URL,"protocol-chess-game");
-            this.ws.addEventListener('close',(e)=>{
-                alert("The room is closed!");
+            let interval=setInterval(()=>{
+                if(this.ws.readyState===1){
+                    clearInterval(interval);
+                    this.isReady=true;
+                    this.generatePromise({
+                        type:"handshake",
+                        content:pckg
+                    },"room-response").then(
+                        ()=>resolve(),
+                        ()=>reject()
+                    )
+                }
             })
-            this.ws.onopen=()=>{
-                this.isReady=true;
-                this.generatePromise({
-                    type:"handshake",
-                    content:pckg
-                },"room-response").then(
-                    ()=>resolve(),
-                    ()=>reject()
-                )
-            }
         })
     }
     acceptJoinRequest(who){

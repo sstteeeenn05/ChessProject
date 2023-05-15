@@ -12,6 +12,7 @@
  * @prop {Player} p1
  * @prop {pipe.ChildProcess} process
  * @prop {GameArgs} gameArgs
+ * @prop {string} fen
  */
 
 /**
@@ -20,6 +21,7 @@
  * @prop {string} nickname
  * @prop {boolean} isSingle
  * @prop {string} roomId
+ * @prop {string} fen
  */
 
 /**
@@ -51,31 +53,12 @@
  * @prop {HandshakePackage|GameArgs|JoinResponse|ServerResponse|string} content
  */
 
-/**
- * @typedef {Object} Request
- * @prop {string} type
- * @prop {HandshakePackage} package
- * @prop {string} command
- */
-
-/**
- * @typedef {Object} Status
- * @prop {boolean} success
- * @prop {string} message
- */
-
-/**
- * @typedef {Object} Response
- * @prop {Status} status
- * @prop {Object} content
- */
-
 const express = require('express');
 const app = express();
 const SocketServer = require('ws').Server;
 const pipe=require('child_process');
 
-app.use(express.static(__dirname+"\\www"));
+app.use(express.static(__dirname+"\\www",{index:"Lobby.html"}));
 
 const PORT=1234;
 const server=app.listen(PORT);
@@ -140,26 +123,28 @@ function getRoomList(ws){
  * @param {HandshakePackage} package 
  */
 function createGame(ws,package){
+    /** @type {Room} */
     let room={
         p0:{ws:ws},
         gameArgs:{}
     }
     room.nowMoving=room.p0;
     if(package.isSingle){
+        room.fen=package.fen;
         room.p0.name="white";
         room.p1={
             name:"black",
             ws:ws
         };
-        room.process=pipe.execFile("application\\chess.exe");
+        room.process=pipe.spawn("application\\chess.exe",[room.fen]);
         startGame(room);
     }else{
+        if(roomList.has(package.roomId)) return ws.close(1000,"Room Existed");
         ws.on('close',()=>{
             roomList.delete(package.roomId);
         })
         room.p0.name=package.nickname;
         room.status="waiting";
-        if(roomList.has(package.roomId)) return ws.close(1000,"room-existed");
         roomList.set(package.roomId,room);
     }
     console.log("created!");
@@ -175,9 +160,9 @@ function createGame(ws,package){
  * @param {HandshakePackage} package 
  */
 function joinGame(ws,package){
-    if(!roomList.has(package.roomId)) return ws.close(1000,"room-not-found");
+    if(!roomList.has(package.roomId)) return ws.close(1000,"404 NOT FOUND");
     let room=roomList.get(package.roomId);
-    if(room.status!="waiting") return ws.close(1000,"room-is-full");
+    if(room.status!="waiting") return ws.close(1000,"The game started");
     room.p0.ws.addEventListener('message',(e)=>{
         /** @type {Package} */
         let response=JSON.parse(e.data.toString());
@@ -282,16 +267,16 @@ function startGame(room){
 
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
-        data=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
-        if(data.length!=7) return wsClose();
+        let arr=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
+        if(arr.length!=7) return wsClose("Internal Server Error");
         gameArgs={
-            status:data[0],
-            who:data[1],
-            canUndo:data[2]==='1',
-            canRedo:data[3]==='1',
-            value:data[4],
-            maskBoard:data[5].toString().split("").map((c)=>{return parseInt(c)}),
-            board:data[6].match(/.{1,8}/g)
+            status:arr[0],
+            who:arr[1],
+            canUndo:arr[2]==='1',
+            canRedo:arr[3]==='1',
+            value:arr[4],
+            maskBoard:arr[5].toString().split("").map((c)=>{return parseInt(c)}),
+            board:arr[6].match(/.{1,8}/g)
         }
         console.log(`send:${gameArgs.value}${gameArgs.maskBoard} > ${gameArgs.status}`);
         room.nowMoving.ws.send(JSON.stringify({
@@ -308,11 +293,22 @@ function startGame(room){
         process.stdin.write("\n");
     }
 
-    let wsClose=()=>{
+    p0.ws.onclose=()=>{
+        console.log("player0 leave!");
+        if(p1.ws.readyState===1) p1.ws.close(1000,"Player0 leave!");
+    }
+    p1.ws.onclose=()=>{
+        console.log("player1 leave!");
+        if(p0.ws.readyState===1) p0.ws.close(1000,"Player1 leave!");
+    }
+
+    let wsClose=(msg)=>{
         console.log("onclose!");
-        process.kill();
-        p0.close();
-        p1.close();
+        p0.ws.onclose=null;
+        p1.ws.onclose=null;
+        p0.ws.close(1000,msg);
+        p1.ws.close(1000,msg);
+        process.write("exit\n");
     }
 }
 

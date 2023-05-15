@@ -5,13 +5,13 @@ function getUrlQuery(key){
     let query=location.search;
     let arr=query.split(key);
     if(arr.length<2) return false;
-    return arr[1].replace('=','').split('&')[0];
+    return decodeURI(arr[1].replace('=','').split('&')[0]);
 }
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('globalScope', () => ({
         loading:true,
-        loadingMessage:"",
+        loadingMessage:"Initializing...",
         loadingDot:"",
         setLoadingDotInterval(){
             let count=0;
@@ -52,6 +52,7 @@ document.addEventListener('alpine:init', () => {
             })
         },
         showResult(player, status) {
+            this.removeCloseEvent();
             if (status !== 'tie') {
                 this.showMessage('Congrats!!', `${player} ${status}s`)
             } else {
@@ -229,7 +230,17 @@ document.addEventListener('alpine:init', () => {
             }
         },
         game: new Game(),
-        roomId: "",
+        addCloseEvent(){
+            this.game.ws.addEventListener('close',(e)=>{
+                this.showMessage("Connection closed!", e.reason);
+                setInterval(()=>{
+                    if(!this.isMessage) location.href="/";
+                },100)
+            })
+        },
+        removeCloseEvent(){
+            this.game.ws.removeEventListener('close');
+        },
         waitJoin(){
             let interval=setInterval(()=>{
                 if(this.game.isStart){
@@ -262,26 +273,27 @@ document.addEventListener('alpine:init', () => {
                 }
             },1000)
         },
+        pckg:new Object(),
         connectGame(){
-            this.setLoadingDotInterval();
-            let pckg=new Object();
+            let pckg=this.pckg;
 
             if(getUrlQuery("create")!==false){
                 this.player="white";
                 pckg.header="create";
                 if(getUrlQuery("single")!==false){
                     pckg.isSingle=true;
+                    if(getUrlQuery("fen")!==false) pckg.fen=getUrlQuery("fen");
                 }else{
                     pckg.isSingle=false;
                     pckg.roomId=getUrlQuery("create");
-                    pckg.nickname=getUrlQuery("nickname")??"Unknown";
+                    pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
                     this.loadingMessage="Wating for Player's Joining";
                 }
             }else if(getUrlQuery("join")!==false){
                 this.player="black";
                 pckg.header="join";
                 pckg.roomId=getUrlQuery("join");
-                pckg.nickname=getUrlQuery("nickname")??"Unknown";
+                pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
                 this.loadingMessage="Wating for Room Leader's Reply"
             }else{
                 this.loadingMessage="missing header";
@@ -290,6 +302,7 @@ document.addEventListener('alpine:init', () => {
 
             console.log(pckg);
 
+            this.addCloseEvent();
             this.game.connect(pckg).then(()=>{
                 this.waitJoin();
             }).catch((msg)=>this.loadingMessage=msg)
