@@ -67,6 +67,9 @@ Board::Board()
 	logs.clear();
 }
 
+//intent:constructor and initialize the board
+//pre:none
+//post:none
 std::string Board::getBoard()
 {
 	std::string output;
