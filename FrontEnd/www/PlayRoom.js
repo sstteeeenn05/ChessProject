@@ -230,16 +230,17 @@ document.addEventListener('alpine:init', () => {
             }
         },
         game: new Game(),
+        closeEvent(e){
+            this.showMessage("Connection closed!", e.reason);
+            setInterval(()=>{
+                if(!this.isMessage) location.href="/";
+            },100)
+        },
         addCloseEvent(){
-            this.game.ws.addEventListener('close',(e)=>{
-                this.showMessage("Connection closed!", e.reason);
-                setInterval(()=>{
-                    if(!this.isMessage) location.href="/";
-                },100)
-            })
+            this.game.ws.addEventListener('close',closeEvent);
         },
         removeCloseEvent(){
-            this.game.ws.removeEventListener('close');
+            this.game.ws.removeEventListener('close',closeEvent);
         },
         waitJoin(){
             let interval=setInterval(()=>{
