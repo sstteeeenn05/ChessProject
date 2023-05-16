@@ -43,6 +43,3 @@ public:
 	bool checkMovement(Player player);
 	bool checkWin(Player player);
 };
-
-// moveAvalible 在 Board.h
-//要吃棋子再去movaAvalible 比較

@@ -164,6 +164,7 @@ bool Board::moveAvalible(Chess& source, Chess& target)
 	Position targetPos = target.getPos();
 	validPos = source.getValidPos(board);
 
+	//check if it is this player's turn
 	if (target.getPlayer() != source.getPlayer())
 	{
 		//run in the vector saved valid positions
@@ -179,83 +180,119 @@ bool Board::moveAvalible(Chess& source, Chess& target)
 	return false;
 }
 
-bool Board::canUndo() {
+//intent:check if there is any steps before
+//pre:none
+//post:true if it has steps in front of it
+bool Board::canUndo() 
+{
 	return logIndex;
 }
 
-bool Board::canRedo() {
+//intent:check if there is any steps after
+//pre:none
+//post:true if it has steps back of it
+bool Board::canRedo() 
+{
 	return logIndex < logs.size();
 }
 
-bool Board::undo() //undo
+//intent:undo the last step
+//pre:none
+//post:true if it undo successfully
+bool Board::undo() 
 {
+	//if there is no steps in front of it
 	if (!canUndo()) return false;
+
 	Log record(logs[logIndex - 1].source, logs[logIndex - 1].target, logs[logIndex - 1].castling, logs[logIndex - 1].enPassant);
+
+	//if the last step king had castling
 	if (record.castling)
 	{
+		//if it is the short castling then return the rook
 		if (record.target.getPos().x == 6)
 		{
 			board[record.source.getPos().y][7].setSpace(board[record.source.getPos().y][5]);
 			board[record.source.getPos().y][5].setEmpty();
 		}
-		else
+		else //if it is the long castling then return the rook
 		{
 			board[record.source.getPos().y][0].setSpace(board[record.source.getPos().y][3]);
 			board[record.source.getPos().y][3].setEmpty();
 		}
 	}
+
+	//if the last step pawn had enPassant
 	if (record.enPassant)
 	{
+		//if the black pawn ate the white chess then recover it
 		if (record.source.getPos().y == 4)
 		{
 			board[4][record.target.getPos().x].setChess(PAWN, WHITE);
 		}
-		else
+		else //if the white pawn ate the black chess then recover it
 		{
 			board[3][record.target.getPos().x].setChess(PAWN, BLACK);
 		}
 	}
-	board[record.source.getPos().y][record.source.getPos().x] = record.source;
-	board[record.target.getPos().y][record.target.getPos().x] = record.target;
+
+	board[record.source.getPos().y][record.source.getPos().x] = record.source; //return the source back
+	board[record.target.getPos().y][record.target.getPos().x] = record.target; //return the target back
 	logIndex--;
 	return true;
 }
 
-bool Board::redo() //redo
+//intent:undo the next step
+//pre:none
+//post:true if it redo successfully
+bool Board::redo() 
 {
+	//if there is no steps after it
 	if (!canRedo()) return false;
+
 	Log record(logs[logIndex].source, logs[logIndex].target, logs[logIndex].castling, logs[logIndex].enPassant);
+
+	//if the next step king had castling
 	if (record.castling)
 	{
+		//if it is the short castling then set the rook to the castling pos
 		if (record.target.getPos().x == 6)
 		{
 			board[record.source.getPos().y][5].setSpace(board[record.source.getPos().y][7]);
 			board[record.source.getPos().y][7].setEmpty();
 		}
-		else
+		else //if it is the long castling then set the rook to the castling pos
 		{
 			board[record.source.getPos().y][3].setSpace(board[record.source.getPos().y][0]);
 			board[record.source.getPos().y][0].setEmpty();
 		}
 	}
+
+	//if the last step pawn had enPassant
 	if (record.enPassant)
 	{
-		if (record.source.getPos().y == 4)
+		//let the black chess to be eaten
+		if (record.source.getPos().y == 4) 
 		{
 			board[4][record.target.getPos().x].setEmpty();
 		}
-		else
+		else //let the white chess to be eaten
 		{
 			board[3][record.target.getPos().x].setEmpty();
 		}
 	}
-	board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]);
-	board[record.source.getPos().y][record.source.getPos().x].setEmpty();
+
+	board[record.target.getPos().y][record.target.getPos().x].setSpace(board[record.source.getPos().y][record.source.getPos().x]); //set the source back
+	board[record.source.getPos().y][record.source.getPos().x].setEmpty(); //set the target back
 	logIndex++;
 	return true;
 }
 
-int Board::getLogIndex() {
+//intent:get the index of log
+//pre:none
+//post:the int represent the number of log
+int Board::getLogIndex()
+{
 	return logIndex;
 }
 
@@ -269,7 +306,7 @@ bool Board::castling(Position source, Position target)
 	//if king hasn't moved before
 	if (!board[source.y][source.x].getMoved())
 	{
-		//if it is the long castling and the castle hasn't moved
+		//if it is the long castling and the rook hasn't moved
 		if (!(board[source.y][0].getMoved()) && target.x == 2)
 		{
 			//loop all the space between them
@@ -299,14 +336,14 @@ bool Board::castling(Position source, Position target)
 			{
 				return true;
 			}
-			else //return the castle back
+			else //return the rook back
 			{
 				board[source.y][0].setSpace(board[source.y][3]);
 				board[source.y][3].setEmpty();
 				return false;
 			}
 		}
-		else if ((!board[source.y][7].getMoved()) && target.x == 6) //if it is the short castling and the castle hasn't moved
+		else if ((!board[source.y][7].getMoved()) && target.x == 6) //if it is the short castling and the rook hasn't moved
 		{
 			//loop all the space between them
 			for (int i = 5; i <= 6; i++)
@@ -335,7 +372,7 @@ bool Board::castling(Position source, Position target)
 			{
 				return true;
 			}
-			else  //return the castle back
+			else  //return the rook back
 			{
 				board[source.y][7].setSpace(board[source.y][5]);
 				board[source.y][5].setEmpty();
@@ -349,18 +386,27 @@ bool Board::castling(Position source, Position target)
 	}
 }
 
+//intent:check if pawn can castling and move the pawn
+//pre:position of source and target and the record
+//post:true if it can enPassant
 bool Board::enPassant(Chess& chess, Position target, Log record)
 {
+	//check if it is pawn
 	if (record.source.getType() != PAWN)
 	{
 		return false;
 	}
+
+	//check if the vertical distance is 2 
 	if (abs(record.source.getPos().y - record.target.getPos().y) != 2)
 	{
 		return false;
 	}
+
 	Player color = chess.getPlayer();
 	Chess king;
+
+	//if it is the black chess
 	if (color == BLACK)
 	{
 		
