@@ -114,6 +114,7 @@ std::vector<Position> Chess::getValidPos(Position target) {
     switch (chess.data.type) {
         case KING:
             chess.checkSquare(output);
+            chess.checkCastling(output);
             break;
         case QUEEN:
             chess.checkStraight(output);
@@ -144,6 +145,36 @@ bool Chess::checkValid(Position pos, std::vector<Position> &output) const {
     return chess.data.player == NONE;
 }
 
+void Chess::checkCastling(std::vector<Position> & output) {
+    if(data.moved) return;
+    if(isChecking) return;
+
+    const Position checkRookPos[2] = {
+            {0, data.position.y},
+            {7, data.position.y}
+    };
+
+    bool isRouteEmpty[2] = {true, true};
+    for(auto &chess : board[data.position.y]) {
+        if(chess.data.position.x != data.position.x &&
+            chess.data.position.x != 0 &&
+            chess.data.position.x != 7 &&
+            chess.data.type != EMPTY) {
+            isRouteEmpty[chess.data.position.x > data.position.x] = false;
+        }
+    }
+
+    for(auto &pos : checkRookPos) {
+        auto& chess = getChess(pos);
+        if(chess.data.type == ROOK && !chess.data.moved &&
+            isRouteEmpty[chess.data.position.x > data.position.x]) {
+            if(pos.x) output.push_back({6, data.position.y});
+            else output.push_back({2, data.position.y});
+        }
+    }
+
+}
+
 void Chess::checkStraight(std::vector<Position> &output) {
     for (int nowX = data.position.x + 1; nowX < 8; nowX++) {
         if (!checkValid({nowX, data.position.y}, output)) break;
@@ -159,7 +190,7 @@ void Chess::checkStraight(std::vector<Position> &output) {
     }
 }
 
-void Chess::checkCross(std::vector<Position> &output) {
+void Chess::checkCross(std::vector<Position> &output) const {
     for (int nowX = data.position.x + 1, nowY = data.position.y + 1; nowX < 8 && nowY < 8; nowX++, nowY++) {
         if (!checkValid({nowX, nowY}, output)) break;
     }
@@ -174,7 +205,7 @@ void Chess::checkCross(std::vector<Position> &output) {
     }
 }
 
-void Chess::checkSquare(std::vector<Position> &output) {
+void Chess::checkSquare(std::vector<Position> &output) const {
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
             if (dy || dx) {
@@ -185,7 +216,7 @@ void Chess::checkSquare(std::vector<Position> &output) {
     }
 }
 
-void Chess::checkL(std::vector<Position> &output) {
+void Chess::checkL(std::vector<Position> &output) const {
     Position posList[8] = {
             {1,  2},
             {-1, 2},
@@ -219,7 +250,7 @@ void Chess::checkPawn(std::vector<Position> &output) {
     if (rightUpEatable || rightEnPassant) checkValid(rightUp, output);
 }
 
-Position Chess::generatePosByPlayer(Position pos) {
+Position Chess::generatePosByPlayer(Position pos) const {
     return data.position + Position{pos.x, data.player == WHITE ? -pos.y : pos.y};
 }
 
@@ -227,7 +258,7 @@ bool Chess::onRiver() const {
     return (data.player == WHITE && data.position.y == 3) || (data.player == BLACK && data.position.y == 4);
 }
 
-std::pair<Position, Position> Chess::getSidePos() {
+std::pair<Position, Position> Chess::getSidePos() const {
     return {
             data.position - Position{1, 0},
             data.position + Position{1, 0}

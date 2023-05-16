@@ -44,21 +44,23 @@ public:
 
     bool checkValid(Position, std::vector<Position> &) const;
 
+    void checkCastling(std::vector<Position> &);
+
     void checkStraight(std::vector<Position> &);
 
-    void checkCross(std::vector<Position> &);
+    void checkCross(std::vector<Position> &) const;
 
-    void checkSquare(std::vector<Position> &);
+    void checkSquare(std::vector<Position> &) const;
 
-    void checkL(std::vector<Position> &);
+    void checkL(std::vector<Position> &) const;
 
     void checkPawn(std::vector<Position> &);
 
-    Position generatePosByPlayer(Position);
+    [[nodiscard]] Position generatePosByPlayer(Position) const;
 
     [[nodiscard]] bool onRiver() const;
 
-    std::pair<Position, Position> getSidePos();
+    [[nodiscard]] std::pair<Position, Position> getSidePos() const;
 
     std::pair<bool, bool> getEnPassant();
 
@@ -66,9 +68,9 @@ public:
 
     static bool move(Player, Position, Position);
 
-    bool checkPromotion() const;
+    [[nodiscard]] bool checkPromotion() const;
 
-    Type doPromotion() const;
+    [[nodiscard]] Type doPromotion() const;
 
     static void checkMovement(const Position& target, std::vector<Position> &validPos);
 
@@ -86,7 +88,7 @@ public:
 
     Chess() = default;
 
-    Chess(Position);
+    explicit Chess(Position);
 
     Chess(Player, Position, Type);
 };
