@@ -1,0 +1,72 @@
+.btn{
+    border-radius: 16px;
+    background: #008dcd;
+    border: none;
+    color: white;
+}
+
+.btn:hover {
+    background: #005b9b;
+    cursor: pointer;
+}
+
+.btn:active {
+    background: #002969;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    background: gray;
+    cursor: initial;
+}
+
+.btn-cancel{
+    border-radius: 16px;
+    background: darkgray;
+    border: none;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: gray;
+    cursor: pointer;
+}
+
+.btn-cancel:active {
+    background:#4e4e4e;
+    cursor: pointer;
+}
+
+.btn-confirm{
+    border-radius: 16px;
+    background: green;
+    border: none;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background: darkolivegreen;
+    cursor: pointer;
+}
+
+.btn-confirm:active {
+    background:darkgreen;
+    cursor: pointer;
+}
+
+.btn-reject{
+    border-radius: 16px;
+    background: crimson;
+    border: none;
+    color: white;
+}
+
+.btn-reject:hover {
+    background: brown;
+    cursor: pointer;
+}
+
+.btn-reject:active {
+    background:darkred;
+    cursor: pointer;
+}

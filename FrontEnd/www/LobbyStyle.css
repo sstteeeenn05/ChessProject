@@ -1,4 +1,7 @@
-[x-cloak] { display: none !important; }
+[x-cloak] {
+    display: none !important;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -9,31 +12,194 @@ body {
     background-size: cover;
 }
 
-.main{
+.leave-button-image{
+    transform: rotate(180deg);
+    width: 90%;
+    height: 90%;
+}
+
+.leave-button {
+    width: 10vh;
+    height: 10vh;
+    max-width: 10vw;
+    max-height: 10vw;
+    border: none;
+    cursor: pointer;
+    position: fixed;
+    z-index: 1000;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border-radius: 100%;
+}
+
+.leave-button:hover{
+    background: gray;
+}
+
+.leave-button:active{
+    background: #4e4e4e;
+}
+
+.content{
+    color:white;
     padding: 0 20px 20px;
-    background: white;
+    background: rgb(56,56,56);
     border-radius: 24px;
     box-shadow: rgba(0, 0, 0, .5) 0 0 10px 5px;
 }
 
-.main > .single-play-button{
+.content-fade-in{
+    animation: content-fade-from-right .5s linear;
+}
+
+.content-fade-out{
+    animation: content-fade-from-left .5s linear reverse;
+}
+
+@keyframes content-fade-from-left{
+    0%{
+        transform: translateX(-30vw) rotateY(-90deg);
+        opacity: 0;
+    }
+    50%{
+        transform: translateX(-15vw) rotateY(-30deg);
+        opacity: 1;
+    }
+    100%{
+        transform: translateX(0%) rotateY(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes content-fade-from-right{
+    0%{
+        transform: translateX(30vw) rotateY(90deg);
+        opacity: 0;
+    }
+    50%{
+        transform: translateX(15vw) rotateY(30deg);
+        opacity: 1;
+    }
+    100%{
+        transform: translateX(0%) rotateY(0deg);
+        opacity: 1;
+    }
+}
+
+.content-multi{
+    width:800px;
+    height:75%;
+}
+
+.function-button{
     height: 50px;
     width: 200px;
     font-size: larger;
-    color: white;
-    border-radius: 16px;
-    background: #008dcd;
-    border: none;
 }
 
-.main > .single-play-button:hover {
-    background: #005b9b;
-    cursor: pointer;
+.room-scroll{
+    width: 100%;
+    height: calc(100% - 87px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.main > .single-play-button:active {
-    background: #002969;
-    cursor: pointer;
+.room-list{
+    width: 100%;
+    overflow-y: auto;
 }
 
+.row{
+    background-color: white;
+    color:black;
+    border-radius: 10px;
+    padding:10px 20px;
+    margin:10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
+.row-room-status{
+    color:white;
+    padding:5px;
+    border-radius: 5px;
+    position: relative;
+    top:-10px;
+    left:10px;
+}
+
+.room-buttons{
+    margin:20px 10px;
+    width:100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.waveGroup{
+    position:absolute;
+    top:20vh;
+    left:0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 200px;
+    width: 100%;
+}
+.wave {
+    width: 10px;
+    height: 100px;
+    background: linear-gradient(135deg,deepskyblue,#005b9b);
+    margin: 10px;
+    animation: wave 1s linear infinite;
+    border-radius: 5px;
+    transform: scaleY(.1) translateY(-10%);
+}
+.wave[waveid="0"] {
+    animation-delay: 0s;
+}
+.wave[waveid="1"] {
+    animation-delay: 0.1s;
+}
+.wave[waveid="2"] {
+    animation-delay: 0.2s;
+}
+.wave[waveid="3"] {
+    animation-delay: 0.3s;
+}
+.wave[waveid="4"] {
+    animation-delay: 0.4s;
+}
+.wave[waveid="5"] {
+    animation-delay: 0.5s;
+}
+.wave[waveid="6"] {
+    animation-delay: 0.6s;
+}
+.wave[waveid="7"] {
+    animation-delay: 0.7s;
+}
+.wave[waveid="8"] {
+    animation-delay: 0.8s;
+}
+.wave[waveid="9"] {
+    animation-delay: 0.9s;
+}
+
+@keyframes wave {
+    0% {
+        transform: scaleY(.1) translateY(0%);
+    }
+    25% {
+        transform: scaleY(1) translateY(-50%);
+    }
+    50% {
+        transform: scaleY(.5) translateY(0%);
+    }
+    80% {
+        transform: scaleY(.2) translateY(-20%);
+    }
+}

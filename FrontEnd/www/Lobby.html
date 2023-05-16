@@ -1,18 +1,129 @@
 <html>
 <head>
-	<script defer src="./api/Alpine.js"></script>
+	<script defer type="module" src="./Lobby.js"></script>
 	<link rel="stylesheet" href="LobbyStyle.css">
+	<link rel="stylesheet" href="lightbox.css">
+	<link rel="stylesheet" href="button.css">
 	<title>Chess</title>
 </head>
 <script>
 
 </script>
-<body>
-	<div class="main">
+<body x-data="globalScope" style="overflow: hidden;" x-cloak>
+	<button class="leave-button"
+		@click="showMode='';setTimeout(()=>showMode='home',500)"
+			x-show="showMode!='home'"
+			x-transition.duration.500ms>
+	  <img class="leave-button-image" src="./assets/exit.svg"
+		   alt="leave">
+	</button>
+	<div class="content content-home"
+		x-show="showMode=='home'"
+		:class="showMode=='home'
+			?'content-fade-in'
+			:'content-fade-out'"
+		x-transition:enter.delay.500ms
+		x-transition:leave.duration.500ms>
 		<h1 class="title">Chess game</h1>
-		<button class="single-play-button" onclick="location.href = 'PlayRoom.html?create&single'">Single Play</button>
+		<button class="btn function-button" onclick="location.href = 'PlayRoom.html?create&single'">SinglePlay</button>
+		<button class="btn function-button"
+			@click="showMode='';setTimeout(()=>{
+				showMode='multi';
+				getRoomList();
+			},500)">MultiPlay</button>
 	</div>
-
+	<div class="content content-multi"
+		x-show="showMode=='multi'"
+		:class="showMode=='multi'
+			?'content-fade-in'
+			:'content-fade-out'"
+		x-transition:enter.delay.500ms
+		x-transition:leave.duration.500ms>
+		<h1 class="title">
+			MultiPlay
+			<span x-show="!gettingRoomList"> - <span x-text="roomList.length"></span> room(s)</span>
+		</h1>
+		<div class="room-scroll">
+			<div class="room-list" x-show="roomList.length&&!gettingRoomList" x-transition.duration.500ms>
+				<template x-for="(room,row) in roomList" :key="row">
+					<div class="row">
+						<div>
+							<img height="50px" style="aspect-ratio: 1; margin-right: 20px;"/>
+							<span class="row-room-status" :style="{backgroundColor:room.status=='Waiting'?'green':'crimson'}" x-text="room.status"></span>
+						</div>
+						<div style="text-align: left; width: 100%;">
+							<p>Room Name : <b x-text="room.id"></b></p>
+							<p>Created by <i x-text="room.p0"></i><span x-show="room.p1"> - Playing with <i x-text="room.p1"></i></span></p>
+						</div>
+						<div>
+							<input class="btn function-button" type="button" value="Join" :disabled="room.status!='Waiting'"
+								@click="showJoinPrompt(room.id)" />
+						</div>
+					</div>
+				</template>
+			</div>
+			<div class="waveGroup" x-show="gettingRoomList" x-transition.duration.500ms>
+				<div class="wave" waveid="9"></div>
+				<div class="wave" waveid="8"></div>
+				<div class="wave" waveid="7"></div>
+				<div class="wave" waveid="6"></div>
+				<div class="wave" waveid="5"></div>
+				<div class="wave" waveid="4"></div>
+				<div class="wave" waveid="3"></div>
+				<div class="wave" waveid="2"></div>
+				<div class="wave" waveid="1"></div>
+				<div class="wave" waveid="0"></div>
+				<div class="wave" waveid="1"></div>
+				<div class="wave" waveid="2"></div>
+				<div class="wave" waveid="3"></div>
+				<div class="wave" waveid="4"></div>
+				<div class="wave" waveid="5"></div>
+				<div class="wave" waveid="6"></div>
+				<div class="wave" waveid="7"></div>
+				<div class="wave" waveid="8"></div>
+				<div class="wave" waveid="9"></div>
+			</div>
+			<h2 x-show="!roomList.length&&!gettingRoomList" x-transition.duration.500ms>No Room Available</h2>
+			<div class="room-buttons" x-show="!gettingRoomList" x-transition.duration.500ms>
+				<input class="btn function-button" type="button" value="Create Room" @click="showCreatePrompt()"/>
+				<input class="btn function-button" type="button" value="Reload" @click="getRoomList()" />
+			</div>
+	</div>
+    <dialog class="lightbox" id="messageBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isMessage" x-transition>
+      <h2 class="lightbox-title" x-text="boxTitle"></h2>
+      <p class="lightbox-content" x-text="boxContext"></p>
+      <button class="btn lightbox-button" @click="closeMessage">OK</button>
+    </dialog>
+    <dialog class="lightbox" id="createPromptBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isCreatePromptOpen" x-transition>
+		<h2 class="lightbox-title">Create Room</h2>
+		<p class="lightbox-content">Please enter the room name and your nickname.</p>
+		<div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+			<input class="lightbox-input" type="text" placeholder="Room Name" x-model="createPromptRoomName"/><br/>
+			<input class="lightbox-input" type="text" placeholder="Nickname (Default is Unknown)" x-model="createPromptNickName"/><br/>
+		</div>
+		<div style="display: flex;">
+			<button class="btn lightbox-button" @click="closeCreatePrompt(true)">Create</button>
+			<button class="btn-cancel lightbox-button" @click="closeCreatePrompt()">Cancel</button>
+		</div>
+    </dialog>
+    <dialog class="lightbox" id="joinPromptBox"
+            @cancel="(event)=>{event.preventDefault()}"
+            x-show="isJoinPromptOpen" x-transition>
+		<h2 class="lightbox-title">Join Room</h2>
+		<p class="lightbox-content">Please enter your nickname to join room <b x-text="joinPromptRoomName"></b>.</p>
+		<div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+			<input class="lightbox-input" type="text" placeholder="Nickname (Default is Unknown)" x-model="joinPromptNickName"/><br/>
+		</div>
+		<div style="display: flex;">
+			<button class="btn lightbox-button" @click="closeJoinPrompt(true)">Create</button>
+			<button class="btn-cancel lightbox-button" @click="closeJoinPrompt()">Cancel</button>
+		</div>
+    </dialog>
+  </div>
 </body>
 
 </html>

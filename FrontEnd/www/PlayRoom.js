@@ -239,10 +239,10 @@ document.addEventListener('alpine:init', () => {
             },100)
         },
         addCloseEvent(){
-            this.game.ws.addEventListener('close',this.closeEvent);
+            this.game.ws.addEventListener('close',this.closeEvent.bind(this));
         },
         removeCloseEvent(){
-            this.game.ws.removeEventListener('close',this.closeEvent);
+            this.game.ws.removeEventListener('close',this.closeEvent.bind(this));
         },
         waitJoin(){
             let interval=setInterval(()=>{
@@ -250,13 +250,16 @@ document.addEventListener('alpine:init', () => {
                     clearInterval(interval);
                     this.loadingMessage="Joining"
                     this.updateStatus();
-                    setTimeout(()=>this.loading=false,1800);
+                    setTimeout(()=>{
+                        this.loading=false;
+                        this.loadingMessage=""
+                    },1800);
                     return;
                 }
                 if(this.game.joinRequestQueue.length){
                     clearInterval(interval);
                     let pckg=this.game.joinRequestQueue.shift();
-                    this.showConfirm("Join Request",`"${pckg.nickname}" wants to join!`);
+                    this.showConfirm("Join Request",`${pckg.nickname} wants to join!`);
                     let jnterval=setInterval(()=>{
                         if(!this.isConfirm){
                             clearInterval(jnterval);
@@ -265,7 +268,7 @@ document.addEventListener('alpine:init', () => {
                                 while(this.game.joinRequestQueue.length){
                                     this.game.rejectJoinRequest(this.joinRequestQueue.shift().nickname);
                                 }
-                                this.loadingMessage=`"${pckg.nickname}" Joining`
+                                this.loadingMessage=`${pckg.nickname} Joining`
                             }
                             else{
                                 this.game.rejectJoinRequest(pckg.nickname);

@@ -1,0 +1,43 @@
+.lightbox{
+    width: 350px;
+    border-radius: 24px;
+    border: none;
+    outline: none;
+}
+
+.lightbox::backdrop{
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.lightbox-title{
+    margin-top: 0;
+    text-align: center;
+}
+
+.lightbox-button{
+    display: block;
+    margin: auto;
+    width: 150px;
+    height: 40px;
+    font-size: large;
+}
+
+.lightbox-content{
+    font-size: larger;
+    text-align: center;
+}
+
+.lightbox-input{
+    font-size: large;
+    width:300px;
+    height:40px;
+    background-color: white;
+    color:black;
+    padding: 20px;
+    border:#008dcd solid 3px;
+    border-radius: 10px;
+}
+
+.lightbox-input:focus{
+    border-color: #005b9b;
+}

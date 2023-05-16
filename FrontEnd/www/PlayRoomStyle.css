@@ -48,6 +48,7 @@ img{
 }
 
 .leave-button-image{
+    transform: rotate(180deg);
     width: 90%;
     height: 90%;
 }
@@ -80,22 +81,6 @@ img{
     text-align: center;
 }
 
-.lightbox{
-    width: 350px;
-    border-radius: 24px;
-    border: none;
-    outline: none;
-}
-
-.lightbox::backdrop{
-    background: rgba(0, 0, 0, 0.6);
-}
-
-.lightbox>h2{
-    margin-top: 0;
-    text-align: center;
-}
-
 .select-div{
     width: 310px;
     margin: auto;
@@ -119,10 +104,6 @@ img{
     width: 60px;
     height: 60px;
     margin: 5px;
-}
-
-.leave-button-image{
-    transform: rotate(180deg);
 }
 
 .bottom-info{
@@ -164,28 +145,6 @@ img{
 .box-content{
     font-size: larger;
     text-align: center;
-}
-
-.confirm-button{
-    display: block;
-    margin: auto;
-    width: 150px;
-    height: 40px;
-    color: white;
-    font-size: large;
-    border-radius: 16px;
-    background: #008dcd;
-    border: none;
-}
-
-.confirm-button:hover{
-    background: #005b9b;
-    cursor: pointer;
-}
-
-.confirm-button:active {
-    background: #002969;
-    cursor: pointer;
 }
 
 /*For loading screen*/

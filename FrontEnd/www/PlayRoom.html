@@ -3,6 +3,8 @@
 <head>
   <script defer type="module" src="PlayRoom.js"></script>
   <link rel="stylesheet" href="PlayRoomStyle.css">
+  <link rel="stylesheet" href="lightbox.css">
+  <link rel="stylesheet" href="button.css">
   <title>Playing Chess</title>
 </head>
 
@@ -12,7 +14,7 @@
         x-init="connectGame()" x-cloak>
       <button class="leave-button"
               @click="loading = true;
-                      setTimeout(()=>{location.href = 'index.html';}, 1000)">
+                      setTimeout(()=>{location.href = '/';}, 1000)">
         <img class="leave-button-image" src="./assets/exit.svg"
              alt="leave">
       </button>
@@ -84,18 +86,18 @@
     <dialog class="lightbox" id="messageBox"
             @cancel="(event)=>{event.preventDefault()}"
             x-show="isMessage" x-transition>
-      <h2 class="box-title" x-text="boxTitle"></h2>
-      <p class="box-content" x-text="boxContext"></p>
-      <button class="confirm-button" @click="closeMessage">OK</button>
+      <h2 class="lightbox-title" x-text="boxTitle"></h2>
+      <p class="lightbox-content" x-text="boxContext"></p>
+      <button class="btn lightbox-button" @click="closeMessage">OK</button>
     </dialog>
     <dialog class="lightbox" id="confirmBox"
             @cancel="(event)=>{event.preventDefault()}"
             x-show="isConfirm" x-transition>
-      <h2 class="box-title" x-text="confirmTitle"></h2>
-      <p class="box-content" x-text="confirmContext"></p>
+      <h2 class="lightbox-title" x-text="confirmTitle"></h2>
+      <p class="lightbox-content" x-text="confirmContext"></p>
       <div style="display: flex;">
-        <button class="confirm-button" @click="closeConfirm(true)">Yes</button>
-        <button class="confirm-button" @click="closeConfirm(false)">NO</button>
+        <button class="btn-confirm lightbox-button" @click="closeConfirm(true)">Yes</button>
+        <button class="btn-reject lightbox-button" @click="closeConfirm(false)">NO</button>
       </div>
     </dialog>
   </div>

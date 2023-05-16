@@ -104,17 +104,25 @@ wss.on('connection',
  * @param {WebSocket} ws 
  */
 function getRoomList(ws){
-    if(roomList.size==0) return ws.close(1000,"empty-roomList");
     let list=new Array();
     roomList.forEach((room,id)=>{
         list.push({
             id:id,
             status:room.status,
-            name:room.name,
-            who:room.p0.name
+            p0:room.p0.name,
+            p1:room.p1?room.p1.name:undefined
         })
     })
-    ws.close(200,JSON.stringify(list));
+    list.sort((a,b)=>{
+        if(a.status==b.status) return 0;
+        if(a.status=="Waiting"&&b.status!="Waiting") return 1;
+        if(a.status!="Waiting"&&b.status=="Waiting") return -1;
+    })
+    list.reverse();
+    ws.send(JSON.stringify({
+        type:"room-list",
+        content:list
+    }));
 }
 
 /**
@@ -144,7 +152,7 @@ function createGame(ws,package){
             roomList.delete(package.roomId);
         })
         room.p0.name=package.nickname;
-        room.status="waiting";
+        room.status="Waiting";
         roomList.set(package.roomId,room);
     }
     console.log("created!");
@@ -162,7 +170,7 @@ function createGame(ws,package){
 function joinGame(ws,package){
     if(!roomList.has(package.roomId)) return ws.close(1000,"404 NOT FOUND");
     let room=roomList.get(package.roomId);
-    if(room.status!="waiting") return ws.close(1000,"The game started");
+    if(room.status!="Waiting") return ws.close(1000,"The game started");
     room.p0.ws.addEventListener('message',(e)=>{
         /** @type {Package} */
         let response=JSON.parse(e.data.toString());
@@ -210,7 +218,7 @@ function startGame(room){
 
     if(!process) wsClose();
 
-    room.status="playing";
+    room.status="Playing";
     gameArgs={
         status:"playing",
         who:"white",
@@ -294,11 +302,11 @@ function startGame(room){
     }
 
     p0.ws.onclose=()=>{
-        console.log("player0 leave!");
+        console.log("Player0 leave!");
         if(p1.ws.readyState===1) p1.ws.close(1000,"Player0 leave!");
     }
     p1.ws.onclose=()=>{
-        console.log("player1 leave!");
+        console.log("Player1 leave!");
         if(p0.ws.readyState===1) p0.ws.close(1000,"Player1 leave!");
     }
 
