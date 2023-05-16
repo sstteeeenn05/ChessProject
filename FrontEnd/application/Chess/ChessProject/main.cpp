@@ -1,44 +1,50 @@
 #include <iostream>
 #include "DataType.h"
-#include "Chess.h"
+#include "Board.h"
 
-int main() {
-	Chess::init();
+int main(int argc, char** argv) {
+    Board gameBoard;
+    if(argc == 4)
+        gameBoard.init(argv[1], argv[2], argv[3]);
+    else
+        gameBoard.init();
+    
 	Player player, enemy, p1 = WHITE, p2 = BLACK;
+
 	while (true)
 	{
 		std::string status, who, canUndo, canRedo, value, maskBoard, board;
-		player = Chess::getNowPlayer();
-		enemy = Chess::getNowEnemy();
+		player = gameBoard.getNowPlayer();
+		enemy = gameBoard.getNowEnemy();
 		std::string mode;
 		std::cin >> mode;
 
         if (mode == "exit") exit(0);
-		if (mode == "undo") value = Chess::undo() ? "success" : "failed";
-		if (mode == "redo") value = Chess::redo() ? "success" : "failed";
+		if (mode == "undo") value = gameBoard.undo() ? "success" : "failed";
+		if (mode == "redo") value = gameBoard.redo() ? "success" : "failed";
 		if (mode == "preview") {
 			Position point;
 			std::cin >> point.x >> point.y;
-			maskBoard = Chess::getMaskBoard(point);
+			maskBoard = gameBoard.getMaskBoard(point);
 		}
 		if (mode == "move") {
 			Position source, target;
 			std::cin >> source.x >> source.y >> target.x >> target.y;
-			value = Chess::move(player, source, target) ? "success" : "failed";
+			value = gameBoard.move(player, source, target) ? "success" : "failed";
 		}
 
-        if (Chess::isWinOrTie() == WIN) status = "win";
-        else if (Chess::isWinOrTie() == TIE) status = "tie";
-        else if (Chess::isCheck()) status = "check";
+        if (gameBoard.isWinOrTie() == WIN) status = "win";
+        else if (gameBoard.isWinOrTie() == TIE) status = "tie";
+        else if (gameBoard.isCheck()) status = "check";
         else status = "playing";
 
-		canUndo = '0' + Chess::canUndo();
-		canRedo = '0' + Chess::canRedo();
+		canUndo = '0' + gameBoard.canUndo();
+		canRedo = '0' + gameBoard.canRedo();
 
 		bool changeRound = value == "success";
-		if (changeRound && Chess::isWinOrTie() == PLAYING) who = enemy == WHITE ? "white" : "black";
+		if (changeRound && gameBoard.isWinOrTie() == PLAYING) who = enemy == WHITE ? "white" : "black";
 		else who = player == WHITE ? "white" : "black";
-		board = Chess::getBoard();
+		board = gameBoard.getBoard();
 
 		std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << maskBoard << ";" << board << std::endl;
 	}
