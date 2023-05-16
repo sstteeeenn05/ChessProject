@@ -69,26 +69,34 @@ Board::Board()
 
 //intent:constructor and initialize the board
 //pre:none
-//post:none
+//post:string
 std::string Board::getBoard()
 {
 	std::string output;
+
+	//loop in the board
 	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) {
 		Chess& c = board[i][j];
-		if (c.getType() == EMPTY || c.getPlayer() == WHITE) output += char(c.getType());
+		
+		if (c.getType() == EMPTY || c.getPlayer() == WHITE) output += char(c.getType()); // it is not hte black chess
 		else output += char(c.getType() + ('a' - 'A'));
 	}
 	return output;
 }
 
-std::string Board::getMaskBoard(Position point) {
+
+std::string Board::getMaskBoard(Position point) 
+{
 	std::string output;
 	std::vector<Position> posList = board[point.y][point.x].getValidPos(board);
 	bool maskBoard[8][8] = { false };
-	for (const auto& pos : posList) {
+
+	for (const auto& pos : posList) 
+	{
 		maskBoard[pos.y][pos.x] = true;
 	}
-	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) {
+	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) 
+	{
 		if (maskBoard[i][j]) output += '1';
 		else output += '0';
 	}
@@ -115,7 +123,8 @@ bool Board::move(Player& player, Position source, Position target)
 	
 	bool EnPassant = false;
 
-	if (abs(target.y - source.y)==1 && abs(target.x - source.x) == 1 &&
+	//if the chess is pawn and wants to enPassant check if the horizontal distance is 1
+	if (abs(target.y - source.y) == 1 && abs(target.x - source.x) == 1 &&
 		sChess.getType() == PAWN && board[source.y][target.x].getType() == PAWN)
 	{
 		EnPassant = enPassant(sChess, target, logs[logIndex - 1]);
@@ -124,14 +133,18 @@ bool Board::move(Player& player, Position source, Position target)
 	//if the target position is valid
 	if (!moveAvalible(sChess, tChess) && !canCastle && !EnPassant) return false;
 
+
+	//delete all the steps that had undo
 	while (logIndex < logs.size())
 	{
 		logs.pop_back();
 	}
+
 	Log record(sChess, tChess, canCastle, EnPassant);
 	logs.push_back(record);
 	logIndex++;
-		
+	
+	// if the king is at the target
 	if (board[target.y][target.x].getType() == KING)
 	{
 		if (player == WHITE)
@@ -148,8 +161,7 @@ bool Board::move(Player& player, Position source, Position target)
 	tChess.setSpace(sChess);
 	sChess.setEmpty();
 
-	//if is pawn check if it can promotion
-	
+	//if is pawn and check if it can promotion
 	if (tChess.checkPromotion()) tChess.doPromotion();
 
 	return true;
@@ -391,7 +403,7 @@ bool Board::castling(Position source, Position target)
 //post:true if it can enPassant
 bool Board::enPassant(Chess& chess, Position target, Log record)
 {
-	//check if it is pawn
+	//check if it is not pawn
 	if (record.source.getType() != PAWN)
 	{
 		return false;
@@ -410,68 +422,81 @@ bool Board::enPassant(Chess& chess, Position target, Log record)
 	if (color == BLACK)
 	{
 		
+		//check if y is 4
 		if (chess.getPos().y != 4)
 		{
 			return false;
 		}
+
 		king.setPos(Chess::getBlackKingPos());
-		king.setChess(KING, BLACK);
+		king.setChess(KING, BLACK); //get the black king
 		bool check = true;
 		Chess tmp1, tmp2;
-		tmp1.setSpace(board[target.y][target.x]);
-		board[target.y][target.x].setSpace(board[4][chess.getPos().x]);
-		board[4][chess.getPos().x].setEmpty();
-		tmp2.setSpace(board[4][target.x]);
-		board[4][target.x].setEmpty();
-		check = board[4][target.x].checkCheck(color, king.getPos(), board);
-		board[4][chess.getPos().x].setSpace(board[target.y][target.x]);
-		board[target.y][target.x].setSpace(tmp1);
+		tmp1.setSpace(board[target.y][target.x]); //save the chess on the target pos
+		board[target.y][target.x].setSpace(board[4][chess.getPos().x]); //move the black chess
+		board[4][chess.getPos().x].setEmpty(); //set the origin pos of black chess to blank
+		tmp2.setSpace(board[4][target.x]); //save the white chess
+		board[4][target.x].setEmpty(); //eat the white chess
+		check = board[4][target.x].checkCheck(color, king.getPos(), board); //if the move won't let the king to be check by any enermy chess
+		board[4][chess.getPos().x].setSpace(board[target.y][target.x]); //return the black chess back
+		board[target.y][target.x].setSpace(tmp1); //return the target back
+
+		//if the king won't be check
 		if (!check)
 		{			
 			return true;
 		}
 		else
 		{
-			board[4][target.x].setSpace(tmp2);
+			board[4][target.x].setSpace(tmp2); //return the white pawn back
 			return false;
 		}
 	}
-	else
+	else //if it is the white chess
 	{
+		//check if y is 3
 		if (chess.getPos().y != 3)
 		{
 			return false;
 		}
+
 		king.setPos(Chess::getWhiteKingPos());
-		king.setChess(KING, WHITE);
+		king.setChess(KING, WHITE); //gst the white king
 		bool check = true;
 		Chess tmp1, tmp2;
-		tmp1.setSpace(board[target.y][target.x]);
-		board[target.y][target.x].setSpace(board[3][chess.getPos().x]);
-		board[3][chess.getPos().x].setEmpty();
-		tmp2.setSpace(board[3][target.x]);
-		board[3][target.x].setEmpty();
-		check = board[3][target.x].checkCheck(color, king.getPos(), board);
-		board[3][chess.getPos().x].setSpace(board[target.y][target.x]);
-		board[target.y][target.x].setSpace(tmp1);
+		tmp1.setSpace(board[target.y][target.x]); //save the chess on the target pos
+		board[target.y][target.x].setSpace(board[3][chess.getPos().x]); //move the white chess
+		board[3][chess.getPos().x].setEmpty();  //set the origin pos of white chess to blank
+		tmp2.setSpace(board[3][target.x]); //save the black chess
+		board[3][target.x].setEmpty(); //eat the black chess
+		check = board[3][target.x].checkCheck(color, king.getPos(), board); //if the move won't let the king to be check by any enermy chess
+		board[3][chess.getPos().x].setSpace(board[target.y][target.x]); //return the white chess back
+		board[target.y][target.x].setSpace(tmp1); //return the target back
+
+		//if the king won't be check
 		if (!check)
 		{
 			return true;
 		}
 		else
 		{
-			board[3][target.x].setSpace(tmp2);
+			board[3][target.x].setSpace(tmp2); //return the black pawn back
 			return false;
 		}
 	}
 }
 
+//intent:check if the king is being check by checking all the same color chess on the board
+//pre:the player
+//post:bool
 bool Board::checkMovement(Player player)
 {
+	//loop the whole board
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
 		{
+			//if it is not this player's chess
 			if (board[i][j].getPlayer() != player)
 			{
 				continue;
@@ -480,7 +505,9 @@ bool Board::checkMovement(Player player)
 			{
 				std::vector<Position> validPos;
 				validPos.clear();
-				validPos = board[i][j].getValidPos(board);
+				validPos = board[i][j].getValidPos(board); //get all the valid move pos of this chess
+
+				//if there is any chess still can move
 				if (validPos.size() != 0)
 				{
 					validPos.clear();
@@ -496,23 +523,29 @@ bool Board::checkMovement(Player player)
 	return false;
 }
 
+//intent:check if the player win
+//pre:the player
+//post:bool
 bool Board::checkWin(Player player)
 {
 	Player enemy;
 	Chess enemyKing;
+
+	//if the color is white
 	if (player== WHITE)
 	{
-		enemy=BLACK;
+		enemy = BLACK;
 		enemyKing.setPos(Chess::getBlackKingPos());
 		enemyKing.setChess(KING, BLACK);
 	}
-	else
+	else //if the color is black
 	{
-		enemy=WHITE;
+		enemy = WHITE;
 		enemyKing.setPos(Chess::getWhiteKingPos());
 		enemyKing.setChess(KING, WHITE);
 	}
-	if (checkMovement(enemy)) return false;
+	
+	if (checkMovement(enemy)) return false; //if there is still some chess can move
 
-	return enemyKing.checkCheck(enemyKing.getPlayer(), enemyKing.getPos(), board);
+	return enemyKing.checkCheck(enemyKing.getPlayer(), enemyKing.getPos(), board); //check if the enermyKing will be check
 }

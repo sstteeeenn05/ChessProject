@@ -25,21 +25,21 @@ public:
 	Board(); //constructor and initialize the board
 	//Board(std::string fen);
 
-	std::string getBoard();
+	std::string getBoard(); //get all the chess on the board 
 	std::string getMaskBoard(Position point);
 
-	bool move(Player& player, Position source, Position target); //move
-	bool moveAvalible(Chess& source, Chess& target); //check if can move
+	bool move(Player& player, Position source, Position target); //move the chess
+	bool moveAvalible(Chess& source, Chess& target); //check if this position is valid
 
-	bool canUndo();
-	bool canRedo();
-	bool undo(); //undo
-	bool redo(); //redo
-	int getLogIndex();
+	bool canUndo(); //check if there is any steps before
+	bool canRedo(); //check if there is any steps after
+	bool undo(); //undo the last step
+	bool redo(); //redo the next step
+	int getLogIndex(); //get the index of log
 
-	bool castling(Position source, Position target);
-	bool enPassant(Chess& chess, Position target, Log record);
+	bool castling(Position source, Position target); //check if king can castling and move the pawn
+	bool enPassant(Chess& chess, Position target, Log record); //check if pawn can enPassant and eat the enermy pawn
 
-	bool checkMovement(Player player);
-	bool checkWin(Player player);
+	bool checkMovement(Player player); //check if the king is being check by checking all the same color chess on the board
+	bool checkWin(Player player); //check if the player win
 };
