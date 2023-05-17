@@ -226,7 +226,7 @@ bool Board::move(Player player, Position source, Position target) {
 
     if (sChess.data.type == KING) {
         kingsPos[sChess.data.player] = tChess.data.position;
-        if (tChess.data.position.x == 2 || tChess.data.position.x == 6) {
+        if ((tChess.data.position.x == 2 || tChess.data.position.x == 6) && !sChess.data.moved) {
             Chess &sRook = getChess({(tChess.data.position.x == 2) ? 0 : 7, sChess.data.position.y});
             Chess &tRook = getChess({(tChess.data.position.x == 2) ? 3 : 5, sChess.data.position.y});
             log.emplace_back(sRook.data, sRook.data.previewMoved());
