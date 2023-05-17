@@ -95,7 +95,7 @@
     <dialog class="lightbox" id="promotion"
             @cancel="(event)=>{event.preventDefault()}"
             x-show="isPromoting" x-transition>
-      <h2>Promotion!!!</h2>
+      <h2 style="text-align: center;margin-top: 0;">Promotion!!!</h2>
       <div class="select-div">
         <template x-for="(item, index) in calculatePromotionChess()" :key="index">
           <div class="promotion-container" @click="promotion(index)">
