@@ -37,48 +37,58 @@ void Board::init(std::string boardCode, std::string turn, std::string castling) 
 
     int rowIndex = 0, colIndex = 0;
 
-    for(auto &item : boardCode) {
-        if(item == '/') {
+    for (auto &item: boardCode) {
+        if (item == '/') {
             rowIndex++;
             colIndex = 0;
         }
-        else if(std::isdigit(item)) {
-            for(int i = 0; i < item - '0'; i++, colIndex++) {
+        else if (std::isdigit(item)) {
+            for (int i = 0; i < item - '0'; i++, colIndex++) {
                 board[rowIndex][colIndex] = Chess({colIndex, rowIndex});
             }
         }
-        else if(std::isupper(item)) {
+        else if (std::isupper(item)) {
             board[rowIndex][colIndex] = Chess(WHITE, {colIndex, rowIndex}, typeMap.at(item));
-            if(getChess({colIndex, rowIndex}).data.type == KING) kingsPos[0] = {colIndex, rowIndex};
+            if (getChess({colIndex, rowIndex}).data.type == KING)
+                kingsPos[WHITE] = {colIndex, rowIndex};
             colIndex++;
         }
-        else if(std::islower(item)) {
+        else if (std::islower(item)) {
             board[rowIndex][colIndex] =
-                    Chess(WHITE, {colIndex, rowIndex}, typeMap.at((char)std::toupper(item)));
-            if(getChess({colIndex, rowIndex}).data.type == KING) kingsPos[1] = {colIndex, rowIndex};
+                    Chess(BLACK, {colIndex, rowIndex}, typeMap.at((char) std::toupper(item)));
+            if (getChess({colIndex, rowIndex}).data.type == KING)
+                kingsPos[BLACK] = {colIndex, rowIndex};
             colIndex++;
         }
     }
 
-    if(turn == "b") {
+    if (std::tolower(turn[0]) == 'b') {
         logList.assign(1, {});
         beginLogIndex = 1;
     }
 
-    const Position rookPos[4] = {{0, 0}, {7, 0}, {0, 7}, {7, 7}};
-    for(auto &pos : rookPos) getChess(pos).data.moved = true;
 
-    for(auto &item : castling) {
-        if(std::toupper(item) == 'K') {
-            if(isupper(item)) {
+    if (castling == "-") {
+        getChess(kingsPos[0]).data.moved = true;
+        getChess(kingsPos[1]).data.moved = true;
+    }
+    const Position rookPos[4] = {{0, 0},
+                                 {7, 0},
+                                 {0, 7},
+                                 {7, 7}};
+    for (auto &pos: rookPos) getChess(pos).data.moved = true;
+
+    for (auto &item: castling) {
+        if (std::toupper(item) == 'K') {
+            if (isupper(item)) {
                 getChess(rookPos[3]).data.moved = false;
             }
             else {
                 getChess(rookPos[1]).data.moved = false;
             }
         }
-        else if(std::toupper(item) == 'Q') {
-            if(isupper(item)) {
+        else if (std::toupper(item) == 'Q') {
+            if (isupper(item)) {
                 getChess(rookPos[2]).data.moved = false;
             }
             else {
@@ -89,7 +99,7 @@ void Board::init(std::string boardCode, std::string turn, std::string castling) 
 
 }
 
-Chess& Board::getChess(Position pos) {
+Chess &Board::getChess(Position pos) {
     return board[pos.y][pos.x];
 }
 
@@ -123,7 +133,7 @@ std::string Board::getMaskBoard(Position target) {
 }
 
 bool Board::canUndo() {
-    return logIndex > beginLogIndex ;
+    return logIndex > beginLogIndex;
 }
 
 bool Board::canRedo() {

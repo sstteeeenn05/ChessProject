@@ -11,12 +11,9 @@ class Board {
     std::vector<std::vector<std::pair<ChessData, ChessData>>> logList;
     int logIndex;
     int beginLogIndex;
-
     static Chess board[8][8];
-
     // 0-white, 1-black
     Position kingsPos[2];
-    // 0-white, 1-black
     bool isChecking;
 
     Status status;
@@ -45,7 +42,7 @@ public:
 
     bool move(Player, Position, Position);
 
-    void checkMovement(const Position& target, std::vector<Position> &validPos);
+    void checkMovement(const Position &target, std::vector<Position> &validPos);
 
     bool isCheck() const;
 

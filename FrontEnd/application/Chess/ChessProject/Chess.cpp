@@ -138,9 +138,9 @@ std::pair<bool, bool> Chess::getEnPassant() const {
     auto [left, right] = getSidePos();
     return {
             !data.enPassanted && left.valid() && Board::getChess(left).data.type == PAWN &&
-                    Board::getChess(left).data.player != data.player && onRiver(),
+            Board::getChess(left).data.player != data.player && onRiver(),
             !data.enPassanted && right.valid() && Board::getChess(right).data.type == PAWN &&
-                    Board::getChess(right).data.player != data.player && onRiver()
+            Board::getChess(right).data.player != data.player && onRiver()
     };
 }
 
