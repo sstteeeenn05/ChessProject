@@ -42,6 +42,8 @@ document.addEventListener('alpine:init',()=>{
             isCreatePromptOpen:false,
             createPromptRoomName:"",
             createPromptNickName:"",
+            createPromptTime:30,
+            createPromptAddTime:10,
             showCreatePrompt(){
                 this.isCreatePromptOpen=true;
                 document.getElementById('createPromptBox').showModal()
@@ -50,14 +52,18 @@ document.addEventListener('alpine:init',()=>{
                 if(value){
                     let roomId=this.createPromptRoomName;
                     let nickname=this.createPromptNickName;
+                    let time=this.createPromptTime;
+                    let addTime=this.createPromptAddTime;
                     if(!roomId) return this.showMessage("Alert!","Missing Room Name");
                     if(!nickname) nickname="Unknown";
-                    location.href=`PlayRoom.html?create=${roomId}&nickname=${nickname}`;
+                    location.href=`PlayRoom.html?create=${roomId}&nickname=${nickname}&clock=${time}+${addTime}`;
                 }
                 this.isCreatePromptOpen=false;
                 setTimeout(()=>{
                     this.createPromptRoomName="";
                     this.createPromptNickName="";
+                    this.createPromptTime=30;
+                    this.createPromptAddTime=10;
                     document.getElementById('createPromptBox').close()
                 })
             },

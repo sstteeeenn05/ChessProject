@@ -53,6 +53,7 @@ document.addEventListener('alpine:init', () => {
         },
         showResult(player, status) {
             this.removeCloseEvent();
+            this.stopUpdateStatus();
             if (status !== 'tie') {
                 this.showMessage('Congrats!!', `${player} ${status}s`)
             } else {
@@ -109,7 +110,7 @@ document.addEventListener('alpine:init', () => {
                 this.showResult(who, status);
             } else {
                 this.nowMoving = who
-                if(getUrlQuery("single")!==false) this.player = who
+                if(this.pckg.isSingle) this.player = who
             }
         },
         canUndo: false,
@@ -173,15 +174,24 @@ document.addEventListener('alpine:init', () => {
         clickedY: -1,
         clickingX: -1,
         clickingY: -1,
-        updateStatus(){
-            let interval=setInterval(()=>{
-                this.game.getState().then((resolve) => {
-                    this.board = resolve.board;
-                    this.resetXY()
-                    this.changeTurn(resolve)
-                    if(this.nowMoving==this.player) clearInterval(interval);
-                })
+        updateInterval:null,
+        whiteRemainTime:0,
+        blackRemainTime:0,
+        startUpdateStatus(){
+            this.updateInterval=setInterval(()=>{
+                if(this.game.ws.readyState==1){
+                    this.game.getState().then((resolve) => {
+                        this.board = resolve.board;
+                        this.changeTurn(resolve)
+                        this.whiteRemainTime=resolve.p0RemainTime;
+                        this.blackRemainTime=resolve.p1RemainTime;
+                        console.log(this.whiteRemainTime,this.blackRemainTime);
+                    })
+                }
             },100)
+        },
+        stopUpdateStatus(){
+            clearInterval(this.updateInterval);
         },
         click(x, y) {
             if ((this.clickedX === -1 && this.clickedY === -1) ||
@@ -219,7 +229,8 @@ document.addEventListener('alpine:init', () => {
                         this.clickingY = y;
                         if (resolve.value === "success") {
                             this.maskChess()
-                            this.updateStatus();
+                            this.resetXY()
+                            this.changeTurn(resolve)
                         }
                         if (resolve.value === "promotion") {
                             let lightbox = document.getElementById('promotion')
@@ -233,7 +244,8 @@ document.addEventListener('alpine:init', () => {
         },
         game: new Game(),
         closeEvent(e){
-            this.showMessage("Connection closed!", e.reason);
+            console.log(e.code,e.reason);
+            this.showMessage(e.code==1000?"Game Over":"Connection Closed", e.code==1006?"Server is down":e.reason);
             setInterval(()=>{
                 if(!this.isMessage) location.href="/";
             },100)
@@ -249,7 +261,7 @@ document.addEventListener('alpine:init', () => {
                 if(this.game.isStart){
                     clearInterval(interval);
                     this.loadingMessage="Joining"
-                    this.updateStatus();
+                    this.startUpdateStatus();
                     setTimeout(()=>{
                         this.loading=false;
                         this.loadingMessage=""
@@ -284,8 +296,14 @@ document.addEventListener('alpine:init', () => {
             let pckg=this.pckg;
 
             if(getUrlQuery("create")!==false){
+                if(getUrlQuery("clock")===false){
+                    this.loadingMessage="missing header";
+                    return;
+                }
                 this.player="white";
                 pckg.header="create";
+                pckg.time=parseInt(getUrlQuery("clock").split('+')[0])*60;
+                pckg.addPerRound=parseInt(getUrlQuery("clock").split('+')[1]);
                 if(getUrlQuery("single")!==false){
                     pckg.isSingle=true;
                     if(getUrlQuery("fen")!==false) pckg.fen=getUrlQuery("fen");
@@ -300,7 +318,7 @@ document.addEventListener('alpine:init', () => {
                 pckg.header="join";
                 pckg.roomId=getUrlQuery("join");
                 pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
-                this.loadingMessage="Wating for Room Leader's Reply"
+                this.loadingMessage="Wating for Room Leader's Reply";
             }else{
                 this.loadingMessage="missing header";
                 return;

@@ -2,6 +2,8 @@
  * @typedef {Object} Player
  * @prop {string} name
  * @prop {WebSocket} ws
+ * @prop {number} remainTime
+ * @prop {boolean} timerPaused
  */
 
 /**
@@ -11,8 +13,11 @@
  * @prop {Player} p0
  * @prop {Player} p1
  * @prop {pipe.ChildProcess} process
+ * @prop {Array<string>} commandList
  * @prop {GameArgs} gameArgs
  * @prop {string} fen
+ * @prop {number} time
+ * @prop {number} addPerRound
  */
 
 /**
@@ -22,6 +27,8 @@
  * @prop {boolean} isSingle
  * @prop {string} roomId
  * @prop {string} fen
+ * @prop {number} time
+ * @prop {number} addPerRound
  */
 
 /**
@@ -33,6 +40,8 @@
  * @prop {string} value
  * @prop {Array<boolean>} maskBoard
  * @prop {Array<string>} board
+ * @prop {number} p0RemainTime
+ * @prop {number} p1RemainTime
  */
 
 /**
@@ -76,12 +85,12 @@ wss.on('connection',
  */
 (ws)=>{
     console.log(`web socket connected! (${ws.protocol})`);
-    if(ws.protocol!="protocol-chess-game") return ws.close();
+    if(ws.protocol!="protocol-chess-game") return ws.close(1002);
     ws.onmessage=(e)=>{
         ws.onmessage=null;
         /** @type {Request} */
         let request=JSON.parse(e.data.toString());
-        if(request.type!="handshake") return ws.close();
+        if(request.type!="handshake") return ws.close(1003);
         /** @type {HandshakePackage} */
         let package=request.content;
         console.log(package);
@@ -133,21 +142,30 @@ function getRoomList(ws){
 function createGame(ws,package){
     /** @type {Room} */
     let room={
-        p0:{ws:ws},
-        gameArgs:{}
+        p0:{
+            ws:ws,
+            remainTime:package.time,
+            timerPaused:true
+        },
+        p1:{
+            remainTime:package.time,
+            timerPaused:true
+        },
+        gameArgs:{},
+        commandList:[],
+        time:package.time,
+        addPerRound:package.addPerRound,
     }
     room.nowMoving=room.p0;
     if(package.isSingle){
         room.fen=package.fen;
         room.p0.name="white";
-        room.p1={
-            name:"black",
-            ws:ws
-        };
+        room.p1.name="black";
+        room.p1.ws=ws;
         room.process=pipe.spawn("application\\chess.exe",[room.fen]);
         startGame(room);
     }else{
-        if(roomList.has(package.roomId)) return ws.close(1000,"Room Existed");
+        if(roomList.has(package.roomId)) return ws.close(1003,"Room Existed");
         ws.on('close',()=>{
             roomList.delete(package.roomId);
         })
@@ -168,9 +186,9 @@ function createGame(ws,package){
  * @param {HandshakePackage} package 
  */
 function joinGame(ws,package){
-    if(!roomList.has(package.roomId)) return ws.close(1000,"404 NOT FOUND");
+    if(!roomList.has(package.roomId)) return ws.close(1003,"404 NOT FOUND");
     let room=roomList.get(package.roomId);
-    if(room.status!="Waiting") return ws.close(1000,"The game started");
+    if(room.status!="Waiting") return ws.close(1003,"The game started");
     room.p0.ws.addEventListener('message',(e)=>{
         /** @type {Package} */
         let response=JSON.parse(e.data.toString());
@@ -183,10 +201,8 @@ function joinGame(ws,package){
                 ws.on('close',()=>{
                     roomList.delete(package.roomId);
                 })
-                room.p1={
-                    name:package.nickname,
-                    ws:ws
-                }
+                room.p1.name=package.nickname;
+                room.p1.ws=ws;
                 room.process=pipe.execFile("application\\chess.exe");
                 startGame(roomList.get(package.roomId));
                 ws.send(JSON.stringify({
@@ -196,7 +212,7 @@ function joinGame(ws,package){
             }
             else{
                 console.log(package.nickname+"closed");
-                ws.close(1000,"join-rejected");
+                ws.close(1003,"join-rejected");
             }
         }
     })
@@ -238,6 +254,44 @@ function startGame(room){
         ]
     }
 
+    let p0Timer=setInterval(()=>{
+        if(!p0.timerPaused){
+            p0.remainTime--;
+            if(p0.remainTime<=0){
+                if(p0==p1) wsClose(`Time's up! Black Wins`);
+                else wsClose(`Time's up! Black(${p1.name}) Wins`, `Time's up! You Win`);
+            }
+        }
+    },1000)
+    let p1Timer=setInterval(()=>{
+        if(!p1.timerPaused){
+            p1.remainTime--;
+            if(p1.remainTime<=0){
+                if(p0==p1) wsClose(`Time's up! White Wins`);
+                else wsClose(`Time's up! You Win`, `Time's up! White(${p0.name}) Wins`);
+            }
+        }
+    },1000)
+
+    function updateGameArgs(){
+        gameArgs.p0RemainTime=p0.remainTime;
+        gameArgs.p1RemainTime=p1.remainTime;
+    }
+
+    function checkCommandToPauseTimer(value){
+        if(room.commandList.length<=1){
+            p0.timerPaused=false;
+            return;
+        }
+        let lastCommand=room.commandList[room.commandList.length-1];
+        if(lastCommand=="move"&&value=="success"){
+            room.nowMoving.timerPaused=true;
+            let nextMoving=room.nowMoving==p0?p1:p0;
+            nextMoving.remainTime=Math.min(room.time,nextMoving.remainTime+room.addPerRound);
+            nextMoving.timerPaused=false;
+        }
+    }
+
     let wsMessageCallback=(e)=>{
         /** @type {Request} */
         let request=JSON.parse(e.data.toString());
@@ -252,13 +306,14 @@ function startGame(room){
             return;
         }
         if(request.content=="get"){
+            updateGameArgs();
             e.target.send(JSON.stringify({
                 type:"game-args",
                 content:gameArgs
             }))
         }else if(e.target==room.nowMoving.ws){
             console.log(`receive from ${e.target==p0?"white":"black"}:${request.type} > ${request.content}`);
-            execute(request.content.toString());
+            execute(request.content);
         }else{
             e.target.send(JSON.stringify({
                 type:"server-response",
@@ -286,37 +341,42 @@ function startGame(room){
             maskBoard:arr[5].toString().split("").map((c)=>{return parseInt(c)}),
             board:arr[6].match(/.{1,8}/g)
         }
+        checkCommandToPauseTimer(gameArgs.value);
+        updateGameArgs();
         console.log(`send:${gameArgs.value}${gameArgs.maskBoard} > ${gameArgs.status}`);
         room.nowMoving.ws.send(JSON.stringify({
             type:"game-args",
             content:gameArgs
         }));
         room.nowMoving=gameArgs.who=="white"?p0:p1;
-        //if(room.status!="playing") return wsClose();
     })
 
     let execute=(commands)=>{
+        if(typeof commands!='number') room.commandList.push(commands.split(' ')[0]);
+        commands=commands.toString();
         console.log("execute:",commands);
         commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
         process.stdin.write("\n");
     }
 
     p0.ws.onclose=()=>{
-        console.log("Player0 leave!");
-        if(p1.ws.readyState===1) p1.ws.close(1000,"Player0 leave!");
+        console.log("Player0 quit!");
+        if(p1.ws.readyState===1) p1.ws.close(1000,`${p0.name} quit the game!`);
     }
     p1.ws.onclose=()=>{
-        console.log("Player1 leave!");
-        if(p0.ws.readyState===1) p0.ws.close(1000,"Player1 leave!");
+        console.log("Player1 quit!");
+        if(p0.ws.readyState===1) p0.ws.close(1000,`${p1.name} quit the game!`);
     }
 
-    let wsClose=(msg)=>{
+    let wsClose=(msg0,msg1=msg0)=>{
         console.log("onclose!");
+        clearInterval(p0Timer);
+        clearInterval(p1Timer);
         p0.ws.onclose=null;
         p1.ws.onclose=null;
-        p0.ws.close(1000,msg);
-        p1.ws.close(1000,msg);
-        process.write("exit\n");
+        p0.ws.close(1000,msg0);
+        p1.ws.close(1000,msg1);
+        process.stdin.write("exit\n");
     }
 }
 
