@@ -40,8 +40,10 @@
  * @prop {string} value
  * @prop {Array<boolean>} maskBoard
  * @prop {Array<string>} board
- * @prop {number} p0RemainTime
- * @prop {number} p1RemainTime
+ * @prop {Player} p0
+ * @prop {Player} p1
+ * @prop {number} time
+ * @prop {number} addPerRound
  */
 
 /**
@@ -186,7 +188,7 @@ function createGame(ws,package){
  * @param {HandshakePackage} package 
  */
 function joinGame(ws,package){
-    if(!roomList.has(package.roomId)) return ws.close(1003,"404 NOT FOUND");
+    if(!roomList.has(package.roomId)) return ws.close(1003,"404 ROOM NOT FOUND");
     let room=roomList.get(package.roomId);
     if(room.status!="Waiting") return ws.close(1003,"The game started");
     room.p0.ws.addEventListener('message',(e)=>{
@@ -274,8 +276,8 @@ function startGame(room){
     },1000)
 
     function updateGameArgs(){
-        gameArgs.p0RemainTime=p0.remainTime;
-        gameArgs.p1RemainTime=p1.remainTime;
+        gameArgs.p0=p0;
+        gameArgs.p1=p1;
     }
 
     function checkCommandToPauseTimer(value){
@@ -361,11 +363,11 @@ function startGame(room){
 
     p0.ws.onclose=()=>{
         console.log("Player0 quit!");
-        if(p1.ws.readyState===1) p1.ws.close(1000,`${p0.name} quit the game!`);
+        if(p1.ws.readyState===1) p1.ws.close(1000,`White(${p0.name}) quit the game!`);
     }
     p1.ws.onclose=()=>{
         console.log("Player1 quit!");
-        if(p0.ws.readyState===1) p0.ws.close(1000,`${p1.name} quit the game!`);
+        if(p0.ws.readyState===1) p0.ws.close(1000,`Black(${p1.name}) quit the game!`);
     }
 
     let wsClose=(msg0,msg1=msg0)=>{

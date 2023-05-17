@@ -181,11 +181,19 @@ document.addEventListener('alpine:init', () => {
             this.updateInterval=setInterval(()=>{
                 if(this.game.ws.readyState==1){
                     this.game.getState().then((resolve) => {
+                        if(!this.pckg.isSingle){
+                            this.p0Name=resolve.p0.name;
+                            this.p1Name=resolve.p1.name;
+                        }
                         this.board = resolve.board;
+                        if(this.needMask){
+                            this.maskChess()
+                            this.resetXY()
+                            this.needMask=false;
+                        }
                         this.changeTurn(resolve)
-                        this.whiteRemainTime=resolve.p0RemainTime;
-                        this.blackRemainTime=resolve.p1RemainTime;
-                        console.log(this.whiteRemainTime,this.blackRemainTime);
+                        this.whiteRemainTime=resolve.p0.remainTime;
+                        this.blackRemainTime=resolve.p1.remainTime;
                     })
                 }
             },100)
@@ -193,6 +201,7 @@ document.addEventListener('alpine:init', () => {
         stopUpdateStatus(){
             clearInterval(this.updateInterval);
         },
+        needMask:false,
         click(x, y) {
             if ((this.clickedX === -1 && this.clickedY === -1) ||
                 (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
@@ -228,9 +237,7 @@ document.addEventListener('alpine:init', () => {
                         this.clickingX = x;
                         this.clickingY = y;
                         if (resolve.value === "success") {
-                            this.maskChess()
-                            this.resetXY()
-                            this.changeTurn(resolve)
+                            this.needMask=true;
                         }
                         if (resolve.value === "promotion") {
                             let lightbox = document.getElementById('promotion')
@@ -292,14 +299,12 @@ document.addEventListener('alpine:init', () => {
             },1000)
         },
         pckg:new Object(),
+        p0Name:"",
+        p1Name:"",
         connectGame(){
             let pckg=this.pckg;
 
             if(getUrlQuery("create")!==false){
-                if(getUrlQuery("clock")===false){
-                    this.loadingMessage="missing header";
-                    return;
-                }
                 this.player="white";
                 pckg.header="create";
                 pckg.time=parseInt(getUrlQuery("clock").split('+')[0])*60;
@@ -308,6 +313,10 @@ document.addEventListener('alpine:init', () => {
                     pckg.isSingle=true;
                     if(getUrlQuery("fen")!==false) pckg.fen=getUrlQuery("fen");
                 }else{
+                    if(getUrlQuery("clock")===false){
+                        this.loadingMessage="missing header";
+                        return;
+                    }
                     pckg.isSingle=false;
                     pckg.roomId=getUrlQuery("create");
                     pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";

@@ -10,7 +10,7 @@
 
 <body>
   <div x-data="globalScope">
-    <div x-show="!loading"
+    <div id="gameArea" x-show="!loading"
         x-init="connectGame()" x-cloak>
       <button class="leave-button"
               @click="loading = true;
@@ -19,6 +19,18 @@
              alt="leave">
       </button>
 
+      <div class="left-info">
+        <p>
+          <p><b>Black</b></p>
+          <p x-show="p1Name">PlayerName : <i x-text="p1Name"></i></p>
+          <p>RemainTime : <span x-text="Math.floor(blackRemainTime/60)"></span>:<span x-text="blackRemainTime%60==0?'00':blackRemainTime%60"></span></p>
+        </p>
+        <p>
+          <p><b>White</b></p>
+          <p x-show="p0Name">PlayerName : <i x-text="p0Name"></i></p>
+          <p>RemainTime : <span x-text="Math.floor(whiteRemainTime/60)"></span>:<span x-text="whiteRemainTime%60==0?'00':whiteRemainTime%60"></span></p>
+        </p>
+      </div>
       <div class="board">
         <template x-for="(line, row) in board" :key="row">
           <div class="row">
