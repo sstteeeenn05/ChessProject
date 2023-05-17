@@ -146,7 +146,6 @@ document.addEventListener('alpine:init', () => {
             ]
             setTimeout(()=>{
                 this.game.readHistory(option).then((resolve)=>{
-                    this.board=resolve.board;
                     this.changeTurn(resolve)
                 });
             },30)
@@ -155,9 +154,10 @@ document.addEventListener('alpine:init', () => {
         promotion(option) {
             this.isPromoting = false;
             document.getElementById('promotion').close()
-            this.game.promotion(option + 1).then(()=>{
+            this.game.promotion(option + 1).then((resolve)=>{
                 this.maskChess()
                 this.resetXY()
+                this.changeTurn(resolve)
                 this.updating=false;
                 document.querySelector('#promoting').pause();
                 document.querySelector('#promoting').load();
