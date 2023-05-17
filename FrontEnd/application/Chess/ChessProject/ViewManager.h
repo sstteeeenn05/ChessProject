@@ -14,6 +14,6 @@ public:
 
     void init(std::string boardCode, std::string turn, std::string castling);
 
-    bool inputCommandAndPrint();
+    int inputCommandAndPrint();
 
 };

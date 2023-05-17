@@ -8,7 +8,7 @@ void ViewManager::init(std::string boardCode, std::string turn, std::string cast
     gameBoard.init(boardCode, turn, castling);
 }
 
-bool ViewManager::inputCommandAndPrint() {
+int ViewManager::inputCommandAndPrint() {
     while (true) {
         std::string status, who, canUndo, canRedo, value, maskBoard, board;
         player = gameBoard.getNowPlayer();
@@ -16,7 +16,7 @@ bool ViewManager::inputCommandAndPrint() {
         std::string mode;
         std::cin >> mode;
 
-        if (mode == "exit") exit(0);
+        if (mode == "exit") return 0;
         if (mode == "undo") value = gameBoard.undo() ? "success" : "failed";
         if (mode == "redo") value = gameBoard.redo() ? "success" : "failed";
         if (mode == "preview") {

@@ -25,7 +25,8 @@
 		x-transition:enter.delay.500ms
 		x-transition:leave.duration.500ms>
 		<h1 class="title">Chess game</h1>
-		<button class="btn function-button" onclick="location.href = 'PlayRoom.html?create&single'">SinglePlay</button>
+		<button class="btn function-button"
+		        @click="showSinglePrompt">SinglePlay</button>
 		<button class="btn function-button"
 			@click="showMode='';setTimeout(()=>{
 				showMode='multi';
@@ -97,6 +98,27 @@
       <p class="lightbox-content" x-text="boxContext"></p>
       <button class="btn lightbox-button" @click="closeMessage">OK</button>
     </dialog>
+		<dialog class="lightbox" id="singlePromptBox"
+		        @cancel="(event)=>{event.preventDefault()}"
+		        x-show="isSinglePromptOpen" x-transition>
+			<h2 class="lightbox-title">Create Room</h2>
+			<div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+				<input class="lightbox-input" type="text" placeholder="FEN" x-model="singleFen"/>
+				<div style="display: flex; justify-content: center; align-items: center;">
+					<p class="lightbox-content">
+						<span>Game Clock:</span>
+						<input class="lightbox-input" style="width:15%;margin:0;padding:5px;" type="number" min="1" placeholder="Time(minutes)" x-model="singlePromptTime"/>
+						<span>m + </span>
+						<input class="lightbox-input" style="width:15%;margin:0;padding:5px;" type="number" min="0" placeholder="Add Time(seconds)" x-model="singlePromptAddTime"/>
+						<span>s</span>
+					</p>
+				</div>
+			</div>
+			<div style="display: flex;">
+				<button class="btn lightbox-button" @click="closeSinglePrompt(true)">Create</button>
+				<button class="btn-cancel lightbox-button" @click="closeSinglePrompt()">Cancel</button>
+			</div>
+		</dialog>
     <dialog class="lightbox" id="createPromptBox"
             @cancel="(event)=>{event.preventDefault()}"
             x-show="isCreatePromptOpen" x-transition>
@@ -107,7 +129,7 @@
 			<div style="display: flex; justify-content: center; align-items: center;">
 				<p class="lightbox-content">
 					<span>Game Clock:</span>
-					<input class="lightbox-input" style="width:15%;margin:0;padding:5px;" type="number" min="1" placeholder="Time(minuts)" x-model="createPromptTime"/>
+					<input class="lightbox-input" style="width:15%;margin:0;padding:5px;" type="number" min="1" placeholder="Time(minutes)" x-model="createPromptTime"/>
 					<span>m + </span>
 					<input class="lightbox-input" style="width:15%;margin:0;padding:5px;" type="number" min="0" placeholder="Add Time(seconds)" x-model="createPromptAddTime"/>
 					<span>s</span>

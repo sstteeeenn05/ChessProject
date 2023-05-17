@@ -39,6 +39,37 @@ document.addEventListener('alpine:init',()=>{
                 let nickname=prompt('Enter your nickname');
                 if(nickname) location.href=`PlayRoom.html?join=${id}&nickname=${nickname}`;
             },
+            isSinglePromptOpen:false,
+            singleFen:"",
+            singlePromptTime:30,
+            singlePromptAddTime:10,
+            showSinglePrompt(){
+                this.isSinglePromptOpen=true;
+                document.getElementById('singlePromptBox').showModal()
+            },
+            closeSinglePrompt(value){
+                if(value){
+                    let time=this.singlePromptTime;
+                    let addTime=this.singlePromptAddTime;
+                    let isFenValid = /([a-zA-Z0-9]+\/){7}[a-zA-Z0-9]+ [bwBW]{1} ([qkQK]{1,4}|\-)/
+                    if(this.singleFen === "") location.href=`PlayRoom.html?create&single&clock=${time}+${addTime}`;
+                    else {
+                        if(!isFenValid.test(this.singleFen)) {
+                            this.showMessage('Alert!', 'FEN invalid')
+                            return;
+                        }
+                        let fen = encodeURI(this.singleFen);
+                        location.href=`PlayRoom.html?create&single&clock=${time}+${addTime}&fen=${fen}`;
+                    }
+                }
+                this.isSinglePromptOpen=false;
+                setTimeout(()=>{
+                    this.singlePromptTime=30;
+                    this.singlePromptAddTime=10;
+                    this.singleFen = "";
+                    document.getElementById('singlePromptBox').close()
+                })
+            },
             isCreatePromptOpen:false,
             createPromptRoomName:"",
             createPromptNickName:"",
