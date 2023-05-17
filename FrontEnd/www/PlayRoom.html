@@ -40,6 +40,7 @@
                    @click="click(column,row)">
                 <img class="image" x-show="calculateUrl(item) !== './assets/nothing.png'"
                      :src="calculateUrl(item)" :alt="item"
+                     :style="{transition:`transform 1s linear`,transform:easterEggStyle?`translate(${Math.random()*100-50}vh,${Math.random()*100-50}vw) rotate(${Math.random()*2-1}turn)`:''}"
                      x-transition:enter.duration.500ms x-transition:leave.duration.0s>
               </div>
             </template>
@@ -50,7 +51,7 @@
         <button class="undo-button" x-show="pckg.isSingle" :disabled="!canUndo" @click="readHistory('undo')">
           <img class="undo-button-image" src="./assets/left.svg" alt="undo">
         </button>
-        <h3 class="round-message" x-text="`Now Moving: ${nowMoving}'s turn`"></h3>
+        <h3 class="round-message" x-text="roundMessage"></h3>
         <button class="redo-button" x-show="pckg.isSingle" :disabled="!canRedo" @click="readHistory('redo')">
           <img class="redo-button-image" src="./assets/right.svg" alt="undo">
         </button>

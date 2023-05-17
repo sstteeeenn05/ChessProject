@@ -261,7 +261,7 @@ function startGame(room){
             p0.remainTime--;
             if(p0.remainTime<=0){
                 if(p0==p1) wsClose(`Time's up! Black Wins`);
-                else wsClose(`Time's up! Black(${p1.name}) Wins`, `Time's up! You Win`);
+                else wsClose(`Time's up! ${p1.name} Wins`, `Time's up! You Win`);
             }
         }
     },1000)
@@ -270,7 +270,7 @@ function startGame(room){
             p1.remainTime--;
             if(p1.remainTime<=0){
                 if(p0==p1) wsClose(`Time's up! White Wins`);
-                else wsClose(`Time's up! You Win`, `Time's up! White(${p0.name}) Wins`);
+                else wsClose(`Time's up! You Win`, `Time's up! ${p0.name} Wins`);
             }
         }
     },1000)
@@ -341,7 +341,7 @@ function startGame(room){
             canRedo:arr[3]==='1',
             value:arr[4],
             maskBoard:arr[5].toString().split("").map((c)=>{return parseInt(c)}),
-            board:arr[6].match(/.{1,8}/g)
+            board:arr[6]?arr[6].match(/.{1,8}/g):gameArgs.board
         }
         checkCommandToPauseTimer(gameArgs.value);
         updateGameArgs();
@@ -363,11 +363,11 @@ function startGame(room){
 
     p0.ws.onclose=()=>{
         console.log("Player0 quit!");
-        if(p1.ws.readyState===1) p1.ws.close(1000,`White(${p0.name}) quit the game!`);
+        if(p1.ws.readyState===1) p1.ws.close(1000,`${p0.name} quit the game!`);
     }
     p1.ws.onclose=()=>{
         console.log("Player1 quit!");
-        if(p0.ws.readyState===1) p0.ws.close(1000,`Black(${p1.name}) quit the game!`);
+        if(p0.ws.readyState===1) p0.ws.close(1000,`${p1.name} quit the game!`);
     }
 
     let wsClose=(msg0,msg1=msg0)=>{

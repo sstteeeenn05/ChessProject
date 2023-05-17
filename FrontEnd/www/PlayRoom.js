@@ -36,6 +36,7 @@ document.addEventListener('alpine:init', () => {
         player:"",
         nowMoving: 'white',
         calculateUrl(input) {
+            if (input === 'z') return './assets/joy.png';
             if (input !== '.') {
                 if (this.islower(input))
                     return './assets/b' + input + '.svg';
@@ -56,8 +57,10 @@ document.addEventListener('alpine:init', () => {
             this.stopUpdateStatus();
             if (status !== 'tie') {
                 this.showMessage('Congrats!!', `${player} ${status}s`)
+                this.roundMessage=`${player} ${status}s`;
             } else {
                 this.showMessage('Game Over', 'the game tied')
+                this.roundMessage=`the game tied`;
             }
             setInterval(()=>{
                 if(!this.isMessage) location.href="/";
@@ -69,6 +72,7 @@ document.addEventListener('alpine:init', () => {
         showMessage(title, message) {
             this.boxTitle = title
             this.boxContext = message
+            document.getElementById('messageBox').close()
             document.getElementById('messageBox').showModal()
             this.isMessage = true
         },
@@ -100,16 +104,29 @@ document.addEventListener('alpine:init', () => {
                 document.getElementById('confirmBox').close()
             }, 75)
         },
+        roundMessage:"",
+        checkShowed:false,
         changeTurn({status, who, canUndo, canRedo}) {
             this.canUndo = canUndo
             this.canRedo = canRedo
-            if (status === 'check') alert('check')
+            if (status === 'check' && !this.checkShowed){
+                this.checkShowed=true;
+                setTimeout(()=>{
+                    if(this.player==who){
+                        this.showMessage("Alert!","Check!");
+                    }else{
+                        this.showMessage("Alert!","You Check The Enemy!");
+                    }
+                },100)
+            } 
             if (status === 'tie') {
                 this.showResult(this.nowMoving, 'tie')
             } else if (status === 'win') {
                 this.showResult(who, status);
             } else {
+                if(status !== 'check') this.checkShowed=false;
                 this.nowMoving = who
+                this.roundMessage=`Now Moving: ${who}'s turn`;
                 if(this.pckg.isSingle) this.player = who
             }
         },
@@ -127,31 +144,16 @@ document.addEventListener('alpine:init', () => {
                 '........'
             ]
             setTimeout(()=>{
-                this.game.readHistory(option).then(() => {
-                    this.game.getState().then((resolve) => {
-                        this.board = resolve.board
-                        this.resetXY()
-                        this.changeTurn(resolve)
-                    })
-                })
+                this.game.readHistory(option);
             },30)
 
         },
         promotion(option) {
-            this.game.promotion(option + 1).then(() => {
+            this.isPromoting = false;
+            document.getElementById('promotion').close()
+            this.game.promotion(option + 1).then(()=>{
                 this.maskChess()
-                this.game.getState().then(
-                  (resolve) => {
-                      this.board = resolve.board
-                      this.resetXY()
-                      this.isPromoting = false;
-                      setTimeout(() => {
-                          document.getElementById('promotion').close()
-                          this.changeTurn(resolve)
-                      }, 75)
-
-                  }
-                )
+                this.resetXY()
             })
         },
         maskChess() {
@@ -177,8 +179,29 @@ document.addEventListener('alpine:init', () => {
         updateInterval:null,
         whiteRemainTime:0,
         blackRemainTime:0,
+        easterEggStyle:false,
         startUpdateStatus(){
             this.updateInterval=setInterval(()=>{
+                if(this.easterEggCounter>=5){
+                    this.stopUpdateStatus();
+                    this.showMessage("😂","😂😂😂😂😂");
+                    this.board = [
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz',
+                        'zzzzzzzz'
+                    ]
+                    console.log(this.board);
+                    setInterval(()=>{
+                        this.easterEggStyle=false;
+                        this.easterEggStyle=true;
+                    },1000)
+                    return;
+                }
                 if(this.game.ws.readyState==1){
                     this.game.getState().then((resolve) => {
                         if(!this.pckg.isSingle){
@@ -186,11 +209,6 @@ document.addEventListener('alpine:init', () => {
                             this.p1Name=resolve.p1.name;
                         }
                         this.board = resolve.board;
-                        if(this.needMask){
-                            this.maskChess()
-                            this.resetXY()
-                            this.needMask=false;
-                        }
                         this.changeTurn(resolve)
                         this.whiteRemainTime=resolve.p0.remainTime;
                         this.blackRemainTime=resolve.p1.remainTime;
@@ -201,7 +219,7 @@ document.addEventListener('alpine:init', () => {
         stopUpdateStatus(){
             clearInterval(this.updateInterval);
         },
-        needMask:false,
+        easterEggCounter:0,
         click(x, y) {
             if ((this.clickedX === -1 && this.clickedY === -1) ||
                 (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
@@ -209,14 +227,12 @@ document.addEventListener('alpine:init', () => {
 
                 if(this.clickedX === x && this.clickedY === y) {
                     this.resetXY()
-                }
-
-                else if(this.board[y][x] !== '.' &&
+                } else if(this.board[y][x] !== '.' &&
                     (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
                     (this.islower(this.board[y][x]) && this.nowMoving === 'black')){
                     this.clickedX = x;
                     this.clickedY = y;
-                    this.game.preview(x, y).then((resolve) => {
+                    this.game.preview(x, y).then((resolve)=>{
                         this.maskBoard = resolve.maskBoard;
                         this.maskBoard[y*8+x] = 1;
                     })
@@ -231,13 +247,15 @@ document.addEventListener('alpine:init', () => {
                         y
                     ).then((resolve) => {
                         if (resolve.value === 'failed') {
+                            if(this.pckg.isSingle) this.easterEggCounter++;
                             this.showMessage('Alert!!', 'invalid move')
                             return;
-                        }
+                        }else this.easterEggCounter=0;
                         this.clickingX = x;
                         this.clickingY = y;
                         if (resolve.value === "success") {
-                            this.needMask=true;
+                            this.maskChess()
+                            this.resetXY()
                         }
                         if (resolve.value === "promotion") {
                             let lightbox = document.getElementById('promotion')
@@ -253,6 +271,7 @@ document.addEventListener('alpine:init', () => {
         closeEvent(e){
             console.log(e.code,e.reason);
             this.showMessage(e.code==1000?"Game Over":"Connection Closed", e.code==1006?"Server is down":e.reason);
+            this.roundMessage=e.code==1006?"Server is down":e.reason;
             setInterval(()=>{
                 if(!this.isMessage) location.href="/";
             },100)
