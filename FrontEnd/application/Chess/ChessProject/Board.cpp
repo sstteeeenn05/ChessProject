@@ -63,7 +63,8 @@ void Board::init(std::string boardCode, std::string turn, std::string castling) 
     }
 
     if (std::tolower(turn[0]) == 'b') {
-        logList.assign(1, {});
+        logList.emplace_back();
+        logIndex = 1;
         beginLogIndex = 1;
     }
 

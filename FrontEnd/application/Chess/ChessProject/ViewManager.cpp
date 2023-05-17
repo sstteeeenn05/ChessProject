@@ -41,7 +41,7 @@ int ViewManager::inputCommandAndPrint() {
         bool changeRound = value == "success";
         if (changeRound && gameBoard.isWinOrTie() == PLAYING) who = enemy == WHITE ? "white" : "black";
         else who = player == WHITE ? "white" : "black";
-        board = gameBoard.getBoard();
+        board = Board::getBoard();
 
         std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << maskBoard << ";"
                   << board << std::endl;
