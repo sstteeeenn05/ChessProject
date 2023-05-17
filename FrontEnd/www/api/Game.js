@@ -107,4 +107,10 @@ export class Game{
     readHistory(option){
         return this.sendCommand(option);
     }
+    resign(who){
+        return this.generatePromise({
+            type:"resign",
+            content:who
+        })
+    }
 }

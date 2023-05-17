@@ -164,7 +164,7 @@ function createGame(ws,package){
         room.p0.name="white";
         room.p1.name="black";
         room.p1.ws=ws;
-        room.process=pipe.spawn("application\\chess.exe",[room.fen]);
+        room.process=pipe.exec(`application\\chess.exe ${room.fen}`);
         startGame(room);
     }else{
         if(roomList.has(package.roomId)) return ws.close(1003,"Room Existed");
@@ -237,24 +237,6 @@ function startGame(room){
     if(!process) wsClose();
 
     room.status="Playing";
-    gameArgs={
-        status:"playing",
-        who:"white",
-        canUndo:false,
-        canRedo:false,
-        value:"",
-        maskBoard:[],
-        board:[
-            'rnbqkbnr',
-            'pppppppp',
-            '........',
-            '........',
-            '........',
-            '........',
-            'PPPPPPPP',
-            'RNBQKBNR'
-        ]
-    }
 
     let p0Timer=setInterval(()=>{
         if(!p0.timerPaused){
@@ -281,7 +263,7 @@ function startGame(room){
     }
 
     function checkCommandToPauseTimer(value){
-        if(room.commandList.length<=1){
+        if(room.commandList.length==1){
             p0.timerPaused=false;
             return;
         }
@@ -297,6 +279,11 @@ function startGame(room){
     let wsMessageCallback=(e)=>{
         /** @type {Request} */
         let request=JSON.parse(e.data.toString());
+        if(request.type=="resign"){
+            if(request.content=="white") wsClose(`${p0.name} Resign! ${p1.name} Wins!`);
+            else wsClose(`${p1.name} Resign! ${p0.name} Wins!`);
+            return;
+        }
         if(request.type!="command"){
             e.target.send(JSON.stringify({
                 type:"server-response",
@@ -380,6 +367,8 @@ function startGame(room){
         p1.ws.close(1000,msg1);
         process.stdin.write("exit\n");
     }
+
+    process.stdin.write("start\n");
 }
 
 console.log("http://localhost:"+PORT);

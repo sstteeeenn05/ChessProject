@@ -145,7 +145,10 @@ document.addEventListener('alpine:init', () => {
                 '........'
             ]
             setTimeout(()=>{
-                this.game.readHistory(option);
+                this.game.readHistory(option).then((resolve)=>{
+                    this.board=resolve.board;
+                    this.changeTurn(resolve)
+                });
             },30)
 
         },
@@ -189,7 +192,10 @@ document.addEventListener('alpine:init', () => {
         easterEggStyle:false,
         canUpdateStatus:false,
         startUpdateStatus(){
-            this.game.getState().then((resolve) => this.changeTurn(resolve))
+            this.game.getState().then((resolve) => {
+                this.board=resolve.board;
+                this.changeTurn(resolve)
+            })
             this.updateInterval=setInterval(()=>{
                 if(this.easterEggCounter>=5){
                     document.querySelectorAll('audio').forEach((audio)=>audio.pause());
@@ -335,6 +341,9 @@ document.addEventListener('alpine:init', () => {
                     },100)
                 }
             },1000)
+        },
+        resign(){
+            this.game.resign(this.player);
         },
         pckg:new Object(),
         p0Name:"",

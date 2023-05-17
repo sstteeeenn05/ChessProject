@@ -9,6 +9,10 @@ void ViewManager::init(std::string boardCode, std::string turn, std::string cast
 }
 
 int ViewManager::inputCommandAndPrint() {
+    std::string key;
+    std::cin >> key;
+    if (key == "start") std::cout << "playing;" << (gameBoard.getNowPlayer()==WHITE?"white":"black") << ";0;0;;;" << gameBoard.getBoard();
+    else return 0;
     while (true) {
         std::string status, who, canUndo, canRedo, value, maskBoard, board;
         player = gameBoard.getNowPlayer();

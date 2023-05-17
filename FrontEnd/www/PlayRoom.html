@@ -35,6 +35,9 @@
           <p x-show="p0Name">PlayerName : <i x-text="p0Name"></i></p>
           <p>RemainTime : <span x-text="Math.floor(whiteRemainTime/60)"></span>:<span x-text="whiteRemainTime%60==0?'00':whiteRemainTime%60"></span></p>
         </div>
+        <div>
+          <p><input class="lightbox-button btn-reject" type="button" value="Resign" @click="resign()"/></p>
+        </div>
         <div x-show="haveMusic===true">
           <p><b>Music Volume :</b></p>
           <p><input type="range" min="0" max="100" x-model="musicVolume" x-effect="updateVolume()" /></p>

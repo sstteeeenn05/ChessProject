@@ -50,7 +50,7 @@
 				<template x-for="(room,row) in roomList" :key="row">
 					<div class="row">
 						<div>
-							<img height="50px" style="aspect-ratio: 1; margin-right: 20px;"/>
+							<img height="50px" src="./assets/board.png" style="aspect-ratio: 1; margin-right: 20px;"/>
 							<span class="row-room-status" :style="{backgroundColor:room.status=='Waiting'?'green':'crimson'}" x-text="room.status"></span>
 						</div>
 						<div style="text-align: left; width: 100%;">
