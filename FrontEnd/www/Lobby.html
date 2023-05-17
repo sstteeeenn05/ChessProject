@@ -10,6 +10,7 @@
 
 </script>
 <body x-data="globalScope" style="overflow: hidden;" x-cloak>
+	<audio id="bgm" src="./assets/lobby.mp3" controls></audio>
 	<button class="leave-button"
 		@click="showMode='';setTimeout(()=>showMode='home',500)"
 			x-show="showMode!='home'"

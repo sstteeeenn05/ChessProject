@@ -10,8 +10,13 @@
 
 <body>
   <div x-data="globalScope">
+    <audio id="bgmHead" src="./assets/playRoomHead.mp3" onended="document.querySelector('#bgm').play()"></audio>
+    <audio id="bgm" src="./assets/playRoomMain.mp3" onended="document.querySelector('#bgm').play()"></audio>
+    <audio id="promoting" src="./assets/promoting.mp3" onended="document.querySelector('#promoting').play()"></audio>
+    <audio id="promoted" src="./assets/promoted.mp3" onended="document.querySelector('#bgm').play()"></audio>
+    <audio id="rick" src="./assets/rick.mp3" onended="document.querySelector('#rick').play()"></audio>
     <div id="gameArea" x-show="!loading"
-        x-init="connectGame()" x-cloak>
+        x-init="init()" x-cloak>
       <button class="leave-button"
               @click="loading = true;
                       setTimeout(()=>{location.href = '/';}, 1000)">
@@ -20,16 +25,20 @@
       </button>
 
       <div class="left-info">
-        <p>
+        <div>
           <p><b>Black</b></p>
           <p x-show="p1Name">PlayerName : <i x-text="p1Name"></i></p>
           <p>RemainTime : <span x-text="Math.floor(blackRemainTime/60)"></span>:<span x-text="blackRemainTime%60==0?'00':blackRemainTime%60"></span></p>
-        </p>
-        <p>
+        </div>
+        <div>
           <p><b>White</b></p>
           <p x-show="p0Name">PlayerName : <i x-text="p0Name"></i></p>
           <p>RemainTime : <span x-text="Math.floor(whiteRemainTime/60)"></span>:<span x-text="whiteRemainTime%60==0?'00':whiteRemainTime%60"></span></p>
-        </p>
+        </div>
+        <div x-show="haveMusic===true">
+          <p><b>Music Volume :</b></p>
+          <p><input type="range" min="0" max="100" x-model="musicVolume" x-effect="updateVolume()" /></p>
+        </div>
       </div>
       <div class="board">
         <template x-for="(line, row) in board" :key="row">

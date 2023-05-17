@@ -12,6 +12,12 @@ body {
     background-size: cover;
 }
 
+#bgm{
+    position:fixed;
+    left:30px;
+    bottom:30px;
+}
+
 .leave-button-image{
     transform: rotate(180deg);
     width: 90%;

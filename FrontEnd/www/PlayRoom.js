@@ -129,6 +129,7 @@ document.addEventListener('alpine:init', () => {
                 this.roundMessage=`Now Moving: ${who}'s turn`;
                 if(this.pckg.isSingle) this.player = who
             }
+            this.canUpdateStatus=this.nowMoving!=this.player;
         },
         canUndo: false,
         canRedo: false,
@@ -154,6 +155,12 @@ document.addEventListener('alpine:init', () => {
             this.game.promotion(option + 1).then(()=>{
                 this.maskChess()
                 this.resetXY()
+                this.updating=false;
+                document.querySelector('#promoting').pause();
+                document.querySelector('#promoting').load();
+                let audio=document.querySelector('#promoted');
+                audio.load();
+                audio.play();
             })
         },
         maskChess() {
@@ -180,9 +187,13 @@ document.addEventListener('alpine:init', () => {
         whiteRemainTime:0,
         blackRemainTime:0,
         easterEggStyle:false,
+        canUpdateStatus:false,
         startUpdateStatus(){
+            this.game.getState().then((resolve) => this.changeTurn(resolve))
             this.updateInterval=setInterval(()=>{
                 if(this.easterEggCounter>=5){
+                    document.querySelectorAll('audio').forEach((audio)=>audio.pause());
+                    document.querySelector('#rick').play();
                     this.stopUpdateStatus();
                     this.showMessage("😂","😂😂😂😂😂");
                     this.board = [
@@ -195,31 +206,31 @@ document.addEventListener('alpine:init', () => {
                         'zzzzzzzz',
                         'zzzzzzzz'
                     ]
-                    console.log(this.board);
                     setInterval(()=>{
                         this.easterEggStyle=false;
                         this.easterEggStyle=true;
                     },1000)
                     return;
                 }
-                if(this.game.ws.readyState==1){
+                if(this.game.ws.readyState==1&&!this.updating){
                     this.game.getState().then((resolve) => {
                         if(!this.pckg.isSingle){
                             this.p0Name=resolve.p0.name;
                             this.p1Name=resolve.p1.name;
                         }
                         this.board = resolve.board;
-                        this.changeTurn(resolve)
+                        if(this.canUpdateStatus) this.changeTurn(resolve)
                         this.whiteRemainTime=resolve.p0.remainTime;
                         this.blackRemainTime=resolve.p1.remainTime;
                     })
                 }
-            },100)
+            },200)
         },
         stopUpdateStatus(){
             clearInterval(this.updateInterval);
         },
         easterEggCounter:0,
+        updating:false,
         click(x, y) {
             if ((this.clickedX === -1 && this.clickedY === -1) ||
                 (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
@@ -232,7 +243,9 @@ document.addEventListener('alpine:init', () => {
                     (this.islower(this.board[y][x]) && this.nowMoving === 'black')){
                     this.clickedX = x;
                     this.clickedY = y;
+                    this.updating=true;
                     this.game.preview(x, y).then((resolve)=>{
+                        this.updating=false;
                         this.maskBoard = resolve.maskBoard;
                         this.maskBoard[y*8+x] = 1;
                     })
@@ -240,6 +253,7 @@ document.addEventListener('alpine:init', () => {
             } else {
 
                 if (x !== this.clickedX || y !== this.clickedY) {
+                    this.updating=true;
                     this.game.move(
                         this.clickedX,
                         this.clickedY,
@@ -248,16 +262,22 @@ document.addEventListener('alpine:init', () => {
                     ).then((resolve) => {
                         if (resolve.value === 'failed') {
                             if(this.pckg.isSingle) this.easterEggCounter++;
-                            this.showMessage('Alert!!', 'invalid move')
+                            this.showMessage('Alert!!', `invalid move${this.easterEggCounter>1?` ${this.easterEggCounter}/5`:''}`)
                             return;
                         }else this.easterEggCounter=0;
                         this.clickingX = x;
                         this.clickingY = y;
                         if (resolve.value === "success") {
-                            this.maskChess()
-                            this.resetXY()
+                            this.changeTurn(resolve);
+                            this.maskChess();
+                            this.resetXY();
+                            this.updating=false;
                         }
                         if (resolve.value === "promotion") {
+                            document.querySelector('#bgm').pause();
+                            let audio=document.querySelector('#promoting');
+                            audio.load();
+                            audio.play();
                             let lightbox = document.getElementById('promotion')
                             lightbox.showModal();
                             this.isPromoting = true
@@ -269,7 +289,6 @@ document.addEventListener('alpine:init', () => {
         },
         game: new Game(),
         closeEvent(e){
-            console.log(e.code,e.reason);
             this.showMessage(e.code==1000?"Game Over":"Connection Closed", e.code==1006?"Server is down":e.reason);
             this.roundMessage=e.code==1006?"Server is down":e.reason;
             setInterval(()=>{
@@ -320,6 +339,24 @@ document.addEventListener('alpine:init', () => {
         pckg:new Object(),
         p0Name:"",
         p1Name:"",
+        haveMusic:false,
+        musicVolume:100,
+        init(){
+            this.showConfirm("Permission","Play Music?");
+            let interval=setInterval(()=>{
+                if(!this.isConfirm){
+                    clearInterval(interval);
+                    if(this.confirmChoice){
+                        this.haveMusic=true;
+                        document.querySelector('#bgmHead').play();
+                    }else this.musicVolume=0;
+                    this.connectGame();
+                }
+            },100)
+        },
+        updateVolume(){
+            document.querySelectorAll('audio').forEach((audio)=>audio.volume=this.musicVolume/100);
+        },
         connectGame(){
             let pckg=this.pckg;
 
@@ -351,8 +388,6 @@ document.addEventListener('alpine:init', () => {
                 this.loadingMessage="missing header";
                 return;
             }
-
-            console.log(pckg);
 
             this.addCloseEvent();
             this.game.connect(pckg).then(()=>{

@@ -140,4 +140,14 @@ document.addEventListener('alpine:init',()=>{
             }
         }
     })
+    document.querySelector('#bgm').addEventListener('ended',(e)=>{
+        e.target.load();
+        e.target.play();
+    })
+})
+
+let played=false;
+document.addEventListener('click',()=>{
+    played=true;
+    document.querySelector('#bgm').play();
 })
