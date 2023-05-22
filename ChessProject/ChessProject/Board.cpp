@@ -67,7 +67,7 @@ Board::Board()
 	logs.clear();
 }
 
-//intent:constructor and initialize the board
+//intent:get all the chess on the board 
 //pre:none
 //post:string
 std::string Board::getBoard()
@@ -78,7 +78,7 @@ std::string Board::getBoard()
 	for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) {
 		Chess& c = board[i][j];
 		
-		if (c.getType() == EMPTY || c.getPlayer() == WHITE) output += char(c.getType()); // it is not hte black chess
+		if (c.getType() == EMPTY || c.getPlayer() == WHITE) output += char(c.getType()); // it is not the black chess
 		else output += char(c.getType() + ('a' - 'A'));
 	}
 	return output;
@@ -254,7 +254,7 @@ bool Board::undo()
 	return true;
 }
 
-//intent:undo the next step
+//intent:redo the next step
 //pre:none
 //post:true if it redo successfully
 bool Board::redo() 
@@ -398,7 +398,7 @@ bool Board::castling(Position source, Position target)
 	}
 }
 
-//intent:check if pawn can castling and move the pawn
+//intent:check if pawn can enPassant and eat the enermy pawn
 //pre:position of source and target and the record
 //post:true if it can enPassant
 bool Board::enPassant(Chess& chess, Position target, Log record)
