@@ -176,6 +176,7 @@ document.addEventListener('alpine:init',()=>{
             }
         },
         readHistory(choice){
+            Alpine.store('game').stopUpdate();
             this.board = [
                 '........',
                 '........',
@@ -189,8 +190,11 @@ document.addEventListener('alpine:init',()=>{
             setTimeout(()=>{
                 this.api.readHistory(choice).then((resolve)=>{
                     Alpine.store('board').resetXY();
-                    this.changeTurn(resolve.args);
-                });
+                    Alpine.store('game').update(resolve);
+                    this.changeTurn();
+                }).finally(()=>{
+                    Alpine.store('game').startUpdate();
+                })
             },75)
         },
         resign(){
