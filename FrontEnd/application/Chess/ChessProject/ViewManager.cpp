@@ -27,6 +27,7 @@ int ViewManager::inputCommandAndPrint() {
             Position point;
             std::cin >> point.x >> point.y;
             maskBoard = gameBoard.getMaskBoard(point);
+            value = maskBoard.length() ? "success" : "failed";
         }
         if (mode == "move") {
             Position source, target;
@@ -42,7 +43,7 @@ int ViewManager::inputCommandAndPrint() {
         canUndo = '0' + gameBoard.canUndo();
         canRedo = '0' + gameBoard.canRedo();
 
-        bool changeRound = value == "success";
+        bool changeRound = value == "success" && mode != "preview";
         if (changeRound && gameBoard.isWinOrTie() == PLAYING) who = enemy == WHITE ? "white" : "black";
         else who = player == WHITE ? "white" : "black";
         board = Board::getBoard();

@@ -1,17 +1,8 @@
-let ws= new WebSocket("ws://localhost:1234");
+import "./api/Alpine.js"
 
-ws.onopen=()=>{
-    console.log("web socket loaded!");
-}
-
-window.onload=()=>{
-    let opt=document.querySelector('#opt');
-    ws.onmessage=(e)=>{
-        opt.innerHTML=e.data.toString().replaceAll('\n','<br/>');
-    }
-    let ipt=document.querySelector('#ipt');
-    let btn=document.querySelector('#btn');
-    btn.addEventListener('click',()=>{
-        ws.send(ipt.value);
+document.addEventListener('alpine:init',()=>{
+    Alpine.store('test',{
+        text:"abcdefg"
     })
-}
+    console.log(Alpine.store('test').text);
+})

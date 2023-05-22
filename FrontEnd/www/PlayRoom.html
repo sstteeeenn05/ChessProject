@@ -9,16 +9,15 @@
 </head>
 
 <body>
-  <div x-data="globalScope">
-    <audio id="bgmHead" src="./assets/playRoomHead.mp3" onended="document.querySelector('#bgm').play()"></audio>
-    <audio id="bgm" src="./assets/playRoomMain.mp3" onended="document.querySelector('#bgm').play()"></audio>
-    <audio id="promoting" src="./assets/promoting.mp3" onended="document.querySelector('#promoting').play()"></audio>
-    <audio id="promoted" src="./assets/promoted.mp3" onended="document.querySelector('#bgm').play()"></audio>
-    <audio id="rick" src="./assets/rick.mp3" onended="document.querySelector('#rick').play()"></audio>
-    <div id="gameArea" x-show="!loading"
-        x-init="init()" x-cloak>
+  <div x-data>
+    <audio id="bgmHead" src="./assets/playRoomHead.mp3" @ended="$store.music.playFromHead('bgm')"></audio>
+    <audio id="bgm" src="./assets/playRoomMain.mp3" @ended="$store.music.playFromHead('bgm')"></audio>
+    <audio id="promoting" src="./assets/promoting.mp3" @ended="$store.music.playFromHead('promoting')"></audio>
+    <audio id="promoted" src="./assets/promoted.mp3" @ended="$store.music.play('bgm')"></audio>
+    <audio id="rick" src="./assets/rick.mp3" @ended="$store.music.playFromHead('rick')"></audio>
+    <div id="gameArea" x-show="!$store.loading.on" x-cloak>
       <button class="leave-button"
-              @click="loading = true;
+              @click="$store.loading.on=true;
                       setTimeout(()=>{location.href = '/';}, 1000)">
         <img class="leave-button-image" src="./assets/exit.svg"
              alt="leave">
@@ -27,32 +26,32 @@
       <div class="left-info">
         <div>
           <p><b>Black</b></p>
-          <p x-show="p1Name">PlayerName : <i x-text="p1Name"></i></p>
-          <p>RemainTime : <span x-text="Math.floor(blackRemainTime/60)"></span>:<span x-text="blackRemainTime%60==0?'00':blackRemainTime%60"></span></p>
+          <p x-show="$store.game.p1.name">PlayerName : <i x-text="$store.game.p1.name"></i></p>
+          <p>RemainTime : <span x-text="Math.floor($store.game.p1.remainTime/60)"></span>:<span x-text="($store.game.p1.remainTime%60).toString().padStart(2,'0')"></span></p>
         </div>
         <div>
           <p><b>White</b></p>
-          <p x-show="p0Name">PlayerName : <i x-text="p0Name"></i></p>
-          <p>RemainTime : <span x-text="Math.floor(whiteRemainTime/60)"></span>:<span x-text="whiteRemainTime%60==0?'00':whiteRemainTime%60"></span></p>
+          <p x-show="$store.game.p0.name">PlayerName : <i x-text="$store.game.p0.name"></i></p>
+          <p>RemainTime : <span x-text="Math.floor($store.game.p0.remainTime/60)"></span>:<span x-text="($store.game.p0.remainTime%60).toString().padStart(2,'0')"></span></p>
         </div>
         <div>
-          <p><input class="lightbox-button btn-reject" type="button" value="Resign" @click="resign()"/></p>
+          <p><input class="lightbox-button btn-reject" type="button" value="Resign" @click="$store.game.resign()"/></p>
         </div>
-        <div x-show="haveMusic===true">
+        <div x-show="$store.music.on===true">
           <p><b>Music Volume :</b></p>
-          <p><input type="range" min="0" max="100" x-model="musicVolume" x-effect="updateVolume()" /></p>
+          <p><input type="range" min="0" max="100" x-model="$store.music.volume" x-effect="$store.music.updateVolume()" /></p>
         </div>
       </div>
       <div class="board">
-        <template x-for="(line, row) in board" :key="row">
+        <template x-for="(line, row) in $store.board.board" :key="row">
           <div class="row">
             <template x-for="(item, column) in line" :key="column">
               <div class="row-element"
-                   :style="{background: previewClass[maskBoard[row*8+column]]}"
-                   @click="click(column,row)">
-                <img class="image" x-show="calculateUrl(item) !== './assets/nothing.png'"
-                     :src="calculateUrl(item)" :alt="item"
-                     :style="{transition:`transform 1s linear`,transform:easterEggStyle?`translate(${Math.random()*100-50}vh,${Math.random()*100-50}vw) rotate(${Math.random()*2-1}turn)`:''}"
+                   :style="{background: $store.board.maskBoard[row*8+column]?'indianred':''}"
+                   @click="$store.board.click(column,row)">
+                <img class="image" x-show="$store.utility.calculateUrl(item) !== './assets/nothing.png'"
+                     :src="$store.utility.calculateUrl(item)" :alt="item"
+                     :style="{transition:`transform 1s linear`,transform:$store.easterEgg.on?`translate(${Math.random()*100-50}vh,${Math.random()*100-50}vw) rotate(${Math.random()*2-1}turn)`:''}"
                      x-transition:enter.duration.500ms x-transition:leave.duration.0s>
               </div>
             </template>
@@ -60,16 +59,16 @@
         </template>
       </div>
       <div class="bottom-info">
-        <button class="undo-button" x-show="pckg.isSingle" :disabled="!canUndo" @click="readHistory('undo')">
+        <button class="undo-button" x-show="$store.game.isSingle" :disabled="!$store.game.args.canUndo" @click="$store.game.readHistory('undo')">
           <img class="undo-button-image" src="./assets/left.svg" alt="undo">
         </button>
-        <h3 class="round-message" x-text="roundMessage"></h3>
-        <button class="redo-button" x-show="pckg.isSingle" :disabled="!canRedo" @click="readHistory('redo')">
+        <h3 class="round-message" x-text="$store.game.roundMessage"></h3>
+        <button class="redo-button" x-show="$store.game.isSingle" :disabled="!$store.game.args.canRedo" @click="$store.game.readHistory('redo')">
           <img class="redo-button-image" src="./assets/right.svg" alt="undo">
         </button>
       </div>
     </div>
-    <div class="center" x-show="loading" x-init="setLoadingDotInterval()" x-transition.duration.500ms>
+    <div class="center" x-show="$store.loading.on" x-init="$store.loading.start()" x-transition.duration.500ms>
       <div>
         <div class="waveGroup">
           <div class="wave" waveid="9"></div>
@@ -92,17 +91,17 @@
           <div class="wave" waveid="8"></div>
           <div class="wave" waveid="9"></div>
         </div>
-        <h2 class="loadingMessage" x-show="loadingMessage" x-text="loadingMessage+loadingDot"></h2>
+        <h2 class="loadingMessage" x-show="$store.loading.message" x-text="$store.loading.message+$store.loading.dot"></h2>
       </div>
     </div>
-    <dialog class="lightbox" id="promotion"
+    <dialog class="lightbox" id="promotionBox"
             @cancel="(event)=>{event.preventDefault()}"
-            x-show="isPromoting" x-transition>
+            x-show="$store.promotionBox.on" x-transition>
       <h2 style="text-align: center;margin-top: 0;">Promotion!!!</h2>
       <div class="select-div">
-        <template x-for="(item, index) in calculatePromotionChess()" :key="index">
-          <div class="promotion-container" @click="promotion(index)">
-            <img class="promotion-image" :src="calculateUrl(item)"
+        <template x-for="(item, index) in $store.promotionBox.calculateChess()" :key="index">
+          <div class="promotion-container" @click="$store.promotionBox.close(index)">
+            <img class="promotion-image" :src="$store.utility.calculateUrl(item)"
                  :alt="item">
           </div>
         </template>
@@ -110,19 +109,19 @@
     </dialog>
     <dialog class="lightbox" id="messageBox"
             @cancel="(event)=>{event.preventDefault()}"
-            x-show="isMessage" x-transition>
-      <h2 class="lightbox-title" x-text="boxTitle"></h2>
-      <p class="lightbox-content" x-text="boxContext"></p>
-      <button class="btn lightbox-button" @click="closeMessage">OK</button>
+            x-show="$store.messageBox.on" x-transition>
+      <h2 class="lightbox-title" x-text="$store.messageBox.title"></h2>
+      <p class="lightbox-content" x-text="$store.messageBox.content"></p>
+      <button class="btn lightbox-button" @click="$store.messageBox.close()">OK</button>
     </dialog>
     <dialog class="lightbox" id="confirmBox"
             @cancel="(event)=>{event.preventDefault()}"
-            x-show="isConfirm" x-transition>
-      <h2 class="lightbox-title" x-text="confirmTitle"></h2>
-      <p class="lightbox-content" x-text="confirmContext"></p>
+            x-show="$store.confirmBox.on" x-transition>
+      <h2 class="lightbox-title" x-text="$store.confirmBox.title"></h2>
+      <p class="lightbox-content" x-text="$store.confirmBox.content"></p>
       <div style="display: flex;">
-        <button class="btn-confirm lightbox-button" @click="closeConfirm(true)">Yes</button>
-        <button class="btn-reject lightbox-button" @click="closeConfirm(false)">NO</button>
+        <button class="btn-confirm lightbox-button" @click="$store.confirmBox.close(true)">Yes</button>
+        <button class="btn-reject lightbox-button" @click="$store.confirmBox.close(false)">NO</button>
       </div>
     </dialog>
   </div>

@@ -1,4 +1,4 @@
-import "./api/Alpine.js";
+import "./api/Alpine.js"
 import {Game} from "./api/Game.js"
 
 function getUrlQuery(key){
@@ -8,33 +8,14 @@ function getUrlQuery(key){
     return decodeURI(arr[1].replace('=','').split('&')[0]);
 }
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('globalScope', () => ({
-        loading:true,
-        loadingMessage:"Initializing",
-        loadingDot:"...",
-        setLoadingDotInterval(){
-            let count=0;
-            setInterval(()=>{
-                this.loadingDot=".".repeat(count++);
-                if(count>=4) count=0;
-            },500)
-        },
+document.addEventListener('alpine:init',()=>{
+    Alpine.store('utility',{
         isupper(input){
             return (input === input.toUpperCase() && input !== '.');
         },
         islower(input){
             return (input === input.toLowerCase() && input !== '.');
         },
-        board: [],
-        maskBoard: [],
-        isPromoting: false,
-        previewClass: [
-            '',
-            'indianred'
-        ],
-        player:"",
-        nowMoving: 'white',
         calculateUrl(input) {
             if (input === 'z') return './assets/joy.png';
             if (input !== '.') {
@@ -43,97 +24,158 @@ document.addEventListener('alpine:init', () => {
                 return './assets/w' + input.toLowerCase() + '.svg';
             }
             return './assets/nothing.png';
+        }
+    })
+    Alpine.store('game',{
+        api:new Game(),
+        roundMessage:"",
+        isSingle:false,
+        playerColor:"",
+        nowMovingColor:"white",
+        p0:{
+            name:"",
+            remainTime:0
         },
-        calculatePromotionChess() {
-            const options = ['q', 'b', 'n', 'r']
-            const isBlack = this.nowMoving === 'black'
-            if (isBlack) return options;
-            return options.map((char) => {
-                return char.toUpperCase()
-            })
+        p1:{
+            name:"",
+            remainTime:0
         },
-        showResult(player, status) {
-            this.removeCloseEvent();
-            this.stopUpdateStatus();
-            if (status !== 'tie') {
-                this.showMessage('Congrats!!', `${player} ${status}s`)
-                this.roundMessage=`${player} ${status}s`;
-            } else {
-                this.showMessage('Game Over', 'the game tied')
-                this.roundMessage=`the game tied`;
-            }
-            setInterval(()=>{
-                if(!this.isMessage) location.href="/";
+        args:{
+            status:"playing",
+            color:"white",
+            canUndo:false,
+            canRedo:false,
+            value:"",
+            maskBoard:[],
+            board:[]
+        },
+        updateInterval:null,
+        update(resolve){
+            this.args=resolve.args;
+            this.p0.remainTime=resolve.p0RemainTime;
+            this.p1.remainTime=resolve.p1RemainTime;
+        },
+        startUpdate(){
+            this.updateInterval=setInterval(()=>{
+                this.api.getArgs().then((resolve)=>{
+                    this.update(resolve);
+                    if(this.playerColor===this.args.color
+                        &&this.playerColor!==this.nowMovingColor
+                        &&!this.isSingle)
+                        this.changeTurn(resolve.args);
+                })
             },100)
         },
-        isMessage: false,
-        boxTitle: '',
-        boxContext: '',
-        showMessage(title, message) {
-            this.boxTitle = title
-            this.boxContext = message
-            document.getElementById('messageBox').close()
-            document.getElementById('messageBox').showModal()
-            this.isMessage = true
+        stopUpdate(){
+            clearInterval(this.updateInterval);
         },
-        closeMessage() {
-            this.isMessage = false;
-            setTimeout(() => {
-                this.boxTitle = ''
-                this.boxContext = ''
-                document.getElementById('messageBox').close()
-            }, 75)
+        connect(){
+            let pckg=new Object();
 
-        },
-        isConfirm: false,
-        confirmTitle: "",
-        confirmContext: "",
-        confirmChoice: false,
-        showConfirm(title, message){
-            this.confirmTitle = title
-            this.confirmContext = message
-            document.getElementById('confirmBox').showModal()
-            this.isConfirm = true
-        },
-        closeConfirm(bool){
-            this.confirmChoice=bool;
-            this.isConfirm = false;
-            setTimeout(() => {
-                this.confirmTitle = ''
-                this.confirmContext = ''
-                document.getElementById('confirmBox').close()
-            }, 75)
-        },
-        roundMessage:"",
-        checkShowed:false,
-        changeTurn({status, who, canUndo, canRedo}) {
-            this.canUndo = canUndo
-            this.canRedo = canRedo
-            if (status === 'check' && !this.checkShowed){
-                this.checkShowed=true;
-                setTimeout(()=>{
-                    if(this.player==who){
-                        this.showMessage("Alert!","Check!");
-                    }else{
-                        this.showMessage("Alert!","You Check The Enemy!");
-                    }
-                },100)
-            } 
-            if (status === 'tie') {
-                this.showResult(this.nowMoving, 'tie')
-            } else if (status === 'win') {
-                this.showResult(who, status);
-            } else {
-                if(status !== 'check') this.checkShowed=false;
-                this.nowMoving = who
-                this.roundMessage=`Now Moving: ${who}'s turn`;
-                if(this.pckg.isSingle) this.player = who
+            if(getUrlQuery("create")!==false){
+                this.playerColor="white";
+                pckg.header="create";
+                if(getUrlQuery("clock")===false){
+                    Alpine.store('loading').message="missing header";
+                    return;
+                }
+                pckg.time=parseInt(getUrlQuery("clock").split('+')[0])*60;
+                pckg.addPerRound=parseInt(getUrlQuery("clock").split('+')[1]);
+                if(getUrlQuery("single")!==false){
+                    pckg.isSingle=true;
+                    this.isSingle=true;
+                    if(getUrlQuery("fen")!==false) pckg.fen=getUrlQuery("fen");
+                }else{
+                    pckg.isSingle=false;
+                    pckg.roomId=getUrlQuery("create");
+                    this.p0.name=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
+                    pckg.nickname=this.p0.name;
+                    Alpine.store('loading').message="Wating for Player's Joining";
+                }
+            }else if(getUrlQuery("join")!==false){
+                this.playerColor="black";
+                pckg.header="join";
+                pckg.roomId=getUrlQuery("join");
+                this.p1.name=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
+                pckg.nickname=this.p1.name;
+                Alpine.store('loading').message="Wating for Room Leader's Reply";
+            }else{
+                Alpine.store('loading').message="missing header";
+                return;
             }
-            this.canUpdateStatus=this.nowMoving!=this.player;
+
+            Alpine.store('onClose').add();
+            this.api.connect(pckg).then((resolve)=>{
+                if(pckg.header=="join") this.p0.name=resolve;
+                this.waitJoin();
+            }).catch((msg)=>Alpine.store('loading').message=msg);
         },
-        canUndo: false,
-        canRedo: false,
-        readHistory(option) {
+        waitJoin(){
+            let interval=setInterval(()=>{
+                if(this.api.isStart){
+                    clearInterval(interval);
+                    Alpine.store('music').play('bgmHead');
+                    Alpine.store('loading').message="Joining";
+                    this.startUpdate();
+                    setTimeout(()=>{
+                        this.changeTurn(this.args);
+                        Alpine.store('loading').on=false;
+                        Alpine.store('loading').message="";
+                    },1800)
+                    return;
+                }
+                if(this.api.joinRequestQueue.length){
+                    clearInterval(interval);
+                    let pckg=this.api.joinRequestQueue.shift();
+                    Alpine.store('confirmBox').show(
+                        "Join Request",
+                        `${pckg.nickname} wants to join!`
+                    ).then(()=>{
+                        this.api.acceptJoinRequest(pckg.nickname);
+                        this.p1.name=pckg.nickname;
+                        while(this.api.joinRequestQueue.length){
+                            this.api.rejectJoinRequest(this.joinRequestQueue.shift().nickname);
+                        }
+                        Alpine.store('loading').message=`${pckg.nickname} Joining`
+                    }).catch(()=>{
+                        this.api.rejectJoinRequest(pckg.nickname);
+                    }).finally(()=>{
+                        this.waitJoin();
+                    })
+                }
+            })
+        },
+        changeTurn(){
+            if(this.args.status=="check"){
+                if(this.playerColor==this.args.color){
+                    Alpine.store('messageBox').show("Alert!","Check!");
+                }else{
+                    Alpine.store('messageBox').show("Alert!","You Check The Enemy!");
+                }
+            }
+            if(this.args.status=="playing"||this.args.status=="check"){
+                this.roundMessage=`Now Moving: ${this.args.color}'s turn`;
+                this.nowMovingColor=this.args.color;
+                if(this.isSingle) this.playerColor=this.args.color;
+                Alpine.store('board').update();
+            }else{
+                this.stopUpdate();
+                Alpine.store('onClose').remove();
+                let title,message;
+                if(this.args.status=="tie"){
+                    title="Game Over";
+                    message="The game tied";
+                }else{
+                    title="Congrats!!";
+                    message=`${this.args.color} ${this.args.status}s`;
+                }
+                this.roundMessage=message;
+                Alpine.store('messageBox').show(title,message).then(()=>{
+                    location.href="/";
+                })
+            }
+        },
+        readHistory(choice){
             this.board = [
                 '........',
                 '........',
@@ -145,263 +187,299 @@ document.addEventListener('alpine:init', () => {
                 '........'
             ]
             setTimeout(()=>{
-                this.game.readHistory(option).then((resolve)=>{
-                    this.changeTurn(resolve)
+                this.api.readHistory(choice).then((resolve)=>{
+                    Alpine.store('board').resetXY();
+                    this.changeTurn(resolve.args);
                 });
-            },30)
-
+            },75)
         },
-        promotion(option) {
-            this.isPromoting = false;
-            document.getElementById('promotion').close()
-            this.game.promotion(option + 1).then((resolve)=>{
-                this.maskChess()
-                this.resetXY()
-                this.changeTurn(resolve)
-                this.updating=false;
-                document.querySelector('#promoting').pause();
-                document.querySelector('#promoting').load();
-                let audio=document.querySelector('#promoted');
-                audio.load();
-                audio.play();
+        resign(){
+            Alpine.store('confirmBox').show(
+                "Alert!",
+                "Do you want to resign?"
+            ).then(()=>{
+                this.api.resign(this.playerColor);
             })
+        }
+    })
+    Alpine.store('board',{
+        board:[],
+        maskBoard:[],
+        update(){
+            this.board=Alpine.store('game').args.board;
+            this.maskBoard=Alpine.store('game').args.maskBoard;
         },
-        maskChess() {
-            this.board[this.clickingY] =
-              this.board[this.clickingY].substring(0, this.clickingX) +
-              '.' + this.board[this.clickingY].substring(this.clickingX + 1);
+        clickedX:-1,
+        clickedY:-1,
+        maskChess(x,y) {
+            this.board[y] =
+              this.board[y].substring(0, x) +
+              '.' + this.board[y].substring(x + 1);
 
             this.board[this.clickedY] =
               this.board[this.clickedY].substring(0, this.clickedX) +
               '.' + this.board[this.clickedY].substring(this.clickedX + 1);
         },
-        resetXY() {
-            this.clickedX = -1;
-            this.clickedY = -1;
-            this.clickingX = -1;
-            this.clickingY = -1;
-            this.maskBoard = [];
+        resetXY(){
+            this.clickedX=-1;
+            this.clickedY=-1;
+            this.maskBoard=[];
         },
-        clickedX: -1,
-        clickedY: -1,
-        clickingX: -1,
-        clickingY: -1,
-        updateInterval:null,
-        whiteRemainTime:0,
-        blackRemainTime:0,
-        easterEggStyle:false,
-        canUpdateStatus:false,
-        startUpdateStatus(){
-            this.game.getState().then((resolve) => {
-                this.board=resolve.board;
-                this.changeTurn(resolve)
-            })
-            this.updateInterval=setInterval(()=>{
-                if(this.easterEggCounter>=5){
-                    document.querySelectorAll('audio').forEach((audio)=>audio.pause());
-                    document.querySelector('#rick').play();
-                    this.stopUpdateStatus();
-                    this.showMessage("😂","😂😂😂😂😂");
-                    this.board = [
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz',
-                        'zzzzzzzz'
-                    ]
-                    setInterval(()=>{
-                        this.easterEggStyle=false;
-                        this.easterEggStyle=true;
-                    },1000)
-                    return;
-                }
-                if(this.game.ws.readyState==1&&!this.updating){
-                    this.game.getState().then((resolve) => {
-                        if(!this.pckg.isSingle){
-                            this.p0Name=resolve.p0.name;
-                            this.p1Name=resolve.p1.name;
-                        }
-                        this.board = resolve.board;
-                        if(this.canUpdateStatus) this.changeTurn(resolve)
-                        this.whiteRemainTime=resolve.p0.remainTime;
-                        this.blackRemainTime=resolve.p1.remainTime;
+        click(x,y){
+            let clicked=this.clickedX!==-1&&this.clickedY!==-1;
+            let clickSameColor=(
+                Alpine.store('utility').isupper(this.board[y][x])
+                && Alpine.store('game').nowMovingColor === "white"
+            )||(
+                Alpine.store('utility').islower(this.board[y][x])
+                && Alpine.store('game').nowMovingColor === "black"
+            )
+            let clickDiff=this.clickedX!==x||this.clickedY!==y;
+            if(!clicked||clickSameColor){
+                if(this.clickedX===x&&this.clickedY===y) this.resetXY();
+                else if(this.board[y][x]!=='.'&&clickSameColor){
+                    this.clickedX=x;
+                    this.clickedY=y;
+                    Alpine.store('game').api.preview(x,y).then((resolve)=>{
+                        this.board=resolve.args.board;
+                        this.maskBoard=resolve.args.maskBoard;
+                        this.maskBoard[y*8+x]=1;
                     })
                 }
-            },200)
-        },
-        stopUpdateStatus(){
-            clearInterval(this.updateInterval);
-        },
-        easterEggCounter:0,
-        updating:false,
-        click(x, y) {
-            if ((this.clickedX === -1 && this.clickedY === -1) ||
-                (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
-                (this.islower(this.board[y][x]) && this.nowMoving === 'black')) {
-
-                if(this.clickedX === x && this.clickedY === y) {
-                    this.resetXY()
-                } else if(this.board[y][x] !== '.' &&
-                    (this.isupper(this.board[y][x]) && this.nowMoving === 'white') ||
-                    (this.islower(this.board[y][x]) && this.nowMoving === 'black')){
-                    this.clickedX = x;
-                    this.clickedY = y;
-                    this.updating=true;
-                    this.game.preview(x, y).then((resolve)=>{
-                        this.updating=false;
-                        this.maskBoard = resolve.maskBoard;
-                        this.maskBoard[y*8+x] = 1;
-                    })
-                }
-            } else {
-
-                if (x !== this.clickedX || y !== this.clickedY) {
-                    this.updating=true;
-                    this.game.move(
+            }else{
+                if(clickDiff){
+                    Alpine.store('game').stopUpdate();
+                    Alpine.store('game').api.move(
                         this.clickedX,
                         this.clickedY,
                         x,
                         y
-                    ).then((resolve) => {
-                        if (resolve.value === 'failed') {
-                            if(this.pckg.isSingle) this.easterEggCounter++;
-                            this.showMessage('Alert!!', `invalid move${this.easterEggCounter>1?` ${this.easterEggCounter}/5`:''}`)
+                    ).then((resolve)=>{
+                        if(resolve.args.value==="failed"){
+                            if(Alpine.store('game').isSingle) Alpine.store('easterEgg').count++;
+                            Alpine.store('messageBox').show(
+                                "Alert!!",
+                                `invalid move${
+                                    Alpine.store('easterEgg').count>1
+                                        ?` ${Alpine.store('easterEgg').count}/5`
+                                        :''
+                                }`
+                            ).then(()=>{
+                                if(Alpine.store('easterEgg').count>=5) Alpine.store('easterEgg').show();
+                            })
+                            Alpine.store('game').startUpdate();
                             return;
-                        }else this.easterEggCounter=0;
-                        this.clickingX = x;
-                        this.clickingY = y;
-                        if (resolve.value === "success") {
-                            this.changeTurn(resolve);
-                            this.maskChess();
+                        }else Alpine.store('easterEgg').count=0;
+                        if(resolve.args.value==="success"){
+                            this.maskChess(x,y);
                             this.resetXY();
-                            this.updating=false;
+                            Alpine.store('game').update(resolve);
+                            Alpine.store('game').changeTurn();
+                            Alpine.store('game').startUpdate();
                         }
-                        if (resolve.value === "promotion") {
-                            document.querySelector('#bgm').pause();
-                            let audio=document.querySelector('#promoting');
-                            audio.load();
-                            audio.play();
-                            let lightbox = document.getElementById('promotion')
-                            lightbox.showModal();
-                            this.isPromoting = true
+                        if(resolve.args.value==="promotion"){
+                            Alpine.store('music').pause('bgm');
+                            Alpine.store('music').playFromHead('promoting');
+                            Alpine.store('promotionBox').show().then((choice)=>{
+                                Alpine.store('music').stop('promoting');
+                                Alpine.store('music').play('promoted');
+                                Alpine.store('game').api.promotion(choice).then((resolve)=>{
+                                    this.maskChess(x,y);
+                                    this.resetXY();
+                                    Alpine.store('game').update(resolve);
+                                    Alpine.store('game').changeTurn();
+                                    Alpine.store('game').startUpdate();
+                                })
+                            })
                         }
                     })
-                } else this.resetXY()
-
+                }else this.resetXY();
             }
-        },
-        game: new Game(),
-        closeEvent(e){
-            this.showMessage(e.code==1000?"Game Over":"Connection Closed", e.code==1006?"Server is down":e.reason);
-            this.roundMessage=e.code==1006?"Server is down":e.reason;
-            setInterval(()=>{
-                if(!this.isMessage) location.href="/";
-            },100)
-        },
-        addCloseEvent(){
-            this.game.ws.addEventListener('close',this.closeEvent.bind(this));
-        },
-        removeCloseEvent(){
-            this.game.ws.removeEventListener('close',this.closeEvent.bind(this));
-        },
-        waitJoin(){
-            let interval=setInterval(()=>{
-                if(this.game.isStart){
-                    clearInterval(interval);
-                    this.loadingMessage="Joining"
-                    this.startUpdateStatus();
-                    setTimeout(()=>{
-                        this.loading=false;
-                        this.loadingMessage=""
-                    },1800);
-                    return;
-                }
-                if(this.game.joinRequestQueue.length){
-                    clearInterval(interval);
-                    let pckg=this.game.joinRequestQueue.shift();
-                    this.showConfirm("Join Request",`${pckg.nickname} wants to join!`);
-                    let jnterval=setInterval(()=>{
-                        if(!this.isConfirm){
-                            clearInterval(jnterval);
-                            if(this.confirmChoice){
-                                this.game.acceptJoinRequest(pckg.nickname);
-                                while(this.game.joinRequestQueue.length){
-                                    this.game.rejectJoinRequest(this.joinRequestQueue.shift().nickname);
-                                }
-                                this.loadingMessage=`${pckg.nickname} Joining`
-                            }
-                            else{
-                                this.game.rejectJoinRequest(pckg.nickname);
-                            }
-                            this.waitJoin();
-                        }
-                    },100)
-                }
-            },1000)
-        },
-        resign(){
-            this.game.resign(this.player);
-        },
-        pckg:new Object(),
-        p0Name:"",
-        p1Name:"",
-        haveMusic:false,
-        musicVolume:100,
-        init(){
-            this.showConfirm("Permission","Play Music?");
-            let interval=setInterval(()=>{
-                if(!this.isConfirm){
-                    clearInterval(interval);
-                    if(this.confirmChoice){
-                        this.haveMusic=true;
-                        document.querySelector('#bgmHead').play();
-                    }else this.musicVolume=0;
-                    this.connectGame();
-                }
-            },100)
-        },
-        updateVolume(){
-            document.querySelectorAll('audio').forEach((audio)=>audio.volume=this.musicVolume/100);
-        },
-        connectGame(){
-            let pckg=this.pckg;
-
-            if(getUrlQuery("create")!==false){
-                this.player="white";
-                pckg.header="create";
-                pckg.time=parseInt(getUrlQuery("clock").split('+')[0])*60;
-                pckg.addPerRound=parseInt(getUrlQuery("clock").split('+')[1]);
-                if(getUrlQuery("single")!==false){
-                    pckg.isSingle=true;
-                    if(getUrlQuery("fen")!==false) pckg.fen=getUrlQuery("fen");
-                }else{
-                    if(getUrlQuery("clock")===false){
-                        this.loadingMessage="missing header";
-                        return;
-                    }
-                    pckg.isSingle=false;
-                    pckg.roomId=getUrlQuery("create");
-                    pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
-                    this.loadingMessage="Wating for Player's Joining";
-                }
-            }else if(getUrlQuery("join")!==false){
-                this.player="black";
-                pckg.header="join";
-                pckg.roomId=getUrlQuery("join");
-                pckg.nickname=getUrlQuery("nickname")!==false?getUrlQuery("nickname"):"Unknown";
-                this.loadingMessage="Wating for Room Leader's Reply";
-            }else{
-                this.loadingMessage="missing header";
-                return;
-            }
-
-            this.addCloseEvent();
-            this.game.connect(pckg).then(()=>{
-                this.waitJoin();
-            }).catch((msg)=>this.loadingMessage=msg)
         }
-    }))
+    })
+    Alpine.store('easterEgg',{
+        count:0,
+        on:false,
+        show(){
+            Alpine.store('game').stopUpdate();
+            Alpine.store('music').pauseAll();
+            Alpine.store('messageBox').show("😂","😂😂😂😂😂");
+            Alpine.store('music').play('rick');
+            Alpine.store('board').board = [
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz',
+                'zzzzzzzz'
+            ]
+            setInterval(()=>{
+                this.on=false;
+                this.on=true;
+                Alpine.store('board').maskBoard=Alpine.store('board').maskBoard.map(()=>{return parseInt(Math.random()*2)})
+            },1000)
+        }
+    })
+    Alpine.store('onClose',{
+        event(e){
+            Alpine.store('game').stopUpdate();
+            let title=e.code==1000?"Game Over":"Connection Closed";
+            let message=e.code==1006?"Server is down":e.reason;
+            Alpine.store('messageBox').show(title,message).then(()=>{
+                location.href="/";
+            })
+        },
+        add(){
+            Alpine.store('game').api.ws.addEventListener('close',this.event.bind(this));
+        },
+        remove(){
+            Alpine.store('game').api.ws.removeEventListener('close',this.event.bind(this));
+        }
+    })
+    Alpine.store('loading',{
+        on:true,
+        message:"",
+        dot:"...",
+        start(){
+            let count=0;
+            setInterval(()=>{
+                this.dot=".".repeat(count++);
+                if(count>=4) count=0;
+            },500)
+        }
+    })
+    Alpine.store('messageBox',{
+        on:false,
+        title:"",
+        content:"",
+        show(title,message){
+            this.title=title;
+            this.content=message;
+            document.querySelector('#messageBox').close();
+            document.querySelector('#messageBox').showModal();
+            this.on=true;
+            return new Promise((resolve)=>{
+                let interval=setInterval(()=>{
+                    if(!this.on){
+                        clearInterval(interval);
+                        resolve();
+                    }
+                },100)
+            })
+        },
+        close(){
+            this.on=false;
+            setTimeout(()=>{
+                this.title="";
+                this.content="";
+                document.querySelector('#messageBox').close();
+            },75)
+        }
+    })
+    Alpine.store('confirmBox',{
+        on:false,
+        title:"",
+        content:"",
+        choice:false,
+        show(title,message){
+            this.title=title;
+            this.content=message;
+            document.querySelector('#confirmBox').close();
+            document.querySelector('#confirmBox').showModal();
+            this.on=true;
+            return new Promise((resolve,reject)=>{
+                let interval=setInterval(()=>{
+                    if(!this.on){
+                        clearInterval(interval);
+                        if(this.choice) resolve();
+                        reject();
+                    }
+                },100)
+            })
+        },
+        close(bool){
+            this.choice=bool;
+            this.on=false;
+            setTimeout(()=>{
+                this.title="";
+                this.content="";
+                document.querySelector('#confirmBox').close();
+            },75)
+        }
+    })
+    Alpine.store('promotionBox',{
+        on:false,
+        choice:0,
+        show(){
+            document.querySelector('#promotionBox').close();
+            document.querySelector('#promotionBox').showModal();
+            this.on=true;
+            return new Promise((resolve)=>{
+                let interval=setInterval(()=>{
+                    if(!this.on){
+                        clearInterval(interval);
+                        resolve(this.choice);
+                    }
+                },100)
+            })
+        },
+        close(choice){
+            this.choice=choice+1;
+            this.on=false;
+            setTimeout(()=>{
+                this.title="";
+                this.content="";
+                document.querySelector('#promotionBox').close();
+            },75)
+        },
+        calculateChess() {
+            const options = ['q', 'b', 'n', 'r']
+            const isBlack = Alpine.store('game').nowMovingColor === 'black'
+            if (isBlack) return options;
+            return options.map((char) => {
+                return char.toUpperCase()
+            })
+        }
+    })
+    Alpine.store('music',{
+        on:false,
+        volume:50,
+        updateVolume(){
+            document.querySelectorAll('audio').forEach((audio)=>{
+                audio.volume=this.volume/100;
+            })
+        },
+        play(name){
+            if(!this.on) return;
+            document.querySelector(`audio#${name}`).play();
+        },
+        playFromHead(name){
+            if(!this.on) return;
+            document.querySelector(`audio#${name}`).load();
+            document.querySelector(`audio#${name}`).play();
+        },
+        pause(name){
+            if(!this.on) return;
+            document.querySelector(`audio#${name}`).pause();
+        },
+        stop(name){
+            if(!this.on) return;
+            document.querySelector(`audio#${name}`).pause();
+            document.querySelector(`audio#${name}`).load();
+        },
+        pauseAll(){
+            document.querySelectorAll('audio').forEach((audio)=>audio.pause());
+        }
+    })
+
+    Alpine.store('confirmBox').show(
+        "Permission",
+        "Play Music?"
+    ).then(()=>{
+        Alpine.store('music').on=true;
+    }).finally(()=>{
+        Alpine.store('game').connect();
+    })
 })

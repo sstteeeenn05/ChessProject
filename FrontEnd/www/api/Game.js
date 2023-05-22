@@ -29,7 +29,7 @@ export class Game{
                         case "room-response":
                             if(request.content.isSingle||request.content.header=="join"){
                                 this.isStart=true;
-                                resolve();
+                                resolve(response.content);
                             }
                             this.ws.onmessage=(e)=>{
                                 let request=JSON.parse(e.data.toString());
@@ -60,7 +60,7 @@ export class Game{
                         type:"handshake",
                         content:pckg
                     },"room-response").then(
-                        ()=>resolve(),
+                        (p0Name)=>resolve(p0Name),
                         ()=>reject()
                     )
                 }
@@ -92,7 +92,7 @@ export class Game{
             content:command
         },"game-args")
     }
-    getState(){
+    getArgs(){
         return this.sendCommand("get");
     }
     promotion(choice){
@@ -107,10 +107,10 @@ export class Game{
     readHistory(option){
         return this.sendCommand(option);
     }
-    resign(who){
+    resign(color){
         return this.generatePromise({
             type:"resign",
-            content:who
+            content:color
         })
     }
 }

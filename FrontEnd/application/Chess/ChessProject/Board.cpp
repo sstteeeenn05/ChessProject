@@ -118,6 +118,7 @@ std::string Board::getBoard() {
 
 std::string Board::getMaskBoard(Position target) {
     std::string output;
+    if (getChess(target).data.player != getNowPlayer()) return output;
     std::vector<Position> posList = getValidPos(target);
     checkMovement(target, posList);
     bool maskBoard[8][8] = {false};

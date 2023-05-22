@@ -34,16 +34,12 @@
 /**
  * @typedef {Object} GameArgs
  * @prop {string} status
- * @prop {string} who
+ * @prop {string} color
  * @prop {boolean} canUndo
  * @prop {boolean} canRedo
  * @prop {string} value
  * @prop {Array<boolean>} maskBoard
  * @prop {Array<string>} board
- * @prop {Player} p0
- * @prop {Player} p1
- * @prop {number} time
- * @prop {number} addPerRound
  */
 
 /**
@@ -209,7 +205,7 @@ function joinGame(ws,package){
                 startGame(roomList.get(package.roomId));
                 ws.send(JSON.stringify({
                     type:"room-response",
-                    content:{success:true}
+                    content:room.p0.name
                 }))
             }
             else{
@@ -257,11 +253,6 @@ function startGame(room){
         }
     },1000)
 
-    function updateGameArgs(){
-        gameArgs.p0=p0;
-        gameArgs.p1=p1;
-    }
-
     function checkCommandToPauseTimer(value){
         if(room.commandList.length==1){
             p0.timerPaused=false;
@@ -295,10 +286,13 @@ function startGame(room){
             return;
         }
         if(request.content=="get"){
-            updateGameArgs();
             e.target.send(JSON.stringify({
                 type:"game-args",
-                content:gameArgs
+                content:{
+                    args:gameArgs,
+                    p0RemainTime:p0.remainTime,
+                    p1RemainTime:p1.remainTime
+                }
             }))
         }else if(e.target==room.nowMoving.ws){
             console.log(`receive from ${e.target==p0?"white":"black"}:${request.type} > ${request.content}`);
@@ -323,21 +317,24 @@ function startGame(room){
         if(arr.length!=7) return wsClose("Internal Server Error");
         gameArgs={
             status:arr[0],
-            who:arr[1],
+            color:arr[1],
             canUndo:arr[2]==='1',
             canRedo:arr[3]==='1',
             value:arr[4],
             maskBoard:arr[5].toString().split("").map((c)=>{return parseInt(c)}),
             board:arr[6]?arr[6].match(/.{1,8}/g):gameArgs.board
         }
+        console.log(gameArgs);
         checkCommandToPauseTimer(gameArgs.value);
-        updateGameArgs();
-        console.log(`send:${gameArgs.value}${gameArgs.maskBoard} > ${gameArgs.status}`);
         room.nowMoving.ws.send(JSON.stringify({
             type:"game-args",
-            content:gameArgs
+            content:{
+                args:gameArgs,
+                p0RemainTime:p0.remainTime,
+                p1RemainTime:p1.remainTime
+            }
         }));
-        room.nowMoving=gameArgs.who=="white"?p0:p1;
+        room.nowMoving=gameArgs.color=="white"?p0:p1;
     })
 
     let execute=(commands)=>{
