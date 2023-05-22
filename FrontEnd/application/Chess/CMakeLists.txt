@@ -10,7 +10,7 @@ set(PROJECT02_SRC_LIST
         ${PROJECT_SOURCE_DIR}/ChessProject/Position.h
         ${PROJECT_SOURCE_DIR}/ChessProject/Board.h
         ${PROJECT_SOURCE_DIR}/ChessProject/Board.cpp
-        ${PROJECT_SOURCE_DIR}/ChessProject/ViewManager.h
-        ${PROJECT_SOURCE_DIR}/ChessProject/ViewManager.cpp)
+        ${PROJECT_SOURCE_DIR}/ChessProject/Game.h
+        ${PROJECT_SOURCE_DIR}/ChessProject/Game.cpp)
 
 add_executable(ChessProject ${PROJECT02_SRC_LIST})

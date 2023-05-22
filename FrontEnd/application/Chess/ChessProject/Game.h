@@ -4,11 +4,11 @@
 
 #pragma once
 
-class ViewManager {
+class Game {
     Board gameBoard;
     Player player, enemy;
 public:
-    ViewManager() = default;
+    Game() = default;
 
     void init();
 

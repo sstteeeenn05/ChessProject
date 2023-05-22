@@ -1,14 +1,14 @@
-#include "ViewManager.h"
+#include "Game.h"
 
-void ViewManager::init() {
+void Game::init() {
     gameBoard.init();
 }
 
-void ViewManager::init(std::string boardCode, std::string turn, std::string castling) {
+void Game::init(std::string boardCode, std::string turn, std::string castling) {
     gameBoard.init(boardCode, turn, castling);
 }
 
-int ViewManager::inputCommandAndPrint() {
+int Game::inputCommandAndPrint() {
     std::string key;
     std::cin >> key;
     if (key == "start") std::cout << "playing;" << (gameBoard.getNowPlayer()==WHITE?"white":"black") << ";0;0;;;" << gameBoard.getBoard();
