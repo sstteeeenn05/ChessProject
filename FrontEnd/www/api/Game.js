@@ -24,7 +24,7 @@ export class Game{
             if(!this.isReady) reject("Web Socket is not ready!");
             this.ws.onmessage=(e)=>{
                 let response=JSON.parse(e.data.toString());
-                if(response.type==responseType)
+                if(response.type==responseType){
                     switch(responseType){
                         case "room-response":
                             if(request.content.isSingle||request.content.header=="join"){
@@ -37,8 +37,11 @@ export class Game{
                             }
                             resolve();
                         case "game-args":
-                            resolve(response.content)
+                            resolve(response.content);
+                        default:
+                            reject();
                     }
+                }else reject();
             }
             this.ws.onclose=(e)=>reject(e.reason);
             this.ws.onerror=(event)=>reject(event);

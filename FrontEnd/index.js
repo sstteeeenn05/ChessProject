@@ -13,7 +13,7 @@
  * @prop {Player} p0
  * @prop {Player} p1
  * @prop {pipe.ChildProcess} process
- * @prop {Array<string>} commandList
+ * @prop {Array<string>} queue
  * @prop {GameArgs} gameArgs
  * @prop {string} fen
  * @prop {number} time
@@ -33,6 +33,7 @@
 
 /**
  * @typedef {Object} GameArgs
+ * @prop {string} mode
  * @prop {string} status
  * @prop {string} color
  * @prop {boolean} canUndo
@@ -150,7 +151,7 @@ function createGame(ws,package){
             timerPaused:true
         },
         gameArgs:{},
-        commandList:[],
+        queue:[],
         time:package.time,
         addPerRound:package.addPerRound,
     }
@@ -232,7 +233,7 @@ function startGame(room){
 
     if(!process) wsClose();
 
-    room.status="Playing";
+    room.status="Connecting";
 
     let p0Timer=setInterval(()=>{
         if(!p0.timerPaused){
@@ -253,13 +254,13 @@ function startGame(room){
         }
     },1000)
 
-    function checkCommandToPauseTimer(value){
-        if(room.commandList.length==1){
+    function checkCommandToPauseTimer(args){
+        if(room.status=="Connecting"&&args.mode){
+            room.status="Playing";
             p0.timerPaused=false;
             return;
         }
-        let lastCommand=room.commandList[room.commandList.length-1];
-        if(lastCommand=="move"&&value=="success"){
+        if(args.mode=="move"&&args.value=="success"){
             room.nowMoving.timerPaused=true;
             let nextMoving=room.nowMoving==p0?p1:p0;
             nextMoving.remainTime=Math.min(room.time,nextMoving.remainTime+room.addPerRound);
@@ -296,7 +297,7 @@ function startGame(room){
             }))
         }else if(e.target==room.nowMoving.ws){
             console.log(`receive from ${e.target==p0?"white":"black"}:${request.type} > ${request.content}`);
-            execute(request.content);
+            room.queue.push(request.content.toString());
         }else{
             e.target.send(JSON.stringify({
                 type:"server-response",
@@ -314,18 +315,20 @@ function startGame(room){
     process.stdout.on('data',(data)=>{
         console.log("ondata!");
         let arr=data.toString().replaceAll(' ','.').replaceAll(/[\u0000-\u001F\u007F-\u009F]/g,'').split(';');
-        if(arr.length!=7) return wsClose("Internal Server Error");
+        if(arr.length!=8) return wsClose("Internal Server Error");
         gameArgs={
-            status:arr[0],
-            color:arr[1],
-            canUndo:arr[2]==='1',
-            canRedo:arr[3]==='1',
-            value:arr[4],
-            maskBoard:arr[5].toString().split("").map((c)=>{return parseInt(c)}),
-            board:arr[6]?arr[6].match(/.{1,8}/g):gameArgs.board
+            mode:arr[0],
+            status:arr[1],
+            color:arr[2],
+            canUndo:arr[3]==='1',
+            canRedo:arr[4]==='1',
+            value:arr[5],
+            maskBoard:arr[6].toString().split("").map((c)=>{return parseInt(c)}),
+            board:arr[7]?arr[7].match(/.{1,8}/g):gameArgs.board
         }
         console.log(gameArgs);
-        checkCommandToPauseTimer(gameArgs.value);
+        checkCommandToPauseTimer(gameArgs);
+        console.log(room.nowMoving==room.p0?"send to p0":"send to p1");
         room.nowMoving.ws.send(JSON.stringify({
             type:"game-args",
             content:{
@@ -335,15 +338,24 @@ function startGame(room){
             }
         }));
         room.nowMoving=gameArgs.color=="white"?p0:p1;
+        executing=false;
     })
 
+    let executing=false;
+
     let execute=(commands)=>{
-        if(typeof commands!='number') room.commandList.push(commands.split(' ')[0]);
+        executing=true;
         commands=commands.toString();
         console.log("execute:",commands);
         commands.split(' ').forEach((command)=>process.stdin.write(command+'\n'));
         process.stdin.write("\n");
     }
+
+    let commandInterval=setInterval(()=>{
+        if(room.queue.length&&!executing){
+            execute(room.queue.shift());
+        }
+    },20)
 
     p0.ws.onclose=()=>{
         console.log("Player0 quit!");
@@ -356,6 +368,7 @@ function startGame(room){
 
     let wsClose=(msg0,msg1=msg0)=>{
         console.log("onclose!");
+        clearInterval(commandInterval);
         clearInterval(p0Timer);
         clearInterval(p1Timer);
         p0.ws.onclose=null;

@@ -55,18 +55,23 @@ document.addEventListener('alpine:init',()=>{
             this.p0.remainTime=resolve.p0RemainTime;
             this.p1.remainTime=resolve.p1RemainTime;
         },
+        updating:false,
         startUpdate(){
+            this.updating=false;
             this.updateInterval=setInterval(()=>{
                 this.api.getArgs().then((resolve)=>{
-                    this.update(resolve);
-                    if(this.playerColor===this.args.color
-                        &&this.playerColor!==this.nowMovingColor
-                        &&!this.isSingle)
-                        this.changeTurn(resolve.args);
+                    if(!this.updating){
+                        this.update(resolve);
+                        if(this.playerColor===this.args.color
+                            &&this.playerColor!==this.nowMovingColor
+                            &&!this.isSingle)
+                            this.changeTurn(resolve.args);
+                    }
                 })
             },100)
         },
         stopUpdate(){
+            this.updating=true;
             clearInterval(this.updateInterval);
         },
         connect(){
@@ -230,6 +235,7 @@ document.addEventListener('alpine:init',()=>{
             this.maskBoard=[];
         },
         click(x,y){
+            console.log("click!")
             let clicked=this.clickedX!==-1&&this.clickedY!==-1;
             let clickSameColor=(
                 Alpine.store('utility').isupper(this.board[y][x])
@@ -240,6 +246,7 @@ document.addEventListener('alpine:init',()=>{
             )
             let clickDiff=this.clickedX!==x||this.clickedY!==y;
             if(!clicked||clickSameColor){
+                Alpine.store('game').stopUpdate();
                 if(this.clickedX===x&&this.clickedY===y) this.resetXY();
                 else if(this.board[y][x]!=='.'&&clickSameColor){
                     this.clickedX=x;
@@ -248,6 +255,7 @@ document.addEventListener('alpine:init',()=>{
                         this.board=resolve.args.board;
                         this.maskBoard=resolve.args.maskBoard;
                         this.maskBoard[y*8+x]=1;
+                        Alpine.store('game').startUpdate();
                     })
                 }
             }else{

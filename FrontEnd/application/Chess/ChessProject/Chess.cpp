@@ -249,7 +249,7 @@ Type Chess::doPromotion() const {
 
     // Prompt the player to choose the type of chess piece for promotion
     do {
-        std::cout << "playing;" << (data.player == WHITE ? "white" : "black") << ";;;promotion;;";
+        std::cout << "move;playing;" << (data.player == WHITE ? "white" : "black") << ";;;promotion;;";
         std::cin >> choose;
 
         if (choose == 1) return QUEEN;
@@ -260,6 +260,6 @@ Type Chess::doPromotion() const {
 
         if (choose == 4) return ROOK;
 
-        std::cout << "playing;" << (data.player == WHITE ? "white" : "black") << ";;;failed;;";
+        std::cout << "promotion;playing;" << (data.player == WHITE ? "white" : "black") << ";;;failed;;";
     } while (choose < 1 || choose > 4); //if the input isn't valid
 }

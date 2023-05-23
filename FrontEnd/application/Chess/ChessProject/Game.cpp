@@ -11,7 +11,7 @@ void Game::init(std::string boardCode, std::string turn, std::string castling) {
 int Game::inputCommandAndPrint() {
     std::string key;
     std::cin >> key;
-    if (key == "start") std::cout << "playing;" << (gameBoard.getNowPlayer()==WHITE?"white":"black") << ";0;0;;;" << gameBoard.getBoard();
+    if (key == "start") std::cout << ";playing;" << (gameBoard.getNowPlayer()==WHITE?"white":"black") << ";0;0;;;" << gameBoard.getBoard();
     else return 0;
     while (true) {
         std::string status, who, canUndo, canRedo, value, maskBoard, board;
@@ -48,7 +48,7 @@ int Game::inputCommandAndPrint() {
         else who = player == WHITE ? "white" : "black";
         board = Board::getBoard();
 
-        std::cout << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << maskBoard << ";"
+        std::cout << mode << ";" << status << ";" << who << ";" << canUndo << ";" << canRedo << ";" << value << ";" << maskBoard << ";"
                   << board << std::endl;
     }
 }
