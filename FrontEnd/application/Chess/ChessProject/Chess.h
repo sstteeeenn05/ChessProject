@@ -33,6 +33,8 @@ public:
 
     [[nodiscard]] bool onRiver() const;
 
+    [[nodiscard]] bool onMyRiver() const;
+
     [[nodiscard]] std::pair<Position, Position> getSidePos() const;
 
     [[nodiscard]] std::pair<bool, bool> getEnPassant() const;

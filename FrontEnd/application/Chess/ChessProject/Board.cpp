@@ -221,50 +221,25 @@ bool Board::move(Player player, Position source, Position target) {
 
     while (logList.size() > logIndex) logList.pop_back();
 
-    std::vector<std::pair<ChessData, ChessData>> log;
-    Chess &sChess = board[source.y][source.x];
-    Chess &tChess = board[target.y][target.x];
+    Log log;
+    Chess &sChess = getChess(source);
+    Chess &tChess = getChess(target);
 
     if (sChess.data.type == KING) {
         kingsPos[sChess.data.player] = tChess.data.position;
-        if ((tChess.data.position.x == 2 || tChess.data.position.x == 6) && !sChess.data.moved) {
-            Chess &sRook = getChess({(tChess.data.position.x == 2) ? 0 : 7, sChess.data.position.y});
-            Chess &tRook = getChess({(tChess.data.position.x == 2) ? 3 : 5, sChess.data.position.y});
-            log.emplace_back(sRook.data, sRook.data.previewMoved());
-            sRook.data.moved = true;
-
-            log.emplace_back(sRook.data, sRook.data.previewClear());
-            log.emplace_back(tRook.data, tRook.data.previewSet(sRook.data));
-            tRook.data.set(sRook.data);
-            sRook.data.clear();
-        }
+        checkCastling(sChess, tChess, log);
     }
 
-    if (sChess.data.type == PAWN) {
-        const auto [leftEnPassant, rightEnPassant] = sChess.getEnPassant();
-        auto [left, right] = sChess.getSidePos();
-        Chess &lChess = getChess(left);
-        Chess &rChess = getChess(right);
+    if (sChess.data.type == PAWN) checkEnPassant(sChess, tChess, log);
 
-        if (leftEnPassant && target == sChess.generatePosByPlayer({-1, 1})) {
-            log.emplace_back(sChess.data, sChess.data.previewEnPassant());
-            sChess.data.enPassanted = true;
-            log.emplace_back(lChess.data, lChess.data.previewClear());
-            lChess.data.clear();
-        }
-
-        if (rightEnPassant && target == sChess.generatePosByPlayer({1, 1})) {
-            log.emplace_back(sChess.data, sChess.data.previewEnPassant());
-            sChess.data.enPassanted = true;
-            log.emplace_back(rChess.data, rChess.data.previewClear());
-            rChess.data.clear();
-        }
-    }
+    clearEnPassanting(log);
 
     log.emplace_back(sChess.data, sChess.data.previewClear());
     log.emplace_back(tChess.data, tChess.data.previewSet(sChess.data));
     tChess.data.set(sChess.data);
     sChess.data.clear();
+
+    if (tChess.data.type == PAWN) checkNextEnPassant(tChess, log);
 
     if (tChess.checkPromotion()) {
         Type promotion = tChess.doPromotion();
@@ -285,6 +260,60 @@ bool Board::move(Player player, Position source, Position target) {
     logIndex = logList.size();
 
     return true;
+}
+
+void Board::checkCastling(Chess& sChess, Chess& tChess, Log& log) {
+    if ((tChess.data.position.x == 2 || tChess.data.position.x == 6) && !sChess.data.moved) {
+        Chess& sRook = getChess({ (tChess.data.position.x == 2) ? 0 : 7, sChess.data.position.y });
+        Chess& tRook = getChess({ (tChess.data.position.x == 2) ? 3 : 5, sChess.data.position.y });
+        log.emplace_back(sRook.data, sRook.data.previewMoved());
+        sRook.data.moved = true;
+
+        log.emplace_back(sRook.data, sRook.data.previewClear());
+        log.emplace_back(tRook.data, tRook.data.previewSet(sRook.data));
+        tRook.data.set(sRook.data);
+        sRook.data.clear();
+    }
+}
+
+void Board::checkEnPassant(Chess& sChess, Chess& tChess, Log& log) {
+    const auto [leftEnPassant, rightEnPassant] = sChess.getEnPassant();
+    auto [left, right] = sChess.getSidePos();
+    Chess& lChess = getChess(left);
+    Chess& rChess = getChess(right);
+
+    if (leftEnPassant && tChess.data.position == sChess.generatePosByPlayer({ -1, 1 })) {
+        log.emplace_back(lChess.data, lChess.data.previewClear());
+        lChess.data.clear();
+    }
+
+    if (rightEnPassant && tChess.data.position == sChess.generatePosByPlayer({ 1, 1 })) {
+        log.emplace_back(rChess.data, rChess.data.previewClear());
+        rChess.data.clear();
+    }
+}
+
+void Board::clearEnPassanting(Log& log) {
+    for (auto& row : board) {
+        for (Chess& chess : row) {
+            if (chess.data.enPassanting) {
+                log.emplace_back(chess.data, chess.data.previewEnPassanted());
+                chess.data.enPassanting = false;
+            }
+        }
+    }
+}
+
+void Board::checkNextEnPassant(Chess& tChess, Log& log) {
+    auto [left, right] = tChess.getSidePos();
+    Chess& lChess = getChess(left);
+    Chess& rChess = getChess(right);
+    if (tChess.onMyRiver()) {
+        if (lChess.data.type == PAWN || rChess.data.type == PAWN) {
+            log.emplace_back(tChess.data, tChess.data.previewEnPassanting());
+            tChess.data.enPassanting = true;
+        }
+    }
 }
 
 Player Board::getNowPlayer() const {

@@ -8,7 +8,7 @@
 class Chess;
 
 class Board {
-    std::vector<std::vector<std::pair<ChessData, ChessData>>> logList;
+    std::vector<Log> logList;
     int logIndex;
     int beginLogIndex;
     static Chess board[8][8];
@@ -41,6 +41,14 @@ public:
     bool canMove(Position, Position);
 
     bool move(Player, Position, Position);
+
+    void checkCastling(Chess&, Chess&, Log&);
+
+    void checkEnPassant(Chess&, Chess&, Log&);
+
+    void clearEnPassanting(Log&);
+
+    void checkNextEnPassant(Chess&, Log&);
 
     void checkMovement(const Position &target, std::vector<Position> &validPos);
 

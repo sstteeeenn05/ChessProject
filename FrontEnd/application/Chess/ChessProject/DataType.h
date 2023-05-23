@@ -30,7 +30,7 @@ struct ChessData {
     Player player = NONE, enemy = NONE;
     Position position;
     Type type = EMPTY;
-    bool enPassanted = false;
+    bool enPassanting = false;
     bool moved = false;
 
     ChessData() = default;
@@ -56,7 +56,7 @@ struct ChessData {
         player = NONE;
         enemy = NONE;
         type = EMPTY;
-        enPassanted = false;
+        enPassanting = false;
         moved = false;
     }
 
@@ -66,9 +66,15 @@ struct ChessData {
         return data;
     }
 
-    ChessData previewEnPassant() {
+    ChessData previewEnPassanting() {
         ChessData data = *this;
-        data.enPassanted = true;
+        data.enPassanting = true;
+        return data;
+    }
+
+    ChessData previewEnPassanted() {
+        ChessData data = *this;
+        data.enPassanting = false;
         return data;
     }
 
@@ -89,3 +95,5 @@ struct ChessData {
         return data;
     }
 };
+
+typedef std::vector<std::pair<ChessData, ChessData>> Log;

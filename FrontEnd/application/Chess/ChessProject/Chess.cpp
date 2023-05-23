@@ -205,6 +205,10 @@ bool Chess::onRiver() const {
     return (data.player == WHITE && data.position.y == 3) || (data.player == BLACK && data.position.y == 4);
 }
 
+bool Chess::onMyRiver() const {
+    return (data.player == WHITE && data.position.y == 4) || (data.player == BLACK && data.position.y == 3);
+}
+
 // Intent: Get the positions adjacent to the current position on the same row
 // Pre: None
 // Post: Returns a pair of positions, representing the left and right adjacent positions 
@@ -221,10 +225,10 @@ std::pair<Position, Position> Chess::getSidePos() const {
 std::pair<bool, bool> Chess::getEnPassant() const {
     auto [left, right] = getSidePos();
     return {
-            !data.enPassanted && left.valid() && Board::getChess(left).data.type == PAWN &&
-            Board::getChess(left).data.player != data.player && onRiver(), // Check if left en passant move is possible
-            !data.enPassanted && right.valid() && Board::getChess(right).data.type == PAWN &&
-            Board::getChess(right).data.player != data.player && onRiver() // Check if right en passant move is possible
+            left.valid() && Board::getChess(left).data.type == PAWN && Board::getChess(left).data.enPassanting &&
+            Board::getChess(left).data.player != data.player && onRiver(),
+            right.valid() && Board::getChess(right).data.type == PAWN && Board::getChess(right).data.enPassanting &&
+            Board::getChess(right).data.player != data.player && onRiver()
     };
 }
 
