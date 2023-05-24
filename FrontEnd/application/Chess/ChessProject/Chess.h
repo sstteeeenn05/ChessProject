@@ -15,33 +15,33 @@ class Chess {
 
 public:
 
-    bool checkValid(Position, std::vector<Position> &) const;
+    bool checkValid(Position, std::vector<Position> &) const; //Check if the given position is a valid move for the chess piece
 
-    void checkCastling(std::vector<Position> &);
+    void checkCastling(std::vector<Position> &); //Check if castling is a valid move for the chess piece
 
-    void checkStraight(std::vector<Position> &);
+    void checkStraight(std::vector<Position> &); //Find all the valid positions on the straight line
 
-    void checkCross(std::vector<Position> &) const;
+    void checkCross(std::vector<Position> &) const; //Find all the valid positions on the diagonal lines
 
-    void checkSquare(std::vector<Position> &) const;
+    void checkSquare(std::vector<Position> &) const; //Find all the valid positions adjacent to the chess piece
 
-    void checkL(std::vector<Position> &) const;
+    void checkL(std::vector<Position> &) const; //Find all the valid positions for a knight move
 
-    void checkPawn(std::vector<Position> &) const;
+    void checkPawn(std::vector<Position> &) const; //Find all the valid positions for a pawn move
 
-    [[nodiscard]] Position generatePosByPlayer(Position) const;
+    [[nodiscard]] Position generatePosByPlayer(Position) const; //Generate a new position based on the current position and the player's perspective
 
-    [[nodiscard]] bool onRiver() const;
+    [[nodiscard]] bool onRiver() const; //Check if the chess piece is on the river
 
-    [[nodiscard]] bool onMyRiver() const;
+    [[nodiscard]] bool onMyRiver() const; //Check if the chess piece is positioned on its own river
 
-    [[nodiscard]] std::pair<Position, Position> getSidePos() const;
+    [[nodiscard]] std::pair<Position, Position> getSidePos() const; //Get the positions adjacent to the current position on the same row
 
-    [[nodiscard]] std::pair<bool, bool> getEnPassant() const;
+    [[nodiscard]] std::pair<bool, bool> getEnPassant() const; //Check if en passant move is possible for the current chess piece
 
-    [[nodiscard]] bool checkPromotion() const;
+    [[nodiscard]] bool checkPromotion() const; //Check if the pawn is at the end of the board
 
-    [[nodiscard]] Type doPromotion() const;
+    [[nodiscard]] Type doPromotion() const; //Execute promotion
 
     Chess() = default;
 

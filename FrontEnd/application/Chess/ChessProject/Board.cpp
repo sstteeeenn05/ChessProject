@@ -31,7 +31,7 @@ void Board::init() {
     for (int i = 0; i < 8; i++) board[7][i] = Chess(WHITE, {i, 7}, typeList[i]);
 }
 
-//intent: Initialize the board with a given board code, turn, and castling information
+//intent:  
 //pre: 
 //post:
 void Board::init(std::string boardCode, std::string turn, std::string castling) {
@@ -522,7 +522,7 @@ Status Board::calculateWinOrTie(Player enemy) {
     return TIE;
 }
 
-// intent: Get the current game status (WIN, TIE, or PLAYING)
+// intent: Get the current game status 
 // pre: The board is initialized
 // post: Returns the current game status based on the board state
 Status Board::isWinOrTie() {

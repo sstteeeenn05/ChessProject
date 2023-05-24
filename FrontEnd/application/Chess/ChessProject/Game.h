@@ -10,10 +10,10 @@ class Game {
 public:
     Game() = default;
 
-    void init();
+    void init(); //Initialize the game with default settings
 
-    void init(std::string boardCode, std::string turn, std::string castling);
+    void init(std::string boardCode, std::string turn, std::string castling); //Initialize the game with custom settings
 
-    int inputCommandAndPrint();
+    int inputCommandAndPrint(); // Handle user input and print game information
 
 };

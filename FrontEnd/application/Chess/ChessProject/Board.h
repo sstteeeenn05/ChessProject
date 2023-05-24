@@ -15,54 +15,54 @@ class Board {
     // 0-white, 1-black
     Position kingsPos[2];
     bool isChecking;
-
     Status status;
+
 public:
-    void init();
+    void init(); //Initialize the board
 
-    void init(std::string boardCode, std::string turn, std::string castling);
+    void init(std::string boardCode, std::string turn, std::string castling); //Initialize the board with a given board code, turn, and castling information
 
-    static Chess &getChess(Position);
+    static Chess &getChess(Position); //Retrieve the chess piece at the given position on the board
 
-    static std::string getBoard();
+    static std::string getBoard(); //Get the current state of the chessboard as a string
 
-    std::string getMaskBoard(Position);
+    std::string getMaskBoard(Position); //Get the mask board indicating the valid movement positions for a chess piece at the target position
 
-    bool canUndo();
+    bool canUndo(); //Check if there are moves to undo
 
-    bool canRedo();
+    bool canRedo(); //Check if there are moves to redo
 
-    bool undo();
+    bool undo(); //Undo the last move
 
-    bool redo();
+    bool redo(); //Redo the last undone move
+     
+    std::vector<Position> getValidPos(Position); //Get a list of valid positions for a given chess piece
 
-    std::vector<Position> getValidPos(Position);
+    bool canMove(Position, Position); //Check if a move from the source position to the target position is valid
 
-    bool canMove(Position, Position);
+    bool move(Player, Position, Position); //Move a chess piece from the source position to the target position
 
-    bool move(Player, Position, Position);
+    void checkCastling(Chess&, Chess&, Log&); //Check and handle castling move if applicable
 
-    void checkCastling(Chess&, Chess&, Log&);
+    void checkEnPassant(Chess&, Chess&, Log&); //Check and handle en passant move if applicable
 
-    void checkEnPassant(Chess&, Chess&, Log&);
+    void clearEnPassanting(Log&); //Clear the en passant status of all pawns on the board
 
-    void clearEnPassanting(Log&);
+    void checkNextEnPassant(Chess&, Log&); //Check if the next pawn move can be captured en passant
 
-    void checkNextEnPassant(Chess&, Log&);
+    void checkMovement(const Position &target, std::vector<Position> &validPos); //Check the movement of a chess piece and update valid positions accordingly
 
-    void checkMovement(const Position &target, std::vector<Position> &validPos);
+    bool isCheck() const; //Check if the current board state is in a check position
 
-    bool isCheck() const;
+    Status isWinOrTie(); //Get the current game status 
 
-    Status isWinOrTie();
+    Player getNowPlayer() const; //Get the player who is currently making a move
 
-    Player getNowPlayer() const;
+    Player getNowEnemy() const; //Get the enemy player of the player who is currently making a move
 
-    Player getNowEnemy() const;
+    [[nodiscard]] bool calculateCheck(Player); //Calculate if the specified player is in a check position
 
-    [[nodiscard]] bool calculateCheck(Player);
-
-    [[nodiscard]] Status calculateWinOrTie(Player);
+    [[nodiscard]] Status calculateWinOrTie(Player); //Check the movement of a chess piece and update valid positions accordingly
 
     friend class Chess;
 };

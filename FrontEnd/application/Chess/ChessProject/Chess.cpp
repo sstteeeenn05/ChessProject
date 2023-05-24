@@ -205,6 +205,9 @@ bool Chess::onRiver() const {
     return (data.player == WHITE && data.position.y == 3) || (data.player == BLACK && data.position.y == 4);
 }
 
+// Intent: Check if the chess piece is positioned on its own river
+// Pre: None
+// Post: Returns true if the chess piece is positioned on its own river, false otherwise
 bool Chess::onMyRiver() const {
     return (data.player == WHITE && data.position.y == 4) || (data.player == BLACK && data.position.y == 3);
 }
