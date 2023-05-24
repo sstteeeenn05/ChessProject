@@ -1,3 +1,12 @@
+/*****************************************************************
+* File: Chess.h
+ * Author: §d²»ºö¡B´¿±R®¦¡BÃ¹¬ý²M¡B­ð¤_µx
+ * Create Date: 2023/05/05
+ * Editor: ´¿±R®¦¡BÃ¹¬ý²M
+ * Update Date: 2023/05/24
+ * Description: the declaration of Chess
+ *********************************************************************/
+
 #pragma once
 
 #include <iostream>
