@@ -337,7 +337,7 @@ bool Board::move(Player player, Position source, Position target) {
     sChess.data.clear();
     
     // Check if the moved pawn is eligible for en passant capture in the next move
-    if (tChess.data.type == PAWN) checkNextEnPassant(tChess, log);
+    if (tChess.data.type == PAWN && std::abs(source.y - target.y) == 2) checkNextEnPassant(tChess, log);
 
     // Check if the pawn is eligible for promotion and perform promotion if necessary
     if (tChess.checkPromotion()) {

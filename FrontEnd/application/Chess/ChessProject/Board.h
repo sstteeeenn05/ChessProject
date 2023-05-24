@@ -13,6 +13,7 @@
 #include "Chess.h"
 #include <cctype>
 #include <map>
+#include <cmath>
 
 class Chess;
 
